@@ -3,7 +3,7 @@
 #![no_std]
 #![no_main]
 
-static HELLO: &[u8] = b"Hello World!.";
+static HELLO: &[u8] = b"Hello World!1111.";
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
