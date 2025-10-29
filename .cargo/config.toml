@@ -18,3 +18,6 @@ target = "i686-unknown-none.json"
 
 [target.i686-unknown-none]
 rustflags = ["-C", "link-args=--image-base=0x30000 -Ttext=0x30400"]
+
+# [target.i686-unknown-none]
+# rustflags = ["-C", "link-args=-Tsrc/linker.ld"]
