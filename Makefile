@@ -14,7 +14,7 @@ LD		= ld
 LDFLAGS = -s -Ttext=$(ENTRYPOINT)
 
 # Objects
-OBJS = kernel.o rustprog.o
+OBJS = kernel.o rustprog.o kliba.o string.o
 LSLKERNEL = kernel.bin
 LSLBOOT = boot/boot.bin boot/loader.bin
 
@@ -50,7 +50,7 @@ boot/loader.bin : boot/loader.asm boot/include/load.inc \
 			boot/include/fat12hdr.inc boot/include/pm.inc
 	$(ASM) $(ASMBFLAGS) -o $@ $<
 
-kernel.o: src/kernel.asm
+kernel.o: kernel/kernel.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
 rustprog.o:
@@ -59,3 +59,9 @@ rustprog.o:
 
 kernel.bin: $(OBJS)
 	$(LD) $(LDFLAGS) -o $(LSLKERNEL) $(OBJS)
+
+kliba.o: lib/kliba.asm
+	$(ASM) $(ASMKFLAGS) -o $@ $<
+
+string.o: lib/string.asm
+	$(ASM) $(ASMKFLAGS) -o $@ $<
