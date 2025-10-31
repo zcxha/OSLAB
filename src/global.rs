@@ -1,10 +1,14 @@
 use crate::config::GDT_SIZE;
-use crate::protect::DESCRIPTOR;
+use crate::protect::{DESCRIPTOR, GDT_PTR_UNION};
+
+
 
 // 注意到这种形式在汇编中是定义这样一段GDT_PTR: .zero 6
 // C中的数组，汇编形式是 一个Label：.zero 6
 #[unsafe(no_mangle)]
-pub static mut GDT_PTR: [u8; 6] = [0; 6];
+pub static mut GDT_PTR: GDT_PTR_UNION = GDT_PTR_UNION{raw: [0; 6]};
+// pub static mut GDT_PTR: [u8; 6] = [0; 6];
+
 #[unsafe(no_mangle)]
 pub static mut DISP_POS: u32 = 0;
 #[unsafe(no_mangle)]

@@ -67,8 +67,10 @@ _start:
 	; 把 esp 从 LOADER 挪到 KERNEL
 	mov	esp, StackTop	; 堆栈在 bss 段中
 	sgdt	[GDT_PTR]	; cstart() 中将会用到 gdt_ptr
+	xchg bx, bx
 	call	rust_main		; 在此函数中改变了gdt_ptr，让它指向新的GDT
 	lgdt	[GDT_PTR]	; 使用新的GDT
+	xchg bx, bx
 	jmp	SELECTOR_KERNEL_CS:csinit
 csinit:
 	jmp $
