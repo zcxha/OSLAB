@@ -23,10 +23,11 @@ global	in_byte
 ;================================================================
 console_putchar:
 	push ebp
+	push edi
 	mov ebp, esp
 
-	mov al, [ebp + 8] ; c
-	mov ah, [ebp + 12] ; color
+	mov al, [ebp + 12] ; c
+	mov ah, [ebp + 16] ; color
 	mov edi, [DISP_POS]
 
 	test al, al
@@ -50,83 +51,9 @@ console_putchar:
 	.2:
 	mov [DISP_POS], edi
 
+	pop edi
 	pop ebp
-	ret
-
-; ========================================================================
-;                  void disp_str(char * pszInfo);
-; ========================================================================
-disp_str:
-	push	ebp
-	mov	ebp, esp
-
-	mov	esi, [ebp + 8]	; pszInfo
-	mov	edi, [DISP_POS]
-	mov	ah, 0Fh
-.1:
-	lodsb
-	test	al, al
-	jz	.2
-	cmp	al, 0Ah	; 是回车吗?
-	jnz	.3
-	push	eax
-	mov	eax, edi
-	mov	cl, 160
-	div	cl
-	and	eax, 0FFh
-	inc	eax
-	mov	cl, 160
-	mul	cl
-	mov	edi, eax
-	pop	eax
-	jmp	.1
-.3:
-	mov	[gs:edi], ax
-	add	edi, 2
-	jmp	.1
-
-.2:
-	mov	[DISP_POS], edi
-
-	pop	ebp
-	ret
-
-; ========================================================================
-;                  void disp_color_str(char * info, int color);
-; ========================================================================
-disp_color_str:
-	push	ebp
-	mov	ebp, esp
-
-	mov	esi, [ebp + 8]	; pszInfo
-	mov	edi, [DISP_POS]
-	mov	ah, [ebp + 12]	; color
-.1:
-	lodsb
-	test	al, al
-	jz	.2
-	cmp	al, 0Ah	; 是回车吗?
-	jnz	.3
-	push	eax
-	mov	eax, edi
-	mov	bl, 160
-	div	bl
-	and	eax, 0FFh
-	inc	eax
-	mov	bl, 160
-	mul	bl
-	mov	edi, eax
-	pop	eax
-	jmp	.1
-.3:
-	mov	[gs:edi], ax
-	add	edi, 2
-	jmp	.1
-
-.2:
-	mov	[DISP_POS], edi
-
-	pop	ebp
+	
 	ret
 
 ; ========================================================================

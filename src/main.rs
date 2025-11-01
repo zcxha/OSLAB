@@ -3,59 +3,38 @@
 #![no_main]
 
 pub mod config;
-pub mod r#const;
+pub mod consts;
 pub mod global;
 pub mod i8259;
 pub mod interrupts;
 pub mod protect;
+pub mod scrout;
 
 use crate::config::*;
 use crate::global::*;
 use crate::i8259::init_8259A;
 use crate::interrupts::*;
 use crate::protect::*;
+use crate::scrout::print;
+use crate::scrout::print_int;
 use core::arch::asm;
 use core::panic::PanicInfo;
+
 
 // extern assembly func
 unsafe extern "C" {
     fn memcpy(p_dst: *const [DESCRIPTOR; GDT_SIZE], p_src: u32, size: u16);
-    fn disp_str(pszInfo: *const u8);
-    fn disp_color_str(Info: *const u8, color: i32);
 }
 
-pub const HEX_CHARS: &[u8; 16] = b"0123456789abcdef";
-pub fn u32_to_hex_buf_lower(value: u32, buf: &mut [u8]) {
-    for i in 0..8 {
-        let shift = (7 - i) * 4;
-        let nibble = ((value >> shift) & 0xF) as usize;
-        if let Some(c) = HEX_CHARS.get(nibble) {
-			if let Some(x) = buf.get_mut(i + 2) {
-				*x = *c;
-			}
-        }
-    }
-}
 
 #[unsafe(no_mangle)]
 pub extern "C" fn rust_main() {
     init_var();
+
     replace_gdt();
-    // init_idt();
-    unsafe {
-        let mut buf: [u8; 11] = [42; 11];
-		asm!("xchg bx, bx");
-		buf[0] = b'0';
-		buf[1] = b'x';
-		buf[10] = 0;
-		asm!("xchg bx, bx");
-        u32_to_hex_buf_lower(333, &mut buf);
-        disp_str(buf.as_ptr());
-
-		disp_str("\n\0".as_ptr());
-
-		disp_str("hello\0".as_ptr());
-    }
+    init_idt();
+	print_int(348);
+    print(c"hello");
     return;
 }
 

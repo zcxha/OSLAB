@@ -1,8 +1,11 @@
 use core::arch::asm;
+use core::ffi::CStr;
+use core::ptr::write_volatile;
 
-use crate::r#const::{PRIVILEGE_KRNL, PRIVILEGE_USER};
+use crate::consts::{PRIVILEGE_KRNL, PRIVILEGE_USER};
 use crate::global::{DISP_POS, IDT};
-use crate::{disp_color_str, disp_str,  protect::*};
+use crate::protect::*;
+use crate::scrout::{print, print_int};
 
 unsafe extern "C" {
     fn divide_error();
@@ -40,8 +43,6 @@ unsafe extern "C" {
 }
 
 pub fn init_int() {
-    unsafe { DISP_POS = 0 };
-
     // 全部初始化成中断门(没有陷阱门)
     init_idt_desc(INT_VECTOR_DIVIDE, DA_386IGate, divide_error, PRIVILEGE_KRNL);
 
@@ -58,7 +59,7 @@ pub fn init_int() {
         INT_VECTOR_BREAKPOINT,
         DA_386IGate,
         breakpoint_exception,
-        PRIVILEGE_USER,
+        PRIVILEGE_KRNL,
     );
 
     init_idt_desc(INT_VECTOR_OVERFLOW, DA_386IGate, overflow, PRIVILEGE_USER);
@@ -164,9 +165,8 @@ pub fn init_int() {
 }
 
 fn init_idt_desc(vector: u8, desc_type: u8, handler: unsafe extern "C" fn(), privilege: u8) {
-    let base: u32 = &raw const handler as u32;
-    // println!("addr:{}", base);
     unsafe {
+        let base: u32 = handler as usize as u32;
         IDT[vector as usize].offset_low = base as u16;
         IDT[vector as usize].selector = SELECTOR_KERN_CS as u16;
         IDT[vector as usize].dcount = 0;
@@ -176,51 +176,59 @@ fn init_idt_desc(vector: u8, desc_type: u8, handler: unsafe extern "C" fn(), pri
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn exception_handler(vec_no: u32, err_code: u32, eip: u32, cs: u32, eflags: u32) {
+pub fn exception_handler(vec_no: u32, err_code: u32, eip: u32, cs: u32, eflags: u32) {
     let err_msg = [
-        "#DE Divide Error",
-        "#DB RESERVED",
-        "—  NMI Interrupt",
-        "#BP Breakpoint",
-        "#OF Overflow",
-        "#BR BOUND Range Exceeded",
-        "#UD Invalid Opcode (Undefined Opcode)",
-        "#NM Device Not Available (No Math Coprocessor)",
-        "#DF Double Fault",
-        "    Coprocessor Segment Overrun (reserved)",
-        "#TS Invalid TSS",
-        "#NP Segment Not Present",
-        "#SS Stack-Segment Fault",
-        "#GP General Protection",
-        "#PF Page Fault",
-        "—  (Intel reserved. Do not use.)",
-        "#MF x87 FPU Floating-Point Error (Math Fault)",
-        "#AC Alignment Check",
-        "#MC Machine Check",
-        "#XF SIMD Floating-Point Exception",
+        c"#DE Divide Error",
+        c"#DB RESERVED",
+        c"—  NMI Interrupt",
+        c"#BP Breakpoint",
+        c"#OF Overflow",
+        c"#BR BOUND Range Exceeded",
+        c"#UD Invalid Opcode (Undefined Opcode)",
+        c"#NM Device Not Available (No Math Coprocessor)",
+        c"#DF Double Fault",
+        c"    Coprocessor Segment Overrun (reserved)",
+        c"#TS Invalid TSS",
+        c"#NP Segment Not Present",
+        c"#SS Stack-Segment Fault",
+        c"#GP General Protection",
+        c"#PF Page Fault",
+        c"—  (Intel reserved. Do not use.)",
+        c"#MF x87 FPU Floating-Point Error (Math Fault)",
+        c"#AC Alignment Check",
+        c"#MC Machine Check",
+        c"#XF SIMD Floating-Point Exception",
     ];
 
-    let text_color = 0x74;
-
-    unsafe { DISP_POS = 0 };
-    for i in 0..80 * 5 {
-        unsafe { disp_str("\n".as_ptr()) };
+    let text_color: i32 = 0x74;
+    // todo: 打印会花屏
+    unsafe {
+        DISP_POS = 0;
     }
-    unsafe { DISP_POS = 0 };
 
-    // printc!(text_color, "Exception! --> ");
+    for i in 0..(80 * 5) {
+        print(c" ");
+    }
+    unsafe {
+        DISP_POS = 0;
+    }
+
+    print(c"Exception! --> ");
     // 用这种方法避免编译器bound_check
     if let Some(msg) = err_msg.get(vec_no as usize) {
-    } else {
+        print(msg);
     }
-    // printc!(text_color, "{}", err_msg[vec_no as usize]);
-    // printlnc!(text_color, "");
-    // printlnc!(text_color, "");
-    // printlnc!(text_color, "EFLAGS:{}", eflags);
-    // printc!(text_color, "CS: {}", cs);
-    // printc!(text_color, "EIP: {}", eip);
+    print(c"EFLAGS: ");
+    print(c"\n");
+    print(c"\n");
+    print_int(eflags);
+    print(c"CS: ");
+    print_int(cs);
+    print(c"EIP: ");
+    print_int(eip);
 
     if err_code != 0xFFFFFFFF {
-        // printc!(text_color, "Error code: {}", err_code);
+        print(c"Err code: ");
+        print_int(err_code);
     }
 }
