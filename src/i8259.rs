@@ -3,6 +3,7 @@ use core::arch::asm;
 use crate::config::*;
 use crate::consts::*;
 use crate::scrout::print;
+use crate::scrout::print_int;
 
 unsafe extern "C" {
     fn in_byte(port: u16) -> u8;
@@ -35,7 +36,7 @@ pub fn init_8259A() {
         out_byte(INT_S_CTLMASK, 0x1);
 
         /* Master 8259, OCW1.  */
-        out_byte(INT_M_CTLMASK, 0xFF);
+        out_byte(INT_M_CTLMASK, 0xFD);
 
         /* Slave  8259, OCW1.  */
         out_byte(INT_S_CTLMASK, 0xFF);
@@ -46,5 +47,6 @@ pub fn init_8259A() {
 pub extern "C" fn spurious_irq(irq: u32) {
     // println!("spurious_irq: {}", irq);
     print(c"spurious_irq");
+	print_int(irq);
     unsafe { out_byte(INT_M_CTL, 0x20) };
 }

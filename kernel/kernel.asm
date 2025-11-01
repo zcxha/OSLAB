@@ -109,7 +109,7 @@ _start:
 	jmp	SELECTOR_KERNEL_CS:csinit
 csinit:
 	sti
-	ud2
+	; ud2
 	jmp $
 
 
