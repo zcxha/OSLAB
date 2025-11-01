@@ -14,7 +14,7 @@ LD		= ld
 LDFLAGS = -s -Ttext=$(ENTRYPOINT)
 
 # Objects
-OBJS = kernel.o rustprog.o kliba.o string.o
+OBJS = kernel.o rustprog.a kliba.o string.o
 LSLKERNEL = kernel.bin
 LSLBOOT = boot/boot.bin boot/loader.bin
 
@@ -53,7 +53,7 @@ boot/loader.bin : boot/loader.asm boot/include/load.inc \
 kernel.o: kernel/kernel.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
-rustprog.o:
+rustprog.a:
 	./build.sh 2>&1 | tee build.json
 	$(PYTHON) build.py
 

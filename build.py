@@ -14,9 +14,9 @@ with open(input_file, "r", encoding="utf-8") as f:
             continue
         try:
             data = json.loads(line)
-            if data.get("emit") == "obj":
+            if data.get("emit") == "link":
                 src = data["artifact"]
-                dst = "./rustprog.o"  # 复制到当前目录并保留文件名
+                dst = "./rustprog.a"  # 复制到当前目录并保留文件名
                 shutil.copy(src, dst)
                 print(f"type: {type(dst)} ")
                 print(f"已复制: {src} → {dst} ")

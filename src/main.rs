@@ -24,13 +24,28 @@ unsafe extern "C" {
 	fn disp_color_str(Info: *const u8, color: i32);
 }
 
+pub const HEX_CHARS: &[u8; 16] = b"0123456789abcdef";
+pub fn u32_to_hex_buf_lower(value: u32, buf: &mut [u8]) {
+	buf[0] = b'0';
+	buf[1] = b'x';
+    for i in 0..8 {
+        let shift = (7 - i) * 4;
+        let nibble = ((value >> shift) & 0xF) as usize;
+        buf[i+2] = HEX_CHARS[nibble];
+    }
+	buf[10] = b'\0';
+}
+
+
 #[unsafe(no_mangle)]
 pub extern "C" fn rust_main() {
     init_var();
 	replace_gdt();
 	init_idt();
     unsafe {
-
+		let mut buf:[u8; 10] = [42; 10];
+		u32_to_hex_buf_lower(333, &mut buf);
+		disp_str(buf.as_ptr());
         let str = "hello\0".as_ptr();
         disp_str(str);
     }

@@ -66,6 +66,12 @@ LABEL_START:			; <--- 从这里开始 *************
 	mov	dword [_dwMCRNumber], 0
 .MemChkOK:
 
+	; 因为kernel.bin很大，要加载到高地址去。
+	; 打开地址线A20
+	in	al, 92h
+	or	al, 00000010b
+	out	92h, al
+
 	; 下面在 A 盘的根目录寻找 KERNEL.BIN
 	mov	word [wSectorNo], SectorNoOfRootDirectory	
 	xor	ah, ah	; ┓
@@ -173,11 +179,6 @@ LABEL_FILE_LOADED:
 
 ; 关中断
 	cli
-
-; 打开地址线A20
-	in	al, 92h
-	or	al, 00000010b
-	out	92h, al
 
 ; 准备切换到保护模式
 	mov	eax, cr0
@@ -367,7 +368,6 @@ LABEL_PM_START:
 	call	InitKernel
 
 	;jmp	$
-	xchg bx, bx
 	;***************************************************************
 	jmp	SelectorFlatC:KernelEntryPointPhyAddr	; 正式进入内核 *
 	;***************************************************************
