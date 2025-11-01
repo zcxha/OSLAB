@@ -105,12 +105,10 @@ _start:
 	call	rust_main		; 在此函数中改变了gdt_ptr，让它指向新的GDT
 	lgdt	[GDT_PTR]	; 使用新的GDT
 
-	lidt	[IDT_PTR]
+	; lidt	[IDT_PTR]
 
 	jmp	SELECTOR_KERNEL_CS:csinit
 csinit:
-	sti
-	ud
 	jmp $
 
 

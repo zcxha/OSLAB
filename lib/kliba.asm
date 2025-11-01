@@ -71,12 +71,12 @@ disp_str:
 	jnz	.3
 	push	eax
 	mov	eax, edi
-	mov	bl, 160
-	div	bl
+	mov	cl, 160
+	div	cl
 	and	eax, 0FFh
 	inc	eax
-	mov	bl, 160
-	mul	bl
+	mov	cl, 160
+	mul	cl
 	mov	edi, eax
 	pop	eax
 	jmp	.1
