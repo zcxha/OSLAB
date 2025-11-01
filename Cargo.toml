@@ -6,7 +6,9 @@ edition = "2024"
 [profile.dev]
 panic = "abort"
 strip = true
+incremental = false
 
 [profile.release]
 panic = "abort"
 strip = true
+incremental = false

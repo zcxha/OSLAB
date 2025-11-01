@@ -367,7 +367,7 @@ LABEL_PM_START:
 	call	InitKernel
 
 	;jmp	$
-
+	xchg bx, bx
 	;***************************************************************
 	jmp	SelectorFlatC:KernelEntryPointPhyAddr	; 正式进入内核 *
 	;***************************************************************

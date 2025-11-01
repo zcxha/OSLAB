@@ -12,10 +12,46 @@ extern	DISP_POS
 [SECTION .text]
 
 ; 导出函数
+global console_putchar
 global	disp_str
 global	disp_color_str
 global	out_byte
 global	in_byte
+
+;================================================================
+;				  void putchar(char c, u8 color)
+;================================================================
+console_putchar:
+	push ebp
+	mov ebp, esp
+
+	mov al, [ebp + 8] ; c
+	mov ah, [ebp + 12] ; color
+	mov edi, [DISP_POS]
+
+	test al, al
+	jz .2
+	cmp al, 0Ah
+	jnz .3
+	push eax
+	mov eax, edi
+	mov cl, 160
+	div cl
+	and eax, 0FFh
+	inc eax
+	mov cl, 160
+	mul cl
+	mov edi, eax
+	pop eax
+	jmp .2
+	.3:
+	mov [gs:edi], ax
+	add edi, 2
+	.2:
+	mov [DISP_POS], edi
+
+	pop ebp
+	ret
 
 ; ========================================================================
 ;                  void disp_str(char * pszInfo);
