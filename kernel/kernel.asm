@@ -108,7 +108,7 @@ _start:
 	lidt	[IDT_PTR]
 	jmp	SELECTOR_KERNEL_CS:csinit
 csinit:
-	; sti
+	sti
 	; ud2
 	jmp $
 
@@ -119,7 +119,7 @@ csinit:
         push    %1
         call    spurious_irq
         add     esp, 4
-        iretd
+        iret
 %endmacro
 ; ---------------------------------
 
@@ -160,7 +160,7 @@ hwint07:                ; Interrupt routine for irq 7 (printer)
         push    %1
         call    spurious_irq
         add     esp, 4
-        iretd
+        iret
 %endmacro
 ; ---------------------------------
 

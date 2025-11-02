@@ -2,6 +2,9 @@ use core::arch::asm;
 
 use crate::config::*;
 use crate::consts::*;
+use crate::global::DISP_POS;
+use crate::mouse::mouse_handler;
+use crate::mouse::mouse_install;
 use crate::scrout::print;
 use crate::scrout::print_int;
 
@@ -36,17 +39,36 @@ pub fn init_8259A() {
         out_byte(INT_S_CTLMASK, 0x1);
 
         /* Master 8259, OCW1.  */
-        out_byte(INT_M_CTLMASK, 0xFD);
+        out_byte(INT_M_CTLMASK, 0xF9);
 
         /* Slave  8259, OCW1.  */
-        out_byte(INT_S_CTLMASK, 0xFF);
+        out_byte(INT_S_CTLMASK, 0xEF);
+
+		mouse_install();
     }
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn spurious_irq(irq: u32) {
     // println!("spurious_irq: {}", irq);
+    unsafe {
+        DISP_POS = 0;
+    }
     print(c"spurious_irq");
-	print_int(irq);
+    print_int(irq);
+
+    if irq == 1 {
+        keybd_handler();
+    } else if irq == 12 {
+		mouse_handler();
+    }
+}
+
+fn keybd_handler() {
+    let data: u8 = unsafe { in_byte(0x60) };
+
+    print(c"Key: ");
+    print_int(data as u32);
+    print(c"\n");
     unsafe { out_byte(INT_M_CTL, 0x20) };
 }

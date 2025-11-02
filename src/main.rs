@@ -10,7 +10,10 @@ pub mod interrupts;
 pub mod protect;
 pub mod scrout;
 pub mod testmm;
+pub mod mouse;
+pub mod inc;
 
+use inc::*;
 use crate::testmm::*;
 use crate::config::*;
 use crate::global::*;
