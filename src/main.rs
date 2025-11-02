@@ -9,7 +9,9 @@ pub mod i8259;
 pub mod interrupts;
 pub mod protect;
 pub mod scrout;
+pub mod testmm;
 
+use crate::testmm::*;
 use crate::config::*;
 use crate::global::*;
 use crate::i8259::init_8259A;
@@ -35,6 +37,8 @@ pub extern "C" fn rust_main() {
     init_idt();
 	print_int(348);
     print(c"hello");
+
+	test_mm();
     return;
 }
 

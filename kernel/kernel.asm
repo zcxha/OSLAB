@@ -108,7 +108,7 @@ _start:
 	lidt	[IDT_PTR]
 	jmp	SELECTOR_KERNEL_CS:csinit
 csinit:
-	sti
+	; sti
 	; ud2
 	jmp $
 
