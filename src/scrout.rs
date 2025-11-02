@@ -4,6 +4,7 @@ unsafe extern "C" {
     fn console_putchar(c: u8, color: u8);
 }
 
+// 改编自Cstr的代码
 #[unsafe(no_mangle)]
 pub fn strlen(ptr: *const c_char) -> usize {
     let mut len = 0;
@@ -22,6 +23,7 @@ pub fn print(s: &CStr) {
     }
 }
 
+// 改编自ChatGPT
 pub const HEX_CHARS: &[u8; 16] = b"0123456789abcdef";
 pub fn u32_to_hex_buf_lower(value: u32, buf: *mut u8) {
     for i in 0..8 {
@@ -44,5 +46,5 @@ pub fn print_int(value: u32) {
 	buf[0] = 48;
 	buf[1] = 120;
     buf[10] = 0;
-    unsafe {print(&*(&buf as *const [u8] as *const CStr));}
+    unsafe {print(&*(&buf as *const [u8] as *const CStr));}// 来自CStr的from_ptr的最后一行
 }
