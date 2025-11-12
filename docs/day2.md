@@ -102,18 +102,30 @@ union
 global.rs
 
 ```rust
-
-pub union GDT_PTR_UNION {
-	pub raw: [u8; 6],
-	pub lim: u16, 
-	pub base: u32
+#[repr(C)]
+pub union DT_PTR_UNION {
+    pub raw: [u8; 6],
+    pub dt_ptr: DT_PTR_STRUCT,
+}
+/// 注意此处的对齐
+/// 若不使用repr(C) 结构体内存布局是不确定的
+#[repr(C, packed(2))]
+#[derive(Clone, Copy)]
+pub struct DT_PTR_STRUCT {
+    pub lim: u16,
+    pub base: u32,
 }
 
-// 注意到这种形式在汇编中是定义这样一段GDT_PTR: .zero 6
-// C中的数组，汇编形式是 一个Label：.zero 6
-#[unsafe(no_mangle)]
-pub static mut GDT_PTR: GDT_PTR_UNION = GDT_PTR_UNION{raw: [0; 6]};
-// pub static mut GDT_PTR: [u8; 6] = [0; 6];
+#[repr(C,packed(2))]
+#[derive(Clone, Copy)]
+pub struct DESCRIPTOR {
+    pub limit_low: u16,       /* Limit */
+    pub base_low: u16,        /* Base */
+    pub base_mid: u8,         /* Base */
+    pub attr1: u8,            /* P(1) DPL(2) DT(1) TYPE(4) */
+    pub limit_high_attr2: u8, /* G(1) D(1) 0(1) AVL(1) LimitHign(4) */
+    pub base_high: u8,        /* Base */
+}
 
 ```
 
@@ -134,7 +146,7 @@ fn replace_gdt()
 }
 ```
 
-
+注意struct的字节对齐。
 
 ###### Code tree
 
@@ -171,18 +183,10 @@ fn replace_gdt()
 │   └── protect.rs # 保护模式数据结构等定义
 ```
 
-
-
 ###### Small Exploration
 
 这个系统启动之后，需要使用代码对```rust```全局变量进行初始化，也就是说声明的时候初始化值是没用的。应该也挺好理解，程序加载器```loader```并没有在对内核```elf```布局的同时初始化内存空间。
 
 ###### Personal Notes
 
-虽然现在的代码看上去很好懂，我现在看都觉得为什么我当时写了这么久才写这么点。还是对```rust```不懂导致的。比如
-
-```
-let newbase = &raw const GDT[0] as u32;
-```
-
-为什么使用```&raw const```，为什么```as *const u32```就不行呢？这只是一个例子。TODO
+虽然现在的代码看上去很好懂，我现在看都觉得为什么我当时写了这么久才写这么点。还是对```rust```不懂导致。

@@ -1,18 +1,18 @@
 use core::arch::asm;
 
 use crate::config::*;
-use crate::consts::*;
 use crate::global::DISP_POS;
 use crate::mouse::mouse_handler;
 use crate::mouse::mouse_install;
 use crate::scrout::print;
 use crate::scrout::print_int;
-
+use crate::protect::*;
 unsafe extern "C" {
     fn in_byte(port: u16) -> u8;
     fn out_byte(port: u16, value: u8);
 }
 
+/// 初始化硬件中断控制器
 pub fn init_8259A() {
     unsafe {
         /* Master 8259, ICW1. */
@@ -48,6 +48,7 @@ pub fn init_8259A() {
     }
 }
 
+/// 硬件中断的默认handler
 #[unsafe(no_mangle)]
 pub extern "C" fn spurious_irq(irq: u32) {
     // println!("spurious_irq: {}", irq);

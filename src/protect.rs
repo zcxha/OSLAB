@@ -1,3 +1,7 @@
+/// protect.rs
+/// 此处存放保护模式相关的数据结构和体系结构常数和各种系统运行相关的常数
+
+
 /// Descriptor Table PTR Union
 #[repr(C)]
 pub union DT_PTR_UNION {
@@ -53,9 +57,11 @@ pub const SELECTOR_DUMMY: usize = 0;
 pub const SELECTOR_FLAT_C: usize = 0x08;
 pub const SELECTOR_FLAT_RW: usize = 0x10;
 pub const SELECTOR_VIDEO: usize = 0x18 + 3;
+pub const SELECTOR_TSS: usize = 0x20;
 
 pub const SELECTOR_KERN_CS: usize = SELECTOR_FLAT_C;
 pub const SELECTOR_KERN_DS: usize = SELECTOR_FLAT_RW;
+
 
 /* 描述符类型值说明 */
 pub const DA_32: usize = 0x4000; /* 32 位段				*/
@@ -101,3 +107,12 @@ pub const INT_VECTOR_COPROC_ERR: u8 = 0x10;
 /* 中断向量 */
 pub const INT_VECTOR_IRQ0: u8 = 0x20;
 pub const INT_VECTOR_IRQ8: u8 = 0x28;
+
+pub const INT_M_CTL: u16 = 0x20;
+pub const INT_M_CTLMASK: u16 = 0x21;
+pub const INT_S_CTL: u16 = 0xA0;
+pub const INT_S_CTLMASK: u16 = 0xA1;
+/* 权限 */
+pub const PRIVILEGE_KRNL: u8 = 0;
+pub const PRIVILEGE_TASK: u8 = 1;
+pub const PRIVILEGE_USER: u8 = 3;

@@ -1,3 +1,6 @@
+/// scrout.rs
+/// 与屏幕输出相关
+
 use core::{arch::asm, ffi::{CStr, c_char}};
 
 unsafe extern "C" {

@@ -66,12 +66,6 @@ LABEL_START:			; <--- 从这里开始 *************
 	mov	dword [_dwMCRNumber], 0
 .MemChkOK:
 
-	; 因为kernel.bin很大，要加载到高地址去。
-	; 打开地址线A20
-	in	al, 92h
-	or	al, 00000010b
-	out	92h, al
-
 	; 下面在 A 盘的根目录寻找 KERNEL.BIN
 	mov	word [wSectorNo], SectorNoOfRootDirectory	
 	xor	ah, ah	; ┓
@@ -172,6 +166,16 @@ LABEL_FILE_LOADED:
 	mov	dh, 1			; "Ready."
 	call	DispStrRealMode		; 显示字符串
 	
+
+	
+	mov dh, 3
+	call	DispStrRealMode		; 显示字符串
+	mov dh, 4
+	call	DispStrRealMode		; 显示字符串
+	mov dh, 5
+	call	DispStrRealMode		; 显示字符串
+
+
 ; 下面准备跳入保护模式 -------------------------------------------
 
 ; 加载 GDTR
@@ -179,6 +183,11 @@ LABEL_FILE_LOADED:
 
 ; 关中断
 	cli
+
+; 打开地址线A20
+	in	al, 92h
+	or	al, 00000010b
+	out	92h, al
 
 ; 准备切换到保护模式
 	mov	eax, cr0
@@ -206,6 +215,9 @@ MessageLength		equ	9
 LoadMessage:		db	"Loading  "
 Message1		db	"Ready.   "
 Message2		db	"No KERNEL"
+PAINT1			db  "---------"
+PAINT2			db  "---LSL---"
+PAINT3			db  "---------"
 ;============================================================================
 
 ;----------------------------------------------------------------------------
@@ -225,8 +237,15 @@ DispStrRealMode:
 	mov	cx, MessageLength	; CX = 串长度
 	mov	ax, 01301h		; AH = 13,  AL = 01h
 	mov	bx, 0007h		; 页号为0(BH = 0) 黑底白字(BL = 07h)
+	cmp dh, 3
+	jb def
+	mov dl, 50
+	add dh, 3
+	jmp dis
+	def:
 	mov	dl, 0
 	add	dh, 3			; 从第 3 行往下显示
+	dis:
 	int	10h			; int 10h
 	ret
 ;----------------------------------------------------------------------------
@@ -368,6 +387,7 @@ LABEL_PM_START:
 	call	InitKernel
 
 	;jmp	$
+
 	;***************************************************************
 	jmp	SelectorFlatC:KernelEntryPointPhyAddr	; 正式进入内核 *
 	;***************************************************************
@@ -567,7 +587,6 @@ DispReturn:
 
 	ret
 ; DispReturn 结束---------------------------------------------------------
-
 
 ; ------------------------------------------------------------------------
 ; 内存拷贝，仿 memcpy

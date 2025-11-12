@@ -1,3 +1,6 @@
+/// global.rs
+/// 此处存放全局变量
+
 use crate::config::{GDT_SIZE, IDT_SIZE};
 use crate::protect::{DESCRIPTOR, GATE, DT_PTR_UNION};
 
@@ -11,7 +14,7 @@ pub static mut GDT_PTR: DT_PTR_UNION = DT_PTR_UNION{raw: [0; 6]};
 pub static mut IDT_PTR: DT_PTR_UNION = DT_PTR_UNION{raw: [0; 6]};
 
 #[unsafe(no_mangle)]
-pub static mut DISP_POS: u32 = 0;
+pub static mut DISP_POS: u32 = 1;
 
 #[unsafe(no_mangle)]
 pub static mut GDT: [DESCRIPTOR; GDT_SIZE] = [DESCRIPTOR {

@@ -1,8 +1,11 @@
+/// 中断异常相关初始化
+/// 进程执行环境相关初始化
+
 use core::arch::asm;
 use core::ffi::CStr;
 use core::ptr::write_volatile;
 
-use crate::consts::{PRIVILEGE_KRNL, PRIVILEGE_USER};
+use crate::protect::{PRIVILEGE_KRNL, PRIVILEGE_USER};
 use crate::global::{DISP_POS, IDT};
 use crate::protect::*;
 use crate::scrout::{print, print_int};
@@ -42,6 +45,7 @@ unsafe extern "C" {
     fn hwint15();
 }
 
+/// 初始化软中断和硬件中断，写IDT
 pub fn init_int() {
     // 全部初始化成中断门(没有陷阱门)
     init_idt_desc(INT_VECTOR_DIVIDE, DA_386IGate, divide_error, PRIVILEGE_KRNL);
@@ -164,6 +168,25 @@ pub fn init_int() {
     init_idt_desc(INT_VECTOR_IRQ8 + 7, DA_386IGate, hwint15, PRIVILEGE_KRNL);
 }
 
+/// 初始化要用的段描述符
+pub fn init_desc()
+{
+	/* 在GDT中填充TSS描述符 */
+
+}
+
+/// 初始化段描述符
+fn init_descriptor(p_desc:&mut DESCRIPTOR, base: u32, limit: u32, attribute: u16)
+{
+	p_desc.limit_low = limit as u16;
+	p_desc.base_low = base as u16;
+	p_desc.base_mid = (base >> 16) as u8;
+	p_desc.attr1 = attribute as u8;
+	p_desc.limit_high_attr2 = ((limit >> 16) & 0x0F) as u8 | 
+					((attribute >> 8) & 0xF0) as u8;
+	p_desc.base_high = (base >> 24) as u8;
+}
+
 fn init_idt_desc(vector: u8, desc_type: u8, handler: unsafe extern "C" fn(), privilege: u8) {
     unsafe {
         let base: u32 = handler as usize as u32;
@@ -175,6 +198,11 @@ fn init_idt_desc(vector: u8, desc_type: u8, handler: unsafe extern "C" fn(), pri
     }
 }
 
+
+
+
+
+/// 软件异常的默认handler
 #[unsafe(no_mangle)]
 pub fn exception_handler(vec_no: u32, err_code: u32, eip: u32, cs: u32, eflags: u32) {
     let err_msg = [

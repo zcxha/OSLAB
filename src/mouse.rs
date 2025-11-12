@@ -1,8 +1,10 @@
+/// mouse.rs
+/// 鼠标中断相关
 use core::ffi::CStr;
 
 use crate::{
-    consts::{INT_M_CTL, INT_S_CTL},
-    inc::{inb, outb},
+    protect::{INT_M_CTL, INT_S_CTL},
+    io::{inb, outb},
     scrout::{print, print_int},
 };
 

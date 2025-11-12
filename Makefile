@@ -9,7 +9,7 @@ ENTRYPOINT = 0x30400
 ASM		= nasm
 PYTHON  = python3.7
 ASMBFLAGS	= -I boot/include/
-ASMKFLAGS	= -f elf
+ASMKFLAGS	= -f elf -I kernel/include/
 LD		= ld
 LDFLAGS = -s -Ttext=$(ENTRYPOINT)
 

@@ -15,6 +15,7 @@ fn pr_int(x: u32) {
 	print(c" ");
 }
 
+/// 测试内存管理功能
 pub fn test_mm() {
     let mut bitmap: [u32; 4] = [1; 4];
 
@@ -29,6 +30,7 @@ pub fn test_mm() {
     for i in 0..4 {
         pr_int(bitmap[i]);
     }
+	print(c"\n");
 
     let va: u32 = 0x00401000;
 
@@ -60,15 +62,18 @@ pub fn test_mm() {
     for i in 0..4 {
         pr_int(bitmap[i]);
     }
+	print(c"\n");
 
 	print(c"res: ");
 	pr_int(res as u32);
+	print(c"allocated blocks: \n");
 
     if res == 0 {
         for i in 0..3 {
             pr_int(blocks[i]);
         }
     }
+	print(c"\n");
 
     // 测试map
     unsafe {
@@ -78,8 +83,6 @@ pub fn test_mm() {
     pa = unsafe { VAToPA(va) as u32 };
 
     pr_int(pa);
-
-    print(c"\n");
 
     // unmap 并测试VAToPA
     unsafe { unmap(va) };
@@ -98,13 +101,17 @@ pub fn test_mm() {
         get_bitmap(bitmap.as_mut_ptr());
     }
 
+	print(c"\n");
+
     for i in 0..4 {
         pr_int(bitmap[i]);
     }
+	print(c"\n");
 
     unsafe {
         alloc_pages(1, blocks.as_mut_ptr().add(1));
     }
+	print(c"realloc: ");
 
 	pr_int(blocks[1]);
 }
