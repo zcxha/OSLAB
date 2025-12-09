@@ -24,11 +24,16 @@ EXTERN	u32		k_reenter;
 EXTERN	TSS		tss;
 EXTERN	PROCESS*	p_proc_ready;
 
+EXTERN  int     nr_current_console;
+
 extern PROCESS proc_table[];
 extern  sched_entity se_table[];
 extern	char		task_stack[];
 extern  TASK            task_table[];
+extern  TASK            user_proc_table[];
 extern	irq_handler	irq_table[];
+extern  TTY     tty_table[];
+extern CONSOLE  console_table[];
 
 extern const int sched_prio_to_weight[];
 extern u32 sysctl_sched_latency;

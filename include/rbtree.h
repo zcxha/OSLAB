@@ -10,5 +10,5 @@ typedef struct rbnode {
 
 struct sched_entity* __pick_first_entity();
 
-#define RED 1
-#define BLACK 0
+#define RB_RED 1
+#define RB_BLACK 0

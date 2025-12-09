@@ -18,7 +18,7 @@ LD		= ld
 ASMBFLAGS	= -I boot/include/
 ASMKFLAGS	= -I include/ -f elf
 CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector
-LDFLAGS		= -s -Ttext $(ENTRYPOINT)
+LDFLAGS		= -s -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 
 # This Program
@@ -26,6 +26,9 @@ ORANGESBOOT	= boot/boot.bin boot/loader.bin
 ORANGESKERNEL	= kernel.bin
 OBJS		= kernel/kernel.o kernel/syscall.o kernel/start.o kernel/main.o kernel/clock.o\
 			kernel/i8259.o kernel/global.o kernel/protect.o kernel/proc.o kernel/rbtree.o\
+			kernel/mm.o kernel/testmm.o\
+			kernel/keyboard.o kernel/tty.o kernel/console.o\
+			kernel/printf.o kernel/vsprintf.o\
 			lib/kliba.o lib/klib.o lib/string.o
 DASMOUTPUT	= kernel.bin.asm
 
@@ -99,9 +102,30 @@ kernel/protect.o: kernel/protect.c include/type.h include/const.h include/protec
 kernel/proc.o: kernel/proc.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+kernel/testmm.o: kernel/testmm.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/keyboard.o: kernel/keyboard.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/tty.o: kernel/tty.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/console.o: kernel/console.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/printf.o: kernel/printf.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/vsprintf.o: kernel/vsprintf.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 lib/klib.o: lib/klib.c include/type.h include/const.h include/protect.h include/string.h include/proc.h include/proto.h \
 			include/global.h
 	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/mm.o: kernel/mm.asm
+	$(ASM) $(ASMKFLAGS) -o $@ $<
 
 lib/kliba.o : lib/kliba.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<

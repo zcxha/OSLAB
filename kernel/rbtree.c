@@ -1,14 +1,19 @@
+/// 进程调度用的红黑树
+/// 本红黑树基于算法导论进行实现
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
 #include "string.h"
 #include "rbtree.h"
 #include "proc.h"
+#include "tty.h"
+#include "console.h"
+#include "proto.h"
 #include "global.h"
 
+
 typedef unsigned int u32;
-rbnode nil = {BLACK, 0, &nil, &nil, &nil};
+rbnode nil = {RB_BLACK, 0, &nil, &nil, &nil};
 
 rbnode *root = &nil;
 
@@ -24,6 +29,7 @@ rbnode *tree_minimum(rbnode *x)
 sched_entity *__pick_first_entity()
 {
 	rbnode *minimum = tree_minimum(root);
+    if(minimum == &nil) return -1;
 	return minimum->se;
 }
 
@@ -79,16 +85,16 @@ void right_rotate(rbnode *x)
 
 void rb_insert_fixup(rbnode *z)
 {
-	while (z->p->color == RED)
+	while (z->p->color == RB_RED)
 	{
 		if (z->p == z->p->p->left)
 		{
 			rbnode *y = z->p->p->right;
-			if (y->color == RED)
+			if (y->color == RB_RED)
 			{
-				z->p->color = BLACK;
-				y->color = BLACK;
-				z->p->p->color = RED;
+				z->p->color = RB_BLACK;
+				y->color = RB_BLACK;
+				z->p->p->color = RB_RED;
 				z = z->p->p;
 			}
 			else
@@ -98,19 +104,19 @@ void rb_insert_fixup(rbnode *z)
 					z = z->p;
 					left_rotate(z);
 				}
-				z->p->color = BLACK;
-				z->p->p->color = RED;
+				z->p->color = RB_BLACK;
+				z->p->p->color = RB_RED;
 				right_rotate(z->p->p);
 			}
 		}
 		else
 		{
 			rbnode *y = z->p->p->left;
-			if (y->color == RED)
+			if (y->color == RB_RED)
 			{
-				z->p->color = BLACK;
-				y->color = BLACK;
-				z->p->p->color = RED;
+				z->p->color = RB_BLACK;
+				y->color = RB_BLACK;
+				z->p->p->color = RB_RED;
 				z = z->p->p;
 			}
 			else
@@ -120,17 +126,17 @@ void rb_insert_fixup(rbnode *z)
 					z = z->p;
 					right_rotate(z);
 				}
-				z->p->color = BLACK;
-				z->p->p->color = RED;
+				z->p->color = RB_BLACK;
+				z->p->p->color = RB_RED;
 				left_rotate(z->p->p);
 			}
 		}
 	}
-	root->color = BLACK;
+	root->color = RB_BLACK;
 }
 
 void rb_insert(rbnode *z)
-{
+{    
 	rbnode *y = &nil;
 	rbnode *x = root;
 	while (x != &nil)
@@ -160,7 +166,7 @@ void rb_insert(rbnode *z)
 	}
 	z->left = &nil;
 	z->right = &nil;
-	z->color = RED;
+	z->color = RB_RED;
 	rb_insert_fixup(z);
 }
 
@@ -184,35 +190,35 @@ void rb_transplant(rbnode *u, rbnode *v)
 
 void rb_delete_fixup(rbnode *x)
 {
-	while (x != root && x->color == BLACK)
+	while (x != root && x->color == RB_BLACK)
 	{
 		if (x == x->p->left)
 		{
 			rbnode *w = x->p->right;
-			if (w->color == RED)
+			if (w->color == RB_RED)
 			{
-				w->color = BLACK;
-				x->p->color = RED;
+				w->color = RB_BLACK;
+				x->p->color = RB_RED;
 				left_rotate(x->p);
 				w = x->p->right;
 			}
-			if (w->left->color == BLACK && w->right->color == BLACK)
+			if (w->left->color == RB_BLACK && w->right->color == RB_BLACK)
 			{
-				w->color = RED;
+				w->color = RB_RED;
 				x = x->p;
 			}
 			else
 			{
-				if (w->right->color == BLACK)
+				if (w->right->color == RB_BLACK)
 				{
-					w->left->color = BLACK;
-					w->color = RED;
+					w->left->color = RB_BLACK;
+					w->color = RB_RED;
 					right_rotate(w);
 					w = x->p->right;
 				}
 				w->color = x->p->color;
-				x->p->color = BLACK;
-				w->right->color = BLACK;
+				x->p->color = RB_BLACK;
+				w->right->color = RB_BLACK;
 				left_rotate(x->p);
 				x = root;
 			}
@@ -220,36 +226,36 @@ void rb_delete_fixup(rbnode *x)
 		else
 		{
 			rbnode *w = x->p->left;
-			if (w->color == RED)
+			if (w->color == RB_RED)
 			{
-				w->color = BLACK;
-				x->p->color = RED;
+				w->color = RB_BLACK;
+				x->p->color = RB_RED;
 				right_rotate(x->p);
 				w = x->p->left;
 			}
-			if (w->right->color == BLACK && w->left->color == BLACK)
+			if (w->right->color == RB_BLACK && w->left->color == RB_BLACK)
 			{
-				w->color = RED;
+				w->color = RB_RED;
 				x = x->p;
 			}
 			else
 			{
-				if (w->left->color == BLACK)
+				if (w->left->color == RB_BLACK)
 				{
-					w->right->color = BLACK;
-					w->color = RED;
+					w->right->color = RB_BLACK;
+					w->color = RB_RED;
 					left_rotate(w);
 					w = x->p->left;
 				}
 				w->color = x->p->color;
-				x->p->color = BLACK;
-				w->left->color = BLACK;
+				x->p->color = RB_BLACK;
+				w->left->color = RB_BLACK;
 				right_rotate(x->p);
 				x = root;
 			}
 		}
 	}
-	x->color = BLACK;
+	x->color = RB_BLACK;
 }
 
 void rb_delete(rbnode *z)
@@ -287,8 +293,24 @@ void rb_delete(rbnode *z)
 		y->left->p = y;
 		y->color = z->color;
 	}
-	if (y_original_color == BLACK)
+	if (y_original_color == RB_BLACK)
 	{
 		rb_delete_fixup(x);
 	}
 }
+// #include <stddef.h>
+// #include <stdio.h>
+// int main()
+// {
+//     rbnode a = {0,999,0,NULL,NULL, NULL};
+//     rbnode b = {0,666,0,NULL,NULL,NULL};
+//     rbnode d = {0,3,0,NULL,NULL,NULL};
+//     rb_insert(&a);
+//     rb_insert(&b);
+//     rb_insert(&d);
+//     printf("a: %d %d %d %d %d %d\n", a.color, a.key, a.left, a.p, a.right, a.se);
+//     printf("b: %d %d %d %d %d %d\n", b.color, b.key, b.left, b.p, b.right, b.se);
+//     printf("d: %d %d %d %d %d %d\n", d.color, d.key, d.left, d.p, d.right, d.se);
+
+//     printf("mini: %d\n", tree_minimum(root)->key);
+// }

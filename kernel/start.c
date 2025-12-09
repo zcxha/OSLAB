@@ -8,10 +8,12 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
 #include "string.h"
 #include "rbtree.h"
 #include "proc.h"
+#include "tty.h"
+#include "console.h"
+#include "proto.h"
 #include "global.h"
 
 
@@ -40,6 +42,11 @@ PUBLIC void cstart()
 	*p_idt_base  = (u32)&idt;
 
 	init_prot();
+
+
+	// test_mm();
+
+	// disp_str("\n-----\"test_mm\" ends-----\n");
 
 	disp_str("-----\"cstart\" finished-----\n");
 }

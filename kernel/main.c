@@ -1,129 +1,142 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-							main.c
+                            main.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-													Forrest Yu, 2005
+                                                    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
 #include "string.h"
 #include "rbtree.h"
 #include "proc.h"
+#include "tty.h"
+#include "console.h"
+#include "proto.h"
 #include "global.h"
 /*======================================================================*
-							kernel_main
+                            kernel_main
  *======================================================================*/
 PUBLIC int kernel_main()
 {
-	disp_str("-----\"kernel_main\" begins-----\n");
+    disp_str("-----\"kernel_main\" begins-----\n");
 
-	TASK *p_task = task_table;
-	PROCESS *p_proc = proc_table;
-	char *p_task_stack = task_stack + STACK_SIZE_TOTAL;
-	u16 selector_ldt = SELECTOR_LDT_FIRST;
+    TASK *p_task = task_table;
+    PROCESS *p_proc = proc_table;
+    char *p_task_stack = task_stack + STACK_SIZE_TOTAL;
+    u16 selector_ldt = SELECTOR_LDT_FIRST;
 
-	add_task(p_task, p_task_stack, selector_ldt, 0, 0);
-	p_task_stack -= p_task->stacksize;
-	p_task++;
-	selector_ldt += 1 << 3;
-	add_task(p_task, p_task_stack, selector_ldt, 1, 1);
-	p_task_stack -= p_task->stacksize;
-	p_task++;
-	selector_ldt += 1 << 3;
-	add_task(p_task, p_task_stack, selector_ldt, 2, 2);
+    int i;
+    for (i = 0; i < NR_TASKS + NR_PROCS; i++)
+    {
+        if (i < NR_TASKS)
+        { // 添加TASK
+            p_task = task_table + i;
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_TASK, RPL_TASK, 0x1202);
+        }
+        else
+        { // 添加用户态进程
+            p_task = user_proc_table + (i - NR_TASKS);
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202);
+        }
+        p_task_stack -= p_task->stacksize;
+        selector_ldt += 1 << 3;
+    }
 
+    // 设置进程优先级
+    proc_table[0].se->priority = 15;
+    proc_table[1].se->priority = 19;
+    proc_table[2].se->priority = 20; // nice0
+    proc_table[3].se->priority = 21;
 
-	proc_table[0].se->priority = 19;
-	proc_table[1].se->priority = 20;// nice0
-	proc_table[2].se->priority = 21;
+    proc_table[1].nr_tty = 0;
+    proc_table[2].nr_tty = 1;
+    proc_table[3].nr_tty = 1;
 
+    sum_weight = 0;
 
-	sum_weight = 0;
-	for(int i = 0; i < NR_TASKS; i++)
-	{
-		sched_entity *se = proc_table[i].se;
-		se->weight = sched_prio_to_weight[se->priority];
-		sum_weight += se->weight;
-	}
+    // 转换weight
+    for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
+    {
+        sched_entity *se = proc_table[i].se;
+        se->weight = sched_prio_to_weight[se->priority];
+        sum_weight += se->weight;
+    }
 
-	for(int i = 0; i < NR_TASKS; i++)
-	{
-		sched_entity *se = proc_table[i].se;
-		se->exec_time = 0;
-		se->start_time = ticks;
-		se->vruntime = 0;
-		se->run_node.se = proc_table[i].se;
-		se->run_node.key = se->vruntime;
-		rb_insert(&se->run_node);
-	}
+    // 初始化se
+    for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
+    {
+        sched_entity *se = proc_table[i].se;
+        se->exec_time = 0;
+        se->start_time = ticks;
+        se->vruntime = 0;
+        se->run_node.se = proc_table[i].se;
+        se->run_node.key = se->vruntime;
 
-	// PROCESS* tmp = __pick_first_entity()->proc;
-	// sched_entity *se1 = __pick_first_entity();
-	// disp_int(se1->proc->pid);
-	// __asm__("xchg %bx, %bx");
-	// add_task(0) has set A to be curr
-	// so deque entity
+        rb_insert(&se->run_node);
+    }
 
-	rb_delete(&proc_table[0].se->run_node);
+    // PROCESS* tmp = __pick_first_entity()->proc;
+    // sched_entity *se1 = __pick_first_entity();
+    // disp_int(se1->proc->pid);
+    // __asm__("xchg %bx, %bx");
+    // add_task(0) has set A to be curr
+    // so deque entity
+    __asm__("xchg %bx, %bx");
 
-	k_reenter = 0;
-	ticks = 0;
+    // 因为进程开始运行了，那么就要从红黑树中删去
+    rb_delete(&proc_table[0].se->run_node);
+    __asm__("xchg %bx, %bx");
 
-	/* 初始化 8253 PIT */
-	out_byte(TIMER_MODE, RATE_GENERATOR);
-	out_byte(TIMER0, (u8)(TIMER_FREQ / HZ));
-	out_byte(TIMER0, (u8)((TIMER_FREQ / HZ) >> 8));
+    k_reenter = 0;
+    ticks = 0;
 
-	put_irq_handler(CLOCK_IRQ, clock_handler); /* 设定时钟中断处理程序 */
-	enable_irq(CLOCK_IRQ);					   /* 让8259A可以接收时钟中断 */
+    init_clock();
+    init_keyboard();
 
-	restart();
+    restart();
 
-	while (1)
-	{
-	}
+    while (1)
+    {
+    }
 }
 
 /*======================================================================*
-							   TestA
+                               TestA
  *======================================================================*/
 void TestA()
 {
-	int i = 0;
-	while (1)
-	{
-		disp_int(proc_table[0].pid);
-		proc_table[0].pid = 4;
-		disp_str("A.");
-		milli_delay(1);
-	}
+    int i = 0;
+    while (1)
+    {
+        printf("A");
+        milli_delay(100);
+    }
 }
 
 /*======================================================================*
-							   TestB
+                               TestB
  *======================================================================*/
 void TestB()
 {
-	int i = 0x1000;
-	while (1)
-	{
-		disp_str("B.");
-		milli_delay(1);
-	}
+    int i = 0x1000;
+    while (1)
+    {
+        printf("B");
+        milli_delay(100);
+    }
 }
 
 /*======================================================================*
-							   TestB
+                               TestB
  *======================================================================*/
 void TestC()
 {
-	int i = 0x2000;
-	while (1)
-	{
-		disp_str("C.");
-		milli_delay(1);
-	}
+    int i = 0x2000;
+    while (1)
+    {
+        printf("C");
+        milli_delay(100);
+    }
 }

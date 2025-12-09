@@ -159,6 +159,7 @@ csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<O
 	sti	; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
 	push	%1			; `.
 	call	[irq_table + 4 * %1]	;  | 中断处理程序
+
 	pop	ecx			; /
 	cli
 	in	al, INT_M_CTLMASK	; `.
@@ -340,23 +341,25 @@ save:
 ; ====================================================================================
 sys_call:
         call    save
-
+	    push	dword [p_proc_ready]
         sti
 
+	    push	ecx
+	    push	ebx
         call    [sys_call_table + eax * 4]
+	    add	esp, 4 * 3
+
         mov     [esi + EAXREG - P_STACKBASE], eax
-
         cli
-
         ret
 
 
 ; ====================================================================================
-;				    restart
+;                                   restart
 ; ====================================================================================
 restart:
 	mov	esp, [p_proc_ready]
-	lldt	[esp + P_LDT_SEL]
+	lldt	[esp + P_LDT_SEL] 
 	lea	eax, [esp + P_STACKTOP]
 	mov	dword [tss + TSS3_S_SP0], eax
 restart_reenter:
