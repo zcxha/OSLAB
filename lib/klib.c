@@ -8,12 +8,11 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "tty.h"
-#include "console.h"
+#include "proto.h"
 #include "string.h"
+#include "rbtree.h"
 #include "proc.h"
 #include "global.h"
-#include "proto.h"
 
 
 /*======================================================================*
@@ -24,7 +23,7 @@ PUBLIC char * itoa(char * str, int num)/* 数字前面的 0 不被显示出来, 
 	char *	p = str;
 	char	ch;
 	int	i;
-	int	flag = 0;
+	int	flag = FALSE;
 
 	*p++ = '0';
 	*p++ = 'x';
@@ -36,7 +35,7 @@ PUBLIC char * itoa(char * str, int num)/* 数字前面的 0 不被显示出来, 
 		for(i=28;i>=0;i-=4){
 			ch = (num >> i) & 0xF;
 			if(flag || (ch > 0)){
-				flag = 1;
+				flag = TRUE;
 				ch += '0';
 				if(ch > '9'){
 					ch += 7;

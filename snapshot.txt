@@ -1,0 +1,8 @@
+
+A.A.A.B.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.B.B.A.
+A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.B.B.C.C.B.B.A.A.A.C.
+C.B.B.A.A.A.C.C.B.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.B.B.C.C.A.
+A.A.A.A.A.B.B.B.C.C.C.B.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.B.B.
+C.C.A.A.A.B.B.C.C.B.B.B.B.A.A.A.C.C.A.A.A.C.C.B.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.
+A.A.A.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.
+A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.A.C.C.A.A.A.B.B.B.B.

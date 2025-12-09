@@ -1,242 +1,129 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                            main.c
+							main.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    Forrest Yu, 2005
+													Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "string.h"
-#include "proc.h"
-#include "tty.h"
-#include "console.h"
-#include "global.h"
 #include "proto.h"
-
-// shared memory
-char buffer[30];
-int counter = 0;
-int consumer_wait = 0;
-int producer_wait = 0;
-
+#include "string.h"
+#include "rbtree.h"
+#include "proc.h"
+#include "global.h"
 /*======================================================================*
-                            kernel_main
+							kernel_main
  *======================================================================*/
 PUBLIC int kernel_main()
 {
-    disp_str("-----\"kernel_main\" begins-----\n");
+	disp_str("-----\"kernel_main\" begins-----\n");
 
-    struct task *p_task;
-    struct proc *p_proc = proc_table;
-    char *p_task_stack = task_stack + STACK_SIZE_TOTAL;
-    u16 selector_ldt = SELECTOR_LDT_FIRST;
-    u8 privilege;
-    u8 rpl;
-    int eflags;
-    int i;
-    int prio;
-    for (i = 0; i < NR_TASKS + NR_PROCS; i++)
-    {
-        if (i < NR_TASKS)
-        { /* 任务 */
-            p_task = task_table + i;
-            privilege = PRIVILEGE_TASK;
-            rpl = RPL_TASK;
-            eflags = 0x1202; /* IF=1, IOPL=1, bit 2 is always 1 */
-            prio = 15;
-        }
-        else
-        { /* 用户进程 */
-            p_task = user_proc_table + (i - NR_TASKS);
-            privilege = PRIVILEGE_USER;
-            rpl = RPL_USER;
-            eflags = 0x202; /* IF=1, bit 2 is always 1 */
-            prio = 5;
-        }
+	TASK *p_task = task_table;
+	PROCESS *p_proc = proc_table;
+	char *p_task_stack = task_stack + STACK_SIZE_TOTAL;
+	u16 selector_ldt = SELECTOR_LDT_FIRST;
 
-        strcpy(p_proc->name, p_task->name); /* name of the process */
-        p_proc->pid = i;                    /* pid */
+	add_task(p_task, p_task_stack, selector_ldt, 0, 0);
+	p_task_stack -= p_task->stacksize;
+	p_task++;
+	selector_ldt += 1 << 3;
+	add_task(p_task, p_task_stack, selector_ldt, 1, 1);
+	p_task_stack -= p_task->stacksize;
+	p_task++;
+	selector_ldt += 1 << 3;
+	add_task(p_task, p_task_stack, selector_ldt, 2, 2);
 
-        p_proc->ldt_sel = selector_ldt;
 
-        memcpy(&p_proc->ldts[0], &gdt[SELECTOR_KERNEL_CS >> 3],
-               sizeof(struct descriptor));
-        p_proc->ldts[0].attr1 = DA_C | privilege << 5;
-        memcpy(&p_proc->ldts[1], &gdt[SELECTOR_KERNEL_DS >> 3],
-               sizeof(struct descriptor));
-        p_proc->ldts[1].attr1 = DA_DRW | privilege << 5;
-        p_proc->regs.cs = (0 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-        p_proc->regs.ds = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-        p_proc->regs.es = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-        p_proc->regs.fs = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-        p_proc->regs.ss = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-        p_proc->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
+	proc_table[0].se->priority = 19;
+	proc_table[1].se->priority = 20;// nice0
+	proc_table[2].se->priority = 21;
 
-        p_proc->regs.eip = (u32)p_task->initial_eip;
-        p_proc->regs.esp = (u32)p_task_stack;
-        p_proc->regs.eflags = eflags;
 
-        p_proc->nr_tty = 0;
+	sum_weight = 0;
+	for(int i = 0; i < NR_TASKS; i++)
+	{
+		sched_entity *se = proc_table[i].se;
+		se->weight = sched_prio_to_weight[se->priority];
+		sum_weight += se->weight;
+	}
 
-        p_proc->p_flags = 0;
-        p_proc->p_msg = 0;
-        p_proc->p_recvfrom = NO_TASK;
-        p_proc->p_sendto = NO_TASK;
-        p_proc->has_int_msg = 0;
-        p_proc->q_sending = 0;
-        p_proc->next_sending = 0;
+	for(int i = 0; i < NR_TASKS; i++)
+	{
+		sched_entity *se = proc_table[i].se;
+		se->exec_time = 0;
+		se->start_time = ticks;
+		se->vruntime = 0;
+		se->run_node.se = proc_table[i].se;
+		se->run_node.key = se->vruntime;
+		rb_insert(&se->run_node);
+	}
 
-        p_proc->ticks = p_proc->priority = prio;
+	// PROCESS* tmp = __pick_first_entity()->proc;
+	// sched_entity *se1 = __pick_first_entity();
+	// disp_int(se1->proc->pid);
+	// __asm__("xchg %bx, %bx");
+	// add_task(0) has set A to be curr
+	// so deque entity
 
-        p_task_stack -= p_task->stacksize;
-        p_proc++;
-        p_task++;
-        selector_ldt += 1 << 3;
-    }
+	rb_delete(&proc_table[0].se->run_node);
 
-    proc_table[NR_TASKS + 0].nr_tty = 0;
-    proc_table[NR_TASKS + 1].nr_tty = 1;
-    proc_table[NR_TASKS + 2].nr_tty = 1;
+	k_reenter = 0;
+	ticks = 0;
 
-    k_reenter = 0;
-    ticks = 0;
+	/* 初始化 8253 PIT */
+	out_byte(TIMER_MODE, RATE_GENERATOR);
+	out_byte(TIMER0, (u8)(TIMER_FREQ / HZ));
+	out_byte(TIMER0, (u8)((TIMER_FREQ / HZ) >> 8));
 
-    p_proc_ready = proc_table;
+	put_irq_handler(CLOCK_IRQ, clock_handler); /* 设定时钟中断处理程序 */
+	enable_irq(CLOCK_IRQ);					   /* 让8259A可以接收时钟中断 */
 
-    init_clock();
-    init_keyboard();
+	restart();
 
-    /* shared memory init */
-    counter = 0;
-    consumer_wait = 0;
-    producer_wait = 0;
-
-    restart();
-
-    while (1)
-    {
-    }
-}
-
-/*****************************************************************************
- *                                get_ticks
- *****************************************************************************/
-PUBLIC int get_ticks()
-{
-    MESSAGE msg;
-    reset_msg(&msg);
-    msg.type = GET_TICKS;
-    send_recv(BOTH, TASK_SYS, &msg);
-    return msg.RETVAL;
+	while (1)
+	{
+	}
 }
 
 /*======================================================================*
-                               TestA
+							   TestA
  *======================================================================*/
 void TestA()
 {
-    while (1)
-    {
-        // printf("<Ticks:%d>", get_ticks());
-        printf("a");
-        MESSAGE msg;
-        reset_msg(&msg);
-        msg.type = 3;
-        // printf("counter: %d", counter);
-        if (counter < 30)
-        {
-            buffer[counter++] = 'A';
-
-            printf("A produced, now counter: %d", counter);
-            if (counter > 0 && consumer_wait)
-            {
-                send_recv(SEND, 3, &msg); // 唤醒消费者
-            }
-        }
-        else
-        {
-            producer_wait = 1;
-            printf("producer sleeps.");
-            send_recv(RECEIVE, 3, &msg); // 休眠
-            printf("producer wake up.");
-            producer_wait = 0;
-        }
-        enable_irq(CLOCK_IRQ);
-        // send_recv(BOTH, 3, &msg);
-        // printf("%d ", msg.RETVAL);
-        milli_delay(200);
-    }
+	int i = 0;
+	while (1)
+	{
+		disp_int(proc_table[0].pid);
+		proc_table[0].pid = 4;
+		disp_str("A.");
+		milli_delay(1);
+	}
 }
 
 /*======================================================================*
-                               TestB
+							   TestB
  *======================================================================*/
 void TestB()
 {
-    while (1)
-    {
-        // printf("B");
-        MESSAGE msg;
-        reset_msg(&msg);
-        msg.type = 3;
-        disable_irq(CLOCK_IRQ);
-        if (counter > 0)
-        {
-
-            printf("%c ",buffer[--counter]);
-
-            printf("B consumed, now counter %d\n", counter);
-            if (counter < 30 && producer_wait)
-            {
-                send_recv(SEND, 2, &msg); // 唤醒生产者
-            }
-        }
-        else
-        {
-            consumer_wait = 1;
-            printf("consumer sleeps");
-            send_recv(RECEIVE, 2, &msg); // 休眠
-            consumer_wait = 0;
-            printf("consumer wake up");
-        }
-        // send_recv(RECEIVE, ANY, &msg);
-        // printf("%d ", msg.RETVAL);
-        // msg.RETVAL = 100;
-        // send_recv(SEND, 2, &msg);
-        milli_delay(200);
-    }
+	int i = 0x1000;
+	while (1)
+	{
+		disp_str("B.");
+		milli_delay(1);
+	}
 }
 
 /*======================================================================*
-                               TestB
+							   TestB
  *======================================================================*/
 void TestC()
 {
-    /* assert(0); */
-    while (1)
-    {
-        // printf("C");
-        milli_delay(200);
-    }
-}
-
-/*****************************************************************************
- *                                panic
- *****************************************************************************/
-PUBLIC void panic(const char *fmt, ...)
-{
-    int i;
-    char buf[256];
-
-    /* 4 is the size of fmt in the stack */
-    va_list arg = (va_list)((char *)&fmt + 4);
-
-    i = vsprintf(buf, fmt, arg);
-
-    printl("%c !!panic!! %s", MAG_CH_PANIC, buf);
-
-    /* should never arrive here */
-    __asm__ __volatile__("ud2");
+	int i = 0x2000;
+	while (1)
+	{
+		disp_str("C.");
+		milli_delay(1);
+	}
 }
