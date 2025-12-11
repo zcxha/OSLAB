@@ -137,7 +137,7 @@ void TestB()
     while (1)
     {
         printf("B");
-        // milli_delay(100);
+        milli_delay(100);
     }
 }
 
@@ -150,7 +150,7 @@ void TestC()
     while (1)
     {
         printf("C");
-        // milli_delay(100);
+        milli_delay(100);
     }
 }
 

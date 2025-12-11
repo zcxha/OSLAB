@@ -256,8 +256,12 @@ PUBLIC int send_recv(int function, int src_dest, MESSAGE *msg)
     {
     case BOTH:
         ret = sendrec(SEND, src_dest, msg);
+        // printl("client got sendresp! ");
         if (ret == 0)
+        {
             ret = sendrec(RECEIVE, src_dest, msg);
+            // printl("client got ret! ");
+        }
         break;
     case SEND:
     case RECEIVE:
@@ -345,14 +349,16 @@ PUBLIC void reset_msg(MESSAGE *p)
 PRIVATE void block(PROCESS *p)
 { // 这里假定了block的进程是当前进程
     // 如果要block其他进程，则需要在红黑树内删除该结点，然后加入等待队列
-    assert(p->p_flags);
+    // printl("block %d ", p->pid);
+
+    assert(p->p_flags == SENDING || p->p_flags == RECEIVING);
 
     assert(wait_cnt <= NR_TASKS + NR_PROCS);
 
-    // printl("to block %d ", p->pid);
 
 
     nr_running--;
+    sum_weight -= p->se->weight;
     wait_table[wait_cnt++] = p;
     if (p == p_proc_ready)
     {
@@ -376,15 +382,28 @@ PRIVATE void block(PROCESS *p)
  *****************************************************************************/
 PRIVATE void unblock(PROCESS *p)
 {
+    // printl("unblock %d ", p->pid);
     assert(p->p_flags == 0);
 
     assert(wait_cnt > 0);
 
-
-    // printl("to unblock %d ", p->pid);
-
-
+    sum_weight += p->se->weight;
     nr_running++;
+
+    // printl("rb insert %d ", wait_table[wait_cnt-1]->pid);
+    // rb_insert(&wait_table[--wait_cnt]->se->run_node);
+
+    // 注意unblock应该是去找那个进程，而不是直接unblk最后入栈的
+    for(int i = 0; i < wait_cnt; i++)
+    {
+        // 这里currently先按照pid来找
+        if(wait_table[i]->pid == p->pid && i != wait_cnt - 1)
+        {
+            PROCESS *tmp = wait_table[wait_cnt - 1];
+            wait_table[wait_cnt - 1] = wait_table[i];
+            wait_table[i] = tmp;
+        }
+    }
 
     rb_insert(&wait_table[--wait_cnt]->se->run_node);
 }
@@ -686,6 +705,7 @@ PRIVATE int msg_receive(PROCESS *current, int src, MESSAGE *m)
         p_who_wanna_recv->p_msg = m;
         p_who_wanna_recv->p_recvfrom = src;
         block(p_who_wanna_recv);
+
 
         assert(p_who_wanna_recv->p_flags == RECEIVING);
         assert(p_who_wanna_recv->p_msg != 0);

@@ -32,12 +32,14 @@ PUBLIC void task_sys()
 	MESSAGE msg;
 	while (1) {
 		send_recv(RECEIVE, ANY, &msg);
+        // printl("received quest from %d. ", msg.source);
 		int src = msg.source;
 
 		switch (msg.type) {
 		case GET_TICKS:
 			msg.RETVAL = ticks;
 			send_recv(SEND, src, &msg);
+            // printl("sended response to %d. ", src);
 			break;
 		default:
 			panic("unknown msg type");
