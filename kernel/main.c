@@ -77,6 +77,8 @@ PUBLIC int kernel_main()
         rb_insert(&se->run_node);
     }
 
+    wait_cnt = 0;
+
     // PROCESS* tmp = __pick_first_entity()->proc;
     // sched_entity *se1 = __pick_first_entity();
     // disp_int(se1->proc->pid);
@@ -122,9 +124,7 @@ void TestA()
     while (1)
     {
         printf("A");
-        __asm__("xchg %bx,%bx");
         milli_delay(100);
-        __asm__("xchg %bx,%bx");
     }
 }
 
@@ -137,7 +137,7 @@ void TestB()
     while (1)
     {
         printf("B");
-        milli_delay(100);
+        // milli_delay(100);
     }
 }
 
@@ -150,7 +150,7 @@ void TestC()
     while (1)
     {
         printf("C");
-        milli_delay(100);
+        // milli_delay(100);
     }
 }
 

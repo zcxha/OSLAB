@@ -26,7 +26,10 @@ EXTERN	PROCESS*	p_proc_ready;
 
 EXTERN  int     nr_current_console;
 
+EXTERN  u32             wait_cnt;
+
 extern PROCESS proc_table[];
+extern PROCESS* wait_table[];
 extern  sched_entity se_table[];
 extern	char		task_stack[];
 extern  TASK            task_table[];

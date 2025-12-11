@@ -90,6 +90,10 @@ PUBLIC	void	dump_msg(const char * title, MESSAGE* m);
 PUBLIC	void	dump_proc(struct s_proc * p);
 PUBLIC	int	send_recv(int function, int src_dest, MESSAGE* msg);
 
+/* rbtree.c */
+void rb_delete(rbnode *z);
+void rb_insert(rbnode *z);
+
 /* lib/misc.c */
 PUBLIC void spin(char * func_name);
 

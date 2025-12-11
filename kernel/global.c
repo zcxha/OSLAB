@@ -19,6 +19,9 @@
 #include "global.h"
 
 PUBLIC	PROCESS			proc_table[NR_TASKS + NR_PROCS];
+PUBLIC  PROCESS*         wait_table[NR_TASKS + NR_PROCS];// TODO: 采用动态数据结构
+
+
 
 PUBLIC	char			task_stack[STACK_SIZE_TOTAL];
 
@@ -83,6 +86,6 @@ PUBLIC u32 sysctl_sched_min_granularity			= 7500;
 PUBLIC u32 sched_nr_latency = 8;
 
 /* CFS rq */
-PUBLIC u32 nr_running = 3;
+PUBLIC u32 nr_running = 0;
 PUBLIC u32 sum_weight = 0;
 PUBLIC u32 has_preempt = 0;
