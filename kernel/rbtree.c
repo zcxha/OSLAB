@@ -13,6 +13,7 @@
 
 
 typedef unsigned int u32;
+
 rbnode nil = {RB_BLACK, 0, &nil, &nil, &nil};
 
 rbnode *root = &nil;

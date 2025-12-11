@@ -19,7 +19,7 @@ void map(u32 va, u32 pa);
 u32 unmap(u32 va);
 
 // 获取整个bitmap，p指向一个4元素数组，这样一共就128位
-get_bitmap(u32 *p);
+void get_bitmap(u32 *p);
 
 // 初始化128位bitmap为全0
 void init_bitmap();

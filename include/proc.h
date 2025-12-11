@@ -51,6 +51,31 @@ typedef struct s_proc
 	struct s_proc *pre;
 	struct s_proc *nxt;
 
+
+	int  p_flags;              /**
+				    * process flags.
+				    * A proc is runnable iff p_flags==0
+				    */
+
+	MESSAGE * p_msg;
+	int p_recvfrom;
+	int p_sendto;
+
+	int has_int_msg;           /**
+				    * nonzero if an INTERRUPT occurred when
+				    * the task is not ready to deal with it.
+				    */
+
+	struct s_proc * q_sending;   /**
+				    * queue of procs sending messages to
+				    * this proc
+				    */
+	struct s_proc * next_sending;/**
+				    * next proc in the sending
+				    * queue (q_sending)
+				    */
+
+
     int nr_tty;
 } PROCESS;
 
@@ -61,12 +86,15 @@ typedef struct s_task
 	char name[32];
 } TASK;
 
+#define proc2pid(x) (x - proc_table)
+
 /* Number of tasks */
-#define NR_TASKS 1
+#define NR_TASKS 2
 #define NR_PROCS 3
 
 /* stacks of tasks */
 #define STACK_SIZE_TTY   0x8000
+#define STACK_SIZE_SYS	 0x8000
 #define STACK_SIZE_TESTA 0x8000
 #define STACK_SIZE_TESTB 0x8000
 #define STACK_SIZE_TESTC 0x8000
@@ -75,8 +103,5 @@ typedef struct s_task
 #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
 						  STACK_SIZE_TESTB + \
 						  STACK_SIZE_TESTC + \
-                            STACK_SIZE_TTY)
-
-
-PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
-     u32 table_idx, u32 pid, u8 privilege, u8 rpl, int eflags/*, int prio*/);
+                            STACK_SIZE_TTY + \
+                            STACK_SIZE_SYS)

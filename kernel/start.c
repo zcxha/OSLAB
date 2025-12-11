@@ -44,9 +44,9 @@ PUBLIC void cstart()
 	init_prot();
 
 
-	// test_mm();
+	test_mm();
 
-	// disp_str("\n-----\"test_mm\" ends-----\n");
+	disp_str("\n-----\"test_mm\" ends-----\n");
 
 	disp_str("-----\"cstart\" finished-----\n");
 }

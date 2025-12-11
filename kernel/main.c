@@ -33,26 +33,26 @@ PUBLIC int kernel_main()
         if (i < NR_TASKS)
         { // 添加TASK
             p_task = task_table + i;
-            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_TASK, RPL_TASK, 0x1202);
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_TASK, RPL_TASK, 0x1202, 15);
         }
         else
         { // 添加用户态进程
             p_task = user_proc_table + (i - NR_TASKS);
-            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202);
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202, 20);
         }
         p_task_stack -= p_task->stacksize;
         selector_ldt += 1 << 3;
     }
 
     // 设置进程优先级
-    proc_table[0].se->priority = 15;
-    proc_table[1].se->priority = 19;
-    proc_table[2].se->priority = 20; // nice0
-    proc_table[3].se->priority = 21;
+    // proc_table[0].se->priority = 15;
+    // proc_table[1].se->priority = 19;
+    // proc_table[2].se->priority = 20; // nice0
+    // proc_table[3].se->priority = 21;
 
-    proc_table[1].nr_tty = 0;
-    proc_table[2].nr_tty = 1;
-    proc_table[3].nr_tty = 1;
+    proc_table[NR_TASKS+0].nr_tty = 0;
+    proc_table[NR_TASKS+1].nr_tty = 1;
+    proc_table[NR_TASKS+2].nr_tty = 1;
 
     sum_weight = 0;
 
@@ -83,11 +83,9 @@ PUBLIC int kernel_main()
     // __asm__("xchg %bx, %bx");
     // add_task(0) has set A to be curr
     // so deque entity
-    __asm__("xchg %bx, %bx");
 
     // 因为进程开始运行了，那么就要从红黑树中删去
     rb_delete(&proc_table[0].se->run_node);
-    __asm__("xchg %bx, %bx");
 
     k_reenter = 0;
     ticks = 0;
@@ -102,6 +100,19 @@ PUBLIC int kernel_main()
     }
 }
 
+
+/*****************************************************************************
+ *                                get_ticks
+ *****************************************************************************/
+PUBLIC int get_ticks()
+{
+    MESSAGE msg;
+    reset_msg(&msg);
+    msg.type = GET_TICKS;
+    send_recv(BOTH, TASK_SYS, &msg);
+    return msg.RETVAL;
+}
+
 /*======================================================================*
                                TestA
  *======================================================================*/
@@ -111,7 +122,9 @@ void TestA()
     while (1)
     {
         printf("A");
+        __asm__("xchg %bx,%bx");
         milli_delay(100);
+        __asm__("xchg %bx,%bx");
     }
 }
 
@@ -139,4 +152,24 @@ void TestC()
         printf("C");
         milli_delay(100);
     }
+}
+
+
+/*****************************************************************************
+ *                                panic
+ *****************************************************************************/
+PUBLIC void panic(const char *fmt, ...)
+{
+    int i;
+    char buf[256];
+
+    /* 4 is the size of fmt in the stack */
+    va_list arg = (va_list)((char *)&fmt + 4);
+
+    i = vsprintf(buf, fmt, arg);
+
+    printl("%c !!panic!! %s", MAG_CH_PANIC, buf);
+
+    /* should never arrive here */
+    __asm__ __volatile__("ud2");
 }

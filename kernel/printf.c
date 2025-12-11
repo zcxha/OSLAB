@@ -54,15 +54,10 @@ int printf(const char *fmt, ...)
 	int i;
 	char buf[256];
 
-	// char * 就是把&fmt这个地址作为一个指向char数组的地址
-	// 然后+4就是栈上的+4
-	// 那就得到了后面可变参数的基地址
-	// 转化为char *，即va_list
-	// 如果这里面有指针那就是4字节的
-	// 只要转换为(int *)arg然后解引用就获得了一个指针
 	va_list arg = (va_list)((char*)(&fmt) + 4); /*4是参数fmt所占堆栈中的大小*/
 	i = vsprintf(buf, fmt, arg);
-	write(buf, i);
+	buf[i] = 0;
+	printx(buf);
 
 	return i;
 }
