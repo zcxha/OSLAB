@@ -38,6 +38,10 @@ extern	irq_handler	irq_table[];
 extern  TTY     tty_table[];
 extern CONSOLE  console_table[];
 
+/*---TEST---*/
+extern int stat[];
+/*---TEST---*/
+
 extern const int sched_prio_to_weight[];
 extern u32 sysctl_sched_latency;
 extern u32 sysctl_sched_min_granularity;

@@ -44,6 +44,9 @@ PUBLIC	CONSOLE		console_table[NR_CONSOLES];
 
 PUBLIC	system_call		sys_call_table[NR_SYS_CALL] = {sys_printx, sys_sendrec};
 
+/*---TEST---*/
+PUBLIC int stat[NR_TASKS+NR_PROCS];
+/*---TEST---*/
 
 PUBLIC const int sched_prio_to_weight[40] = {
  /* -20 */     88761,     71755,     56483,     46273,     36291,

@@ -22,6 +22,7 @@
 PUBLIC void clock_handler(int irq)
 {
 	ticks++; // += 1 ms
+    stat[p_proc_ready->pid]++;
 	/* update_curr */
 	// DELTA_EXEC = 1000
 	p_proc_ready->se->exec_time += 1000; // 1ms = 1000milli

@@ -30,6 +30,11 @@ PUBLIC int kernel_main()
     int i;
     for (i = 0; i < NR_TASKS + NR_PROCS; i++)
     {
+
+        /*---TEST---*/
+        stat[i] = 0;
+        /*---TEST---*/
+
         if (i < NR_TASKS)
         { // 添加TASK
             p_task = task_table + i;
@@ -38,7 +43,16 @@ PUBLIC int kernel_main()
         else
         { // 添加用户态进程
             p_task = user_proc_table + (i - NR_TASKS);
-            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202, 20);
+            int prio = 20;
+            if(i-NR_TASKS == 0)
+            {
+                prio = 15;
+            }
+            else if(i-NR_TASKS == 1)
+            {
+                prio = 25;
+            }
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202, prio);
         }
         p_task_stack -= p_task->stacksize;
         selector_ldt += 1 << 3;
@@ -120,11 +134,21 @@ PUBLIC int get_ticks()
  *======================================================================*/
 void TestA()
 {
-    int i = 0;
+    // TEST CFS SCHED MODULE
+    int flag = 0;
+
     while (1)
     {
-        printf("A");
-        milli_delay(100);
+        if(get_ticks() >= 5000 && !flag)
+        {
+            flag = 1;
+            for(int i = 0; i < NR_TASKS+NR_PROCS; i++)
+            {
+                printf("%d ", stat[i]);
+            }
+        }
+        // printf("A");
+        // milli_delay(100);
     }
 }
 
@@ -136,8 +160,8 @@ void TestB()
     int i = 0x1000;
     while (1)
     {
-        printf("B");
-        milli_delay(100);
+        // printf("B");
+        // milli_delay(100);
     }
 }
 
@@ -149,8 +173,8 @@ void TestC()
     int i = 0x2000;
     while (1)
     {
-        printf("C");
-        milli_delay(100);
+        // printf("C");
+        // milli_delay(100);
     }
 }
 
