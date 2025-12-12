@@ -37,7 +37,7 @@ LABEL_DESC_VIDEO:		Descriptor	 0B8000h,               0ffffh, DA_DRW            
 
 GdtLen		equ	$ - LABEL_GDT
 GdtPtr		dw	GdtLen - 1				; 段界限
-		dd	LOADER_PHY_ADDR + LABEL_GDT		; 基地址 (让基地址八字节对齐将起到优化速度之效果，目前懒得改)
+		dd	BaseOfLoaderPhyAddr + LABEL_GDT		; 基地址 (让基地址八字节对齐将起到优化速度之效果，目前懒得改)
 ; The GDT is not a segment itself; instead, it is a data structure in linear address space.
 ; The base linear address and limit of the GDT must be loaded into the GDTR register. -- IA-32 Software Developer’s Manual, Vol.3A
 
@@ -85,66 +85,88 @@ LABEL_START:			; <--- 从这里开始 *************
 	mov	dword [_dwMCRNumber], 0
 .MemChkOK:
 
-	;; get the sector nr of `/' (ROOT_INODE), it'll be stored in eax
-	mov	eax, [fs:SB_ROOT_INODE] ; fs -> super_block (see hdboot.asm)
-	call	get_inode
-
-	;; read `/' into es:bx
-	mov	dword [disk_address_packet +  8], eax
+; 跟boot 一模一样
+    ; 假设根目录占8sector
+    mov ecx, 4
+    mov	dword [disk_address_packet +  8], ROOT_BASE
+    .getent:
+    xor esi, esi
 	call	read_sector
+	mov	ax, BaseOfKernelFile
+	mov	fs, ax
+    mov edi, 0
+    .inner:
+    mov esi, KernelFileName
+    cld
+    lodsd
+    cmp eax, [fs:edi]
+    jne .innerloop
+    cld
+    lodsd
+    cmp eax, [fs:(edi+4)]
+    jne .innerloop
+    cld
+    lodsd
+    cmp eax, [fs:(edi + 8)]
+    jne .innerloop
 
-	;; let's search `/' for the kernel
-	mov	si, KernelFileName
-	push	bx		; <- save
-.str_cmp:
-	;; before comparation:
-	;;     es:bx -> dir_entry @ disk
-	;;     ds:si -> filename we want
-	add	bx, [fs:SB_DIR_ENT_FNAME_OFF]
-.1:
-	lodsb				; ds:si -> al
-	cmp	al, byte [es:bx]
-	jz	.2
-	jmp	.different		; oops
-.2:					; so far so good
-	cmp	al, 0			; both arrive at a '\0', match
-	jz	.found
-	inc	bx			; next char @ disk
-	jmp	.1			; on and on
-.different:
-	pop	bx		; -> restore
-	add	bx, [fs:SB_DIR_ENT_SIZE]
-	sub	ecx, [fs:SB_DIR_ENT_SIZE]
-	jz	.not_found
-	push	bx
-	mov	si, KernelFileName
-	jmp	.str_cmp
-.not_found:
-	mov	dh, 3
-	call	real_mode_disp_str
-	jmp	$
-.found:
-	pop	bx
-	add	bx, [fs:SB_DIR_ENT_INODE_OFF]
-	mov	eax, [es:bx]		; eax <- inode nr of kernel
-	call	get_inode		; eax <- start sector nr of kernel
-	mov	dword [disk_address_packet +  8], eax
-load_kernel:
-	call	read_sector
-	cmp	ecx, SECT_BUF_SIZE
-	jl	.done
-	sub	ecx, SECT_BUF_SIZE	; bytes_left -= SECT_BUF_SIZE
-	add	word  [disk_address_packet + 4], SECT_BUF_SIZE ; transfer buffer
-	jc	.1
-	jmp	.2
-.1:
-	add	word  [disk_address_packet + 6], 1000h
-.2:
-	add	dword [disk_address_packet + 8], TRANS_SECT_NR ; LBA
-	jmp	load_kernel
-.done:
-	mov	dh, 2
-	call	real_mode_disp_str
+
+    jmp .succ
+    .innerloop:; innerloop遍历这次SECTORBUFFER所有目录项
+    add edi, 0x20
+    cmp edi, 0x400
+    jge .outerloop
+    jmp .inner
+
+    .outerloop:
+    add dword [disk_address_packet + 8], TRANS_SECT_NR
+    dec ecx
+    cmp ecx, 0
+    jg .getent; while ecx > 0
+
+    .fail:
+    mov dh, 3
+    call real_mode_disp_str
+    jmp $
+
+    ; fs:edi 指向目录项 [0x14-0x15] [0x1a-0x1b]
+    ;[1c~1f] byte len
+    .succ:
+    ; mov dx, fs:[edi+0x14] 假定loader在低16位的簇块中
+    xor eax, eax
+    xor edx, edx
+    mov ax, [fs:(edi+0x1a)]; 获取目录项指向数据cluster地址
+    sub ax, 2
+    mov ecx, 8
+    mul ecx
+    add eax, ROOT_BASE
+    ; 此时eax为loader的数据地址lba(sector)
+    push eax
+
+    ; 加载文件长度
+    mov eax, [fs:(edi+0x1c)]
+
+    ; 计算读多少次
+    mov ebx, SECT_BUF_SIZE
+    div ebx ; 有一丢丢问题，这是对1024对齐读到内存，不知道会不会覆盖
+    cmp edx, 0
+    je .noadd
+    inc eax
+    .noadd:
+    mov word [disk_address_packet + 4], OffsetOfKernelFile
+    mov word [disk_address_packet + 6], BaseOfKernelFile
+    mov ecx, eax
+    pop eax
+    mov dword [disk_address_packet + 8], eax
+    .rdld:
+    call read_sector
+    add word [disk_address_packet + 4], SECT_BUF_SIZE
+    add dword [disk_address_packet + 8], TRANS_SECT_NR
+    loop .rdld
+    xchg bx, bx
+    .done:
+    mov dh, 2
+    call real_mode_disp_str
 
 
 ; 下面准备跳入保护模式 -------------------------------------------
@@ -166,7 +188,7 @@ load_kernel:
 	mov	cr0, eax
 
 ; 真正进入保护模式
-	jmp	dword SelectorFlatC:(LOADER_PHY_ADDR+LABEL_PM_START)
+	jmp	dword SelectorFlatC:(BaseOfLoaderPhyAddr+LABEL_PM_START)
 
 
 	jmp	$		; never arrive here
@@ -181,7 +203,7 @@ dwKernelSize		dd	0		; KERNEL.BIN 文件大小
 ;============================================================================
 ;字符串
 ;----------------------------------------------------------------------------
-KernelFileName		db	"kernel.bin", 0	; KERNEL.BIN 之文件名
+KernelFileName		db	"KERNEL  BIN", 0x20	; FAT32目录项的，、，
 ; 为简化代码, 下面每个字符串的长度均为 MessageLength
 MessageLength		equ	9
 LoadMessage:		db	"Loading  "
@@ -247,51 +269,7 @@ read_sector:
 	mov	bx, [disk_address_packet + 4]
 
 	ret
-
-;----------------------------------------------------------------------------
-; get_inode
-;----------------------------------------------------------------------------
-; before:
-;     - eax    : inode nr.
-; after:
-;     - eax    : sector nr.
-;     - ecx    : the_inode.i_size
-;     - es:ebx : inodes sector buffer
-; registers changed:
-;     - eax, ebx, ecx, edx
-get_inode:
-	dec	eax				; eax <-  inode_nr -1
-	mov	bl, [fs:SB_INODE_SIZE]
-	mul	bl				; eax <- (inode_nr - 1) * INODE_SIZE
-	mov	edx, SECT_BUF_SIZE
-	sub	edx, dword [fs:SB_INODE_SIZE]
-	cmp	eax, edx
-	jg	err
-	push	eax
-
-	mov	ebx, [fs:SB_NR_IMAP_SECTS]
-	mov	edx, [fs:SB_NR_SMAP_SECTS]
-	lea	eax, [ebx+edx+ROOT_BASE+2]
-	mov	dword [disk_address_packet +  8], eax
-	call	read_sector
-
-	pop	eax				; [es:ebx+eax] -> the inode
-
-	mov	edx, dword [fs:SB_INODE_ISIZE_OFF]
-	add	edx, ebx
-	add	edx, eax			; [es:edx] -> the_inode.i_size
-	mov	ecx, [es:edx]			; ecx <- the_inode.i_size
-
-	add	ax, word [fs:SB_INODE_START_OFF]; es:[ebx+eax] -> the_inode.i_start_sect
-
-	add	bx, ax
-	mov	eax, [es:bx]
-	add	eax, ROOT_BASE			; eax <- the_inode.i_start_sect
-	ret
-
-
 	
-
 
 ; 从此以后的代码在保护模式下执行 ----------------------------------------------------
 ; 32 位代码段. 由实模式跳入 ---------------------------------------------------------
@@ -323,16 +301,17 @@ LABEL_PM_START:
 	call	InitKernel
 
 	;jmp	$
-	mov	dword [BOOT_PARAM_ADDR], BOOT_PARAM_MAGIC	; BootParam[0] = BootParamMagic;
-	mov	eax, [dwMemSize]				;
-	mov	[BOOT_PARAM_ADDR + 4], eax			; BootParam[1] = MemSize;
-	mov	eax, KERNEL_FILE_SEG
-	shl	eax, 4
-	add	eax, KERNEL_FILE_OFF
-	mov	[BOOT_PARAM_ADDR + 8], eax			; BootParam[2] = KernelFilePhyAddr;
+    ; 没有集成文件系统，所以不需要
+	; mov	dword [BOOT_PARAM_ADDR], BOOT_PARAM_MAGIC	; BootParam[0] = BootParamMagic;
+	; mov	eax, [dwMemSize]				;
+	; mov	[BOOT_PARAM_ADDR + 4], eax			; BootParam[1] = MemSize;
+	; mov	eax, KERNEL_FILE_SEG
+	; shl	eax, 4
+	; add	eax, KERNEL_FILE_OFF
+	; mov	[BOOT_PARAM_ADDR + 8], eax			; BootParam[2] = KernelFilePhyAddr;
 
 	;***************************************************************
-	jmp	SelectorFlatC:KRNL_ENT_PT_PHY_ADDR	; 正式进入内核 *
+	jmp	SelectorFlatC:KernelEntryPointPhyAddr	; 正式进入内核 *
 	;***************************************************************
 	; 内存看上去是这样的：
 	;              ┃                                    ┃
@@ -343,10 +322,10 @@ LABEL_PM_START:
 	;              ┃■■■■■■■■■■■■■■■■■■┃
 	;              ┃■■■■■■Page  Tables■■■■■■┃
 	;              ┃■■■■■(大小由LOADER决定)■■■■┃
-	;    00101000h ┃■■■■■■■■■■■■■■■■■■┃ PAGE_TBL_BASE
+	;    00101000h ┃■■■■■■■■■■■■■■■■■■┃ PageTblBase
 	;              ┣━━━━━━━━━━━━━━━━━━┫
 	;              ┃■■■■■■■■■■■■■■■■■■┃
-	;    00100000h ┃■■■■Page Directory Table■■■■┃ PAGE_DIR_BASE  <- 1M
+	;    00100000h ┃■■■■Page Directory Table■■■■┃ PageDirBase  <- 1M
 	;              ┣━━━━━━━━━━━━━━━━━━┫
 	;              ┃□□□□□□□□□□□□□□□□□□┃
 	;       F0000h ┃□□□□□□□System ROM□□□□□□┃
@@ -692,9 +671,9 @@ SetupPaging:
 	; 首先初始化页目录
 	mov	ax, SelectorFlatRW
 	mov	es, ax
-	mov	edi, PAGE_DIR_BASE	; 此段首地址为 PAGE_DIR_BASE
+	mov	edi, PageDirBase	; 此段首地址为 PageDirBase
 	xor	eax, eax
-	mov	eax, PAGE_TBL_BASE | PG_P  | PG_USU | PG_RWW
+	mov	eax, PageTblBase | PG_P  | PG_USU | PG_RWW
 .1:
 	stosd
 	add	eax, 4096		; 为了简化, 所有页表在内存中是连续的.
@@ -705,7 +684,7 @@ SetupPaging:
 	mov	ebx, 1024		; 每个页表 1024 个 PTE
 	mul	ebx
 	mov	ecx, eax		; PTE个数 = 页表个数 * 1024
-	mov	edi, PAGE_TBL_BASE	; 此段首地址为 PAGE_TBL_BASE
+	mov	edi, PageTblBase	; 此段首地址为 PageTblBase
 	xor	eax, eax
 	mov	eax, PG_P  | PG_USU | PG_RWW
 .2:
@@ -713,7 +692,7 @@ SetupPaging:
 	add	eax, 4096		; 每一页指向 4K 的空间
 	loop	.2
 
-	mov	eax, PAGE_DIR_BASE
+	mov	eax, PageDirBase
 	mov	cr3, eax
 	mov	eax, cr0
 	or	eax, 80000000h
@@ -732,17 +711,17 @@ SetupPaging:
 ; --------------------------------------------------------------------------------------------
 InitKernel:	; 遍历每一个 Program Header，根据 Program Header 中的信息来确定把什么放进内存，放到什么位置，以及放多少。
 	xor	esi, esi
-	mov	cx, word [KERNEL_FILE_PHY_ADDR + 2Ch]	; ┓ ecx <- pELFHdr->e_phnum
+	mov	cx, word [BaseOfKernelFilePhyAddr + 2Ch]	; ┓ ecx <- pELFHdr->e_phnum
 	movzx	ecx, cx					; ┛
-	mov	esi, [KERNEL_FILE_PHY_ADDR + 1Ch]	; esi <- pELFHdr->e_phoff
-	add	esi, KERNEL_FILE_PHY_ADDR		; esi <- OffsetOfKernel + pELFHdr->e_phoff
+	mov	esi, [BaseOfKernelFilePhyAddr + 1Ch]	; esi <- pELFHdr->e_phoff
+	add	esi, BaseOfKernelFilePhyAddr		; esi <- OffsetOfKernel + pELFHdr->e_phoff
 .Begin:
 	mov	eax, [esi + 0]
 	cmp	eax, 0				; PT_NULL
 	jz	.NoAction
 	push	dword [esi + 010h]		; size	┓
 	mov	eax, [esi + 04h]		;	┃
-	add	eax, KERNEL_FILE_PHY_ADDR	;	┣ ::memcpy(	(void*)(pPHdr->p_vaddr),
+	add	eax, BaseOfKernelFilePhyAddr	;	┣ ::memcpy(	(void*)(pPHdr->p_vaddr),
 	push	eax				; src	┃		uchCode + pPHdr->p_offset,
 	push	dword [esi + 08h]		; dst	┃		pPHdr->p_filesz;
 	call	MemCpy				;	┃
@@ -787,30 +766,30 @@ _ARDStruct:			; Address Range Descriptor Structure
 _MemChkBuf:	times	256	db	0
 ;
 ;; 保护模式下使用这些符号
-szMemChkTitle		equ	LOADER_PHY_ADDR + _szMemChkTitle
-szRAMSize		equ	LOADER_PHY_ADDR + _szRAMSize
-;;; szCylinder		equ	LOADER_PHY_ADDR + _szCylinder
-;;; szHead			equ	LOADER_PHY_ADDR + _szHead
-;;; szSector		equ	LOADER_PHY_ADDR + _szSector
-;;; szNOHD			equ	LOADER_PHY_ADDR + _szNOHD
-szReturn		equ	LOADER_PHY_ADDR + _szReturn
-;;; dwNrCylinder		equ	LOADER_PHY_ADDR + _dwNrCylinder
-;;; dwNrHead		equ	LOADER_PHY_ADDR + _dwNrHead
-;;; dwNrSector		equ	LOADER_PHY_ADDR + _dwNrSector
-dwDispPos		equ	LOADER_PHY_ADDR + _dwDispPos
-dwMemSize		equ	LOADER_PHY_ADDR + _dwMemSize
-dwMCRNumber		equ	LOADER_PHY_ADDR + _dwMCRNumber
-ARDStruct		equ	LOADER_PHY_ADDR + _ARDStruct
-	dwBaseAddrLow	equ	LOADER_PHY_ADDR + _dwBaseAddrLow
-	dwBaseAddrHigh	equ	LOADER_PHY_ADDR + _dwBaseAddrHigh
-	dwLengthLow	equ	LOADER_PHY_ADDR + _dwLengthLow
-	dwLengthHigh	equ	LOADER_PHY_ADDR + _dwLengthHigh
-	dwType		equ	LOADER_PHY_ADDR + _dwType
-MemChkBuf		equ	LOADER_PHY_ADDR + _MemChkBuf
+szMemChkTitle		equ	BaseOfLoaderPhyAddr + _szMemChkTitle
+szRAMSize		equ	BaseOfLoaderPhyAddr + _szRAMSize
+;;; szCylinder		equ	BaseOfLoaderPhyAddr + _szCylinder
+;;; szHead			equ	BaseOfLoaderPhyAddr + _szHead
+;;; szSector		equ	BaseOfLoaderPhyAddr + _szSector
+;;; szNOHD			equ	BaseOfLoaderPhyAddr + _szNOHD
+szReturn		equ	BaseOfLoaderPhyAddr + _szReturn
+;;; dwNrCylinder		equ	BaseOfLoaderPhyAddr + _dwNrCylinder
+;;; dwNrHead		equ	BaseOfLoaderPhyAddr + _dwNrHead
+;;; dwNrSector		equ	BaseOfLoaderPhyAddr + _dwNrSector
+dwDispPos		equ	BaseOfLoaderPhyAddr + _dwDispPos
+dwMemSize		equ	BaseOfLoaderPhyAddr + _dwMemSize
+dwMCRNumber		equ	BaseOfLoaderPhyAddr + _dwMCRNumber
+ARDStruct		equ	BaseOfLoaderPhyAddr + _ARDStruct
+	dwBaseAddrLow	equ	BaseOfLoaderPhyAddr + _dwBaseAddrLow
+	dwBaseAddrHigh	equ	BaseOfLoaderPhyAddr + _dwBaseAddrHigh
+	dwLengthLow	equ	BaseOfLoaderPhyAddr + _dwLengthLow
+	dwLengthHigh	equ	BaseOfLoaderPhyAddr + _dwLengthHigh
+	dwType		equ	BaseOfLoaderPhyAddr + _dwType
+MemChkBuf		equ	BaseOfLoaderPhyAddr + _MemChkBuf
 
 
 ; 堆栈就在数据段的末尾
 StackSpace:	times	1000h	db	0
-TopOfStack	equ	LOADER_PHY_ADDR + $	; 栈顶
+TopOfStack	equ	BaseOfLoaderPhyAddr + $	; 栈顶
 ; SECTION .data1 之结束 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

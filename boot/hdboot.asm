@@ -43,6 +43,7 @@ boot_start:
 
     ; 假设根目录占8sector
     mov ecx, 4
+    xchg bx, bx
     mov	dword [disk_address_packet +  8], ROOT_BASE
     .getent:
     xor esi, esi
@@ -65,7 +66,6 @@ boot_start:
     cmp eax, [fs:(edi + 8)]
     jne .innerloop
 
-
     jmp .succ
     .innerloop:
     add edi, 0x20
@@ -79,6 +79,13 @@ boot_start:
     cmp ecx, 0
     jg .getent; while ecx > 0
 
+    ; 查找完根目录还没找到说明找失败了。
+    .fail:
+    mov dh, 2
+    call    disp_str
+
+    jmp $
+
     ; fs:edi 指向目录项 [0x14-0x15] [0x1a-0x1b]
     ;[1c~1f] byte len
     .succ:
@@ -89,6 +96,7 @@ boot_start:
     sub ax, 2
     mov ecx, 8
     mul ecx
+    xchg bx, bx
     add eax, ROOT_BASE
     ; 此时eax为loader的数据地址lba(sector)
     push eax
@@ -110,7 +118,7 @@ boot_start:
     mov dword [disk_address_packet + 8], eax
     .rdld:
     call read_sector
-    add word [disk_address_packet + 6], SECT_BUF_SIZE
+    add word [disk_address_packet + 4], SECT_BUF_SIZE
     add dword [disk_address_packet + 8], TRANS_SECT_NR
     loop .rdld
     
@@ -118,12 +126,6 @@ boot_start:
     call disp_str
     xchg bx, bx
     jmp BaseOfLoader:OffsetOfLoader
-
-    jmp $
-
-    .fail:
-    mov dh, 2
-    call    disp_str
 
     jmp $
 

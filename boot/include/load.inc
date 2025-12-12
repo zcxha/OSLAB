@@ -27,5 +27,5 @@ PageTblBase		equ	201000h	; 页表开始地址:			2M + 4K
 SUPER_BLK_SEG       equ 70h
 
 ; ROOT DIR BASE LBA(sector)
-ROOT_BASE           equ 1810h
-ROOT_BASE_ADDR      equ 302000h
+ROOT_BASE_ADDR      equ 302800h
+ROOT_BASE           equ ROOT_BASE_ADDR / 512
