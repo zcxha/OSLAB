@@ -22,3 +22,10 @@ KernelEntryPointPhyAddr	equ	030400h	; 注意：1、必须与 MAKEFILE 中参数 
 PageDirBase		equ	200000h	; 页目录开始地址:		2M
 PageTblBase		equ	201000h	; 页表开始地址:			2M + 4K
 
+
+; FAT32 HDD boot
+SUPER_BLK_SEG       equ 70h
+
+; ROOT DIR BASE LBA(sector)
+ROOT_BASE           equ 1810h
+ROOT_BASE_ADDR      equ 302000h
