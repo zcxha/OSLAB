@@ -38,3 +38,7 @@ sudo losetup -d /dev/loop6
 dd if=stage1 of=disk.img bs=1 count=446 conv=notrunc
 dd if=stage1 of=disk.img bs=1 seek=510 skip=510 count=2 conv=notrunc
 dd if=stage2 of=disk.img bs=512 seek=1 conv=notrunc
+
+# 给vmware生成vmdk
+# https://stackoverflow.com/questions/454899/how-to-convert-flat-raw-disk-image-to-vmdk-for-virtualbox-or-vmplayer
+qemu-img convert -O vmdk disk.img disk.vmdk
