@@ -16,8 +16,8 @@ DASM		= ndisasm
 CC		= gcc
 LD		= ld
 ASMBFLAGS	= -I boot/include/
-ASMKFLAGS	= -I include/ -f elf -g
-CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector -g
+ASMKFLAGS	= -I include/ -f elf
+CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector
 LDFLAGS		= -s -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 
@@ -45,6 +45,9 @@ everything : $(ORANGESBOOT) $(ORANGESKERNEL)
 all : realclean everything
 
 image : realclean everything clean buildimg
+
+hdimg : 
+	./mkimg.sh
 
 clean :
 	rm -f $(OBJS)

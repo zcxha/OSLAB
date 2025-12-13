@@ -26,11 +26,12 @@ PUBLIC int kernel_main()
     PROCESS *p_proc = proc_table;
     char *p_task_stack = task_stack + STACK_SIZE_TOTAL;
     u16 selector_ldt = SELECTOR_LDT_FIRST;
+    // disp_str("1 ");
 
     int i;
     for (i = 0; i < NR_TASKS + NR_PROCS; i++)
     {
-
+// disp_str("2 ");
         /*---TEST---*/
         stat[i] = 0;
         /*---TEST---*/
@@ -57,7 +58,7 @@ PUBLIC int kernel_main()
         p_task_stack -= p_task->stacksize;
         selector_ldt += 1 << 3;
     }
-
+// disp_str("3 ");
     // 设置进程优先级
     // proc_table[0].se->priority = 15;
     // proc_table[1].se->priority = 19;
@@ -77,7 +78,7 @@ PUBLIC int kernel_main()
         se->weight = sched_prio_to_weight[se->priority];
         sum_weight += se->weight;
     }
-
+// disp_str("4");
     // 初始化se
     for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
     {
@@ -92,7 +93,7 @@ PUBLIC int kernel_main()
     }
 
     wait_cnt = 0;
-
+// disp_str("5");
     // PROCESS* tmp = __pick_first_entity()->proc;
     // sched_entity *se1 = __pick_first_entity();
     // disp_int(se1->proc->pid);
@@ -102,13 +103,13 @@ PUBLIC int kernel_main()
 
     // 因为进程开始运行了，那么就要从红黑树中删去
     rb_delete(&proc_table[0].se->run_node);
-
+// disp_str("6");
     k_reenter = 0;
     ticks = 0;
 
     init_clock();
     init_keyboard();
-
+    disp_str("-----\"kernel_main\" ends-----\n");
     restart();
 
     while (1)

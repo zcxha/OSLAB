@@ -21,6 +21,7 @@
  *======================================================================*/
 PUBLIC void clock_handler(int irq)
 {
+    // disp_str("clock ");
 	ticks++; // += 1 ms
     stat[p_proc_ready->pid]++;
 	/* update_curr */
@@ -56,6 +57,7 @@ PUBLIC void clock_handler(int irq)
 	if(delta > ideal_runtime){
 		schedule();
 	}
+    // disp_str("clock2 ");
 }
 
 /*======================================================================*

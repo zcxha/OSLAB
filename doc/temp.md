@@ -36,7 +36,17 @@ chainloader +1
 boot
 ```
 
-#### 启发者
+经过一天的迭代，这些全都过时了，详见mkimg.sh
+
+### 已知问题:
+
+经测试，在虚拟机VMWARE上可以运行lab7的kernel，但是当前的kernel暂时无法正常运行。
+
+在真机上只测试了LAB，也是同样的经过loader之后无法运行kernel
+
+映像转换工具：starwind v2v converter
+
+#### 参考
 
 1. https://askubuntu.com/questions/667291/create-blank-disk-image-for-file-storage 
 

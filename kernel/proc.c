@@ -86,18 +86,17 @@ PUBLIC void schedule()
 PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
                      u32 table_idx, u32 pid, u8 privilege, u8 rpl, int eflags, int prio)
 {
+    // disp_str("at1 ");
     nr_running++;
     PROCESS *p_proc = &proc_table[table_idx];
 
     strcpy(p_proc->p_name, p_task->name); // name of the process
     p_proc->pid = pid;                    // pid
-
     p_proc->se = &se_table[table_idx];
     se_table[table_idx].proc = p_proc;
     // se_table[table_idx].priority = prio;
-
+// disp_str("at2 ");
     p_proc->ldt_sel = selector_ldt;
-
     memcpy(&p_proc->ldts[0], &gdt[SELECTOR_KERNEL_CS >> 3],
            sizeof(DESCRIPTOR));
     p_proc->ldts[0].attr1 = DA_C | privilege << 5;
@@ -110,7 +109,7 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     p_proc->regs.fs = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.ss = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
-
+// disp_str("at3 ");
     p_proc->regs.eip = (u32)p_task->initial_eip;
     p_proc->regs.esp = (u32)p_task_stack;
     p_proc->regs.eflags = eflags; /* IF=1, IOPL=1 */
@@ -143,6 +142,7 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     /* TODO: 新添加任务的vruntime不应该设置为0，否则会占用很长时间吧 */
     // .se.vruntime = __pick_first_entity().key
     // sumweight += weight
+    // disp_str("at4 ");
 }
 
 // 从当前进程开始扫描，扫描到pid等于的进程然后将其删除（TODO:注意此处存在没有释放资源的问题，不过没有实现内存分配器所以无所谓）
