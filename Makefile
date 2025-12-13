@@ -22,7 +22,7 @@ LDFLAGS		= -s -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 
 # This Program
-ORANGESBOOT	= boot/boot.bin boot/loader.bin
+ORANGESBOOT	= boot/boot.bin boot/loader.bin boot/hdboot.bin boot/hdldr.bin
 ORANGESKERNEL	= kernel.bin
 OBJS		= kernel/kernel.o kernel/syscall.o kernel/start.o kernel/main.o kernel/clock.o\
 			kernel/i8259.o kernel/global.o kernel/protect.o kernel/proc.o kernel/rbtree.o\
@@ -67,6 +67,12 @@ boot/boot.bin : boot/boot.asm boot/include/load.inc boot/include/fat12hdr.inc
 	$(ASM) $(ASMBFLAGS) -o $@ $<
 
 boot/loader.bin : boot/loader.asm boot/include/load.inc boot/include/fat12hdr.inc boot/include/pm.inc
+	$(ASM) $(ASMBFLAGS) -o $@ $<
+
+boot/hdboot.bin : boot/hdboot.asm boot/include/load.inc
+	$(ASM) $(ASMBFLAGS) -o $@ $<
+
+boot/hdldr.bin : boot/hdldr.asm boot/include/load.inc boot/include/pm.inc
 	$(ASM) $(ASMBFLAGS) -o $@ $<
 
 $(ORANGESKERNEL) : $(OBJS)
