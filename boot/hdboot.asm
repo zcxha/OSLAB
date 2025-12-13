@@ -50,6 +50,8 @@ boot_start:
 	call	read_sector
 	mov	ax, SUPER_BLK_SEG
 	mov	fs, ax
+    cmp word [fs: 0], 0
+    je err
     mov edi, 0
     .inner:
     mov esi, LoaderFileName

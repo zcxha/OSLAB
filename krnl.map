@@ -24,38 +24,151 @@ proc_table          0x30c             kernel/global.o
 
 Discarded input sections
 
+ .stab          0x0000000000000000      0x660 kernel/kernel.o
+ .stabstr       0x0000000000000000       0x13 kernel/kernel.o
+ .stab          0x0000000000000000       0x9c kernel/syscall.o
+ .stabstr       0x0000000000000000       0x14 kernel/syscall.o
+ .debug_info    0x0000000000000000      0x1ee kernel/start.o
+ .debug_abbrev  0x0000000000000000       0xdc kernel/start.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/start.o
+ .debug_line    0x0000000000000000       0x7c kernel/start.o
+ .debug_str     0x0000000000000000      0x1a9 kernel/start.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/start.o
+ .debug_info    0x0000000000000000      0x819 kernel/main.o
+ .debug_abbrev  0x0000000000000000      0x1a2 kernel/main.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/main.o
+ .debug_line    0x0000000000000000      0x15f kernel/main.o
+ .debug_str     0x0000000000000000      0x3c1 kernel/main.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/main.o
+ .debug_info    0x0000000000000000      0x5bb kernel/clock.o
+ .debug_abbrev  0x0000000000000000      0x13c kernel/clock.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/clock.o
+ .debug_line    0x0000000000000000       0xb3 kernel/clock.o
+ .debug_str     0x0000000000000000      0x324 kernel/clock.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/clock.o
+ .debug_info    0x0000000000000000      0x101 kernel/i8259.o
+ .debug_abbrev  0x0000000000000000       0xce kernel/i8259.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/i8259.o
+ .debug_line    0x0000000000000000       0x88 kernel/i8259.o
+ .debug_str     0x0000000000000000      0x115 kernel/i8259.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/i8259.o
+ .debug_info    0x0000000000000000      0xac6 kernel/global.o
+ .debug_abbrev  0x0000000000000000      0x122 kernel/global.o
+ .debug_aranges
+                0x0000000000000000       0x18 kernel/global.o
+ .debug_line    0x0000000000000000       0x87 kernel/global.o
+ .debug_str     0x0000000000000000      0x520 kernel/global.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/global.o
+ .debug_info    0x0000000000000000      0x8ca kernel/protect.o
+ .debug_abbrev  0x0000000000000000      0x18f kernel/protect.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/protect.o
+ .debug_line    0x0000000000000000      0x146 kernel/protect.o
+ .debug_str     0x0000000000000000      0x3fb kernel/protect.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/protect.o
+ .debug_info    0x0000000000000000      0xc3c kernel/proc.o
+ .debug_abbrev  0x0000000000000000      0x2b2 kernel/proc.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/proc.o
+ .debug_ranges  0x0000000000000000       0x18 kernel/proc.o
+ .debug_line    0x0000000000000000      0x55b kernel/proc.o
+ .debug_str     0x0000000000000000      0x521 kernel/proc.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/proc.o
+ .debug_info    0x0000000000000000      0x6ff kernel/rbtree.o
+ .debug_abbrev  0x0000000000000000      0x1ce kernel/rbtree.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/rbtree.o
+ .debug_line    0x0000000000000000      0x14d kernel/rbtree.o
+ .debug_str     0x0000000000000000      0x335 kernel/rbtree.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/rbtree.o
+ .stab          0x0000000000000000      0xb34 kernel/mm.o
+ .stabstr       0x0000000000000000        0xf kernel/mm.o
+ .debug_info    0x0000000000000000      0x1d1 kernel/testmm.o
+ .debug_abbrev  0x0000000000000000       0xee kernel/testmm.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/testmm.o
+ .debug_line    0x0000000000000000       0xc7 kernel/testmm.o
+ .debug_str     0x0000000000000000      0x12a kernel/testmm.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/testmm.o
+ .debug_info    0x0000000000000000      0x42e kernel/keyboard.o
+ .debug_abbrev  0x0000000000000000      0x181 kernel/keyboard.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/keyboard.o
+ .debug_line    0x0000000000000000      0x23a kernel/keyboard.o
+ .debug_str     0x0000000000000000      0x289 kernel/keyboard.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/keyboard.o
+ .debug_info    0x0000000000000000      0x817 kernel/tty.o
+ .debug_abbrev  0x0000000000000000      0x1b8 kernel/tty.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/tty.o
+ .debug_line    0x0000000000000000      0x175 kernel/tty.o
+ .debug_str     0x0000000000000000      0x3d3 kernel/tty.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/tty.o
+ .debug_info    0x0000000000000000      0x301 kernel/console.o
+ .debug_abbrev  0x0000000000000000      0x12c kernel/console.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/console.o
+ .debug_line    0x0000000000000000       0xf1 kernel/console.o
+ .debug_str     0x0000000000000000      0x24f kernel/console.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/console.o
+ .debug_info    0x0000000000000000      0x20d kernel/systask.o
+ .debug_abbrev  0x0000000000000000       0xfa kernel/systask.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/systask.o
+ .debug_line    0x0000000000000000       0x74 kernel/systask.o
+ .debug_str     0x0000000000000000      0x171 kernel/systask.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/systask.o
+ .debug_info    0x0000000000000000       0xf3 kernel/printf.o
+ .debug_abbrev  0x0000000000000000       0xbc kernel/printf.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/printf.o
+ .debug_line    0x0000000000000000       0x59 kernel/printf.o
+ .debug_str     0x0000000000000000       0xef kernel/printf.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/printf.o
+ .debug_info    0x0000000000000000      0x1dd kernel/vsprintf.o
+ .debug_abbrev  0x0000000000000000       0xf3 kernel/vsprintf.o
+ .debug_aranges
+                0x0000000000000000       0x20 kernel/vsprintf.o
+ .debug_line    0x0000000000000000       0xfd kernel/vsprintf.o
+ .debug_str     0x0000000000000000      0x113 kernel/vsprintf.o
  .note.GNU-stack
                 0x0000000000000000        0x0 kernel/vsprintf.o
+ .stab          0x0000000000000000      0x570 lib/kliba.o
+ .stabstr       0x0000000000000000        0xf lib/kliba.o
+ .debug_info    0x0000000000000000      0x14c lib/klib.o
+ .debug_abbrev  0x0000000000000000       0xcf lib/klib.o
+ .debug_aranges
+                0x0000000000000000       0x20 lib/klib.o
+ .debug_line    0x0000000000000000       0x90 lib/klib.o
+ .debug_str     0x0000000000000000       0xf6 lib/klib.o
  .note.GNU-stack
                 0x0000000000000000        0x0 lib/klib.o
+ .stab          0x0000000000000000      0x348 lib/string.o
+ .stabstr       0x0000000000000000       0x10 lib/string.o
+ .debug_info    0x0000000000000000       0xcb lib/misc.o
+ .debug_abbrev  0x0000000000000000       0x83 lib/misc.o
+ .debug_aranges
+                0x0000000000000000       0x20 lib/misc.o
+ .debug_line    0x0000000000000000       0x4b lib/misc.o
+ .debug_str     0x0000000000000000      0x100 lib/misc.o
  .note.GNU-stack
                 0x0000000000000000        0x0 lib/misc.o
 

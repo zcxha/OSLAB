@@ -3,7 +3,7 @@
 ###############################################################
 
 # how much memory the emulated machine will have
-megs: 32
+megs: 1024
 
 # filename of ROM images
 romimage: file=/usr/share/bochs/BIOS-bochs-latest
@@ -24,4 +24,4 @@ mouse: enabled=0
 # enable key mapping, using US layout as default.
 # keyboard_mapping: enabled=1, map=/usr/share/bochs/keymaps/x11-pc-us.map
 magic_break: enabled=1
-ata0-master: type=disk, path="test.img", mode=flat, translation=lba
+ata0-master: type=disk, path="disk.img", mode=flat, translation=lba

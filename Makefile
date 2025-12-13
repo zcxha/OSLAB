@@ -16,8 +16,8 @@ DASM		= ndisasm
 CC		= gcc
 LD		= ld
 ASMBFLAGS	= -I boot/include/
-ASMKFLAGS	= -I include/ -f elf
-CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector
+ASMKFLAGS	= -I include/ -f elf -g
+CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector -g
 LDFLAGS		= -s -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 

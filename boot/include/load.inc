@@ -26,6 +26,8 @@ PageTblBase		equ	201000h	; 页表开始地址:			2M + 4K
 ; FAT32 HDD boot
 SUPER_BLK_SEG       equ 70h
 
-; ROOT DIR BASE LBA(sector)
-ROOT_BASE_ADDR      equ 302800h
+; bochs:0x302800
+; REAL: 0x304000
+; ROOT DIR BASE LBA(sector) 注意，这里的LBA和地址，是相对于整个硬盘的LBA/地址，而不是相对于分区
+ROOT_BASE_ADDR      equ 202800h+100000h ; 这里用加法，100000是DBR相对于整个硬盘的地址，4a9800是ROOTDIR相对于DBR的
 ROOT_BASE           equ ROOT_BASE_ADDR / 512

@@ -11,7 +11,7 @@ dd if=/dev/zero of=test.img bs=1G count=1
 sudo losetup loop6 test.img
 # 在这里，用gparted建分区表、然后格式化为FAT32 随便弄个卷标，可以发现这个磁盘大小的时候
 # 根目录的地址总是0x302800
-sudo -H gparted /dev/loop6 
+sudo -H gparted /dev/loop6  # mkfs.vfat 1G的partition似乎也行
 # 不信的话可以在里面先建个test.txt输入点内容然后执行以下命令找一下根目录在哪
 xxd -a0 -g1 test.img
 ```
@@ -41,3 +41,5 @@ boot
 1. https://askubuntu.com/questions/667291/create-blank-disk-image-for-file-storage 
 
 2. https://alpha.gnu.org/gnu/grub/ 
+
+3. https://zhuanlan.zhihu.com/p/615492566
