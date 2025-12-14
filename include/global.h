@@ -50,3 +50,6 @@ extern u32 sched_nr_latency;
 extern u32 nr_running;
 extern u32 sum_weight;
 extern u32 has_preempt;
+
+/* Frame Allocator */
+extern FrameTracker phy_frames[FRAME_COUNT];

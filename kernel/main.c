@@ -14,6 +14,9 @@
 #include "tty.h"
 #include "console.h"
 #include "proto.h"
+#include "mm/aspace.h"
+#include "mm/page_table.h"
+#include "mm/frame_allocator.h"
 #include "global.h"
 /*======================================================================*
                             kernel_main

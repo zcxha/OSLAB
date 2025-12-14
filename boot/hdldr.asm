@@ -310,6 +310,7 @@ LABEL_PM_START:
 	; add	eax, KERNEL_FILE_OFF
 	; mov	[BOOT_PARAM_ADDR + 8], eax			; BootParam[2] = KernelFilePhyAddr;
 
+
 	;***************************************************************
 	jmp	SelectorFlatC:KernelEntryPointPhyAddr	; 正式进入内核 *
 	;***************************************************************

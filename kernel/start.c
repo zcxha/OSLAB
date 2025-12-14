@@ -15,6 +15,7 @@
 #include "console.h"
 #include "proto.h"
 #include "global.h"
+#include "mm/frame_allocator.h"
 
 
 /*======================================================================*

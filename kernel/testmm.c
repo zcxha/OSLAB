@@ -16,9 +16,11 @@ void printint(u32 x)
 	disp_str(" ");
 }
 
+const int MAP_BITS = 1048576 / 32;
+
 void test_mm()
 {
-	u32 bitmap[4];
+	u32 bitmap[MAP_BITS];
 
 	init_bitmap();
 
@@ -97,6 +99,8 @@ void test_mm()
 	}
 
 	alloc_pages(1, &blocks[1]);
+
+    // bug: unmap之后应该要map回去
 
 	disp_int(blocks[1]);
 }

@@ -92,3 +92,6 @@ PUBLIC u32 sched_nr_latency = 8;
 PUBLIC u32 nr_running = 0;
 PUBLIC u32 sum_weight = 0;
 PUBLIC u32 has_preempt = 0;
+
+/* Frame Tracker */
+PUBLIC FrameTracker phy_frames[FRAME_COUNT];

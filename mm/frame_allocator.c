@@ -1,0 +1,55 @@
+/*
+    因为汇编是早期（3个月前）编写，代码难以维护，于是重写成c的形式。 - lsl
+
+*/
+#include "type.h"
+#include "const.h"
+#include "proto.h"
+#include "mm/aspace.h"
+#include "mm/frame_allocator.h"
+#include "global.h"
+
+void init_frametracker()
+{
+    for(int i = 0; i < FRAME_COUNT; i++)
+    {
+        phy_frames[i].count = phy_frames[i].in_use = 1; // 因为ldr默认把所有都direct 映射了一遍
+        phy_frames[i].phybase = i * FRAME_SIZE;
+    }
+}
+
+FrameTracker *frame_alloc()
+{
+    for(int i = 0; i < FRAME_COUNT; i++)
+    {
+        if(phy_frames[i].in_use == 0)
+        {
+            phy_frames[i].in_use = 1;
+            return &phy_frames[i];
+        }
+    }
+    panic("no phy frame to alloc.");
+}
+
+void frame_dealloc(FrameTracker *ft)
+{
+    assert(ft->count == 0);
+
+    ft->in_use = 0;
+}
+
+/*
+    TODO:本来以为不会再接触到phybase，结果unmap就来了。
+    那么之后考虑用红黑树结点去查找node再释放吧。(线性查找其实也行)
+*/
+FrameTracker *frame_find(void *pa)
+{
+    for(int i = 0; i < FRAME_COUNT; i++)
+    {
+        if(phy_frames[i].phybase == (u32)pa)
+        {
+            return &phy_frames[i];
+        }
+    }
+    panic("can't find frame to unmap.");
+}

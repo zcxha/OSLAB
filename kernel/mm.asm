@@ -1,7 +1,7 @@
 SELECTOR_KERNEL_DS  equ 16		; 数据段选择子
 PageDirBase			equ	200000h	; 页目录开始地址:		2M
 PageTblBase			equ	201000h	; 页表开始地址:			2M + 4K
-FreePageBase		equ 300000h ; 是物理页集合的基地址 3M，大小为4M(一个页是4k，1k个页)
+FreePageBase		equ 000000h ; 是物理页集合的基地址 3M，大小为4M(一个页是4k，1k个页)
 
 ;----------------------------------------------------------------------------
 ; 分页机制使用的常量说明
@@ -22,8 +22,11 @@ global unmap
 global get_bitmap
 global init_bitmap
 
+MAP_BITS        equ 1048576
+
 [section .bss]
-BitMap resb 128 ; 能分配的物理帧一共128 * 4K = 512K
+BitMap resb MAP_BITS ; 能分配的物理帧一共128 * 4K = 512K
+; 1024 * 1024 * 4K = 4G
 
 [section .text]	; 以下为自实现内存管理
 ; (old define )
@@ -121,7 +124,7 @@ alloc_pages:
 	push esi
 	push ebx
 
-	cmp eax, 1024
+	cmp eax, MAP_BITS
 	ja alloc_fail
 	
 	mov esi, BitMap
@@ -382,23 +385,24 @@ unmap:
 
 ;(new)
 ; void get_bitmap(u32 *p)
-; 获取整个bitmap，p指向一个4元素数组，这样一共就128位
+; 获取整个bitmap，p指向一个MAP_BITS元素数组
 get_bitmap:
 	push edi
 	push esi
 	push ebp
 	mov ebp, esp
 	
-	mov edi, [ebp + 16]; 数组起始字节的位置
+	mov edi, [ebp + 16]; param 数组起始字节的位置
+
 	mov esi, BitMap ; BitMap起始字节位置
 
-	mov ecx, 4
-	.cp:
-	mov eax, [esi]
-	mov [edi], eax
-	add esi, 4
-	add edi, 4
-	loop .cp
+	mov ecx, MAP_BITS / 32
+    cld
+    rep movsd
+	; mov eax, [esi]
+	; mov [edi], eax
+	; add esi, 4
+	; add edi, 4
 
 	pop ebp
 	pop esi
@@ -411,7 +415,7 @@ get_bitmap:
 init_bitmap:
 	push edi
 	mov edi, BitMap
-	mov ecx, 128
+	mov ecx, MAP_BITS / 8
 	.lp:
 	mov byte [edi], 0
 	inc edi
