@@ -13,6 +13,9 @@
 #include "rbtree.h"
 #include "proc.h"
 #include "string.h"
+#include "mm/aspace.h"
+#include "mm/frame_allocator.h"
+#include "mm/page_table.h"
 #include "global.h"
 #include "proto.h"
 

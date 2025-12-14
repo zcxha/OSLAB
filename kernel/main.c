@@ -15,9 +15,10 @@
 #include "console.h"
 #include "proto.h"
 #include "mm/aspace.h"
-#include "mm/page_table.h"
 #include "mm/frame_allocator.h"
+#include "mm/page_table.h"
 #include "global.h"
+#include "test/testmm.h"
 /*======================================================================*
                             kernel_main
  *======================================================================*/
@@ -34,7 +35,7 @@ PUBLIC int kernel_main()
     int i;
     for (i = 0; i < NR_TASKS + NR_PROCS; i++)
     {
-// disp_str("2 ");
+        // disp_str("2 ");
         /*---TEST---*/
         stat[i] = 0;
         /*---TEST---*/
@@ -48,11 +49,11 @@ PUBLIC int kernel_main()
         { // 添加用户态进程
             p_task = user_proc_table + (i - NR_TASKS);
             int prio = 20;
-            if(i-NR_TASKS == 0)
+            if (i - NR_TASKS == 0)
             {
                 prio = 15;
             }
-            else if(i-NR_TASKS == 1)
+            else if (i - NR_TASKS == 1)
             {
                 prio = 25;
             }
@@ -61,16 +62,16 @@ PUBLIC int kernel_main()
         p_task_stack -= p_task->stacksize;
         selector_ldt += 1 << 3;
     }
-// disp_str("3 ");
+    // disp_str("3 ");
     // 设置进程优先级
     // proc_table[0].se->priority = 15;
     // proc_table[1].se->priority = 19;
     // proc_table[2].se->priority = 20; // nice0
     // proc_table[3].se->priority = 21;
 
-    proc_table[NR_TASKS+0].nr_tty = 0;
-    proc_table[NR_TASKS+1].nr_tty = 1;
-    proc_table[NR_TASKS+2].nr_tty = 1;
+    proc_table[NR_TASKS + 0].nr_tty = 0;
+    proc_table[NR_TASKS + 1].nr_tty = 1;
+    proc_table[NR_TASKS + 2].nr_tty = 1;
 
     sum_weight = 0;
 
@@ -81,7 +82,7 @@ PUBLIC int kernel_main()
         se->weight = sched_prio_to_weight[se->priority];
         sum_weight += se->weight;
     }
-// disp_str("4");
+    // disp_str("4");
     // 初始化se
     for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
     {
@@ -96,7 +97,7 @@ PUBLIC int kernel_main()
     }
 
     wait_cnt = 0;
-// disp_str("5");
+    // disp_str("5");
     // PROCESS* tmp = __pick_first_entity()->proc;
     // sched_entity *se1 = __pick_first_entity();
     // disp_int(se1->proc->pid);
@@ -106,12 +107,13 @@ PUBLIC int kernel_main()
 
     // 因为进程开始运行了，那么就要从红黑树中删去
     rb_delete(&proc_table[0].se->run_node);
-// disp_str("6");
+    // disp_str("6");
     k_reenter = 0;
     ticks = 0;
 
     init_clock();
     init_keyboard();
+
     disp_str("-----\"kernel_main\" ends-----\n");
     restart();
 
@@ -119,7 +121,6 @@ PUBLIC int kernel_main()
     {
     }
 }
-
 
 /*****************************************************************************
  *                                get_ticks
@@ -143,10 +144,12 @@ void TestA()
 
     while (1)
     {
-        if(get_ticks() >= 5000 && !flag)
+        printl("testmm ");
+        testmm();
+        if (get_ticks() >= 5000 && !flag)
         {
             flag = 1;
-            for(int i = 0; i < NR_TASKS+NR_PROCS; i++)
+            for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
             {
                 printf("%d ", stat[i]);
             }
@@ -181,7 +184,6 @@ void TestC()
         // milli_delay(100);
     }
 }
-
 
 /*****************************************************************************
  *                                panic

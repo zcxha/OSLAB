@@ -16,3 +16,6 @@ typedef struct pte* pgtable_t;
 */
 void* la2pa(void* la);
 
+void map(void *la, FrameTracker *ft);
+
+FrameTracker *unmap(void *la);

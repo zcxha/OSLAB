@@ -26,11 +26,12 @@ ORANGESBOOT	= boot/boot.bin boot/loader.bin boot/hdboot.bin boot/hdldr.bin
 ORANGESKERNEL	= kernel.bin
 OBJS		= kernel/kernel.o kernel/syscall.o kernel/start.o kernel/main.o kernel/clock.o\
 			kernel/i8259.o kernel/global.o kernel/protect.o kernel/proc.o kernel/rbtree.o\
-			kernel/mm.o kernel/testmm.o\
 			kernel/keyboard.o kernel/tty.o kernel/console.o\
 			kernel/systask.o\
 			kernel/printf.o kernel/vsprintf.o\
-			lib/kliba.o lib/klib.o lib/string.o lib/misc.o
+			mm/frame_allocator.o mm/page_table.o\
+			lib/kliba.o lib/klib.o lib/string.o lib/misc.o\
+			test/testmm.o
 DASMOUTPUT	= kernel.bin.asm
 
 # All Phony Targets
@@ -112,9 +113,6 @@ kernel/protect.o: kernel/protect.c include/type.h include/const.h include/protec
 kernel/proc.o: kernel/proc.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-kernel/testmm.o: kernel/testmm.c
-	$(CC) $(CFLAGS) -o $@ $<
-
 kernel/keyboard.o: kernel/keyboard.c
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -133,6 +131,12 @@ kernel/vsprintf.o: kernel/vsprintf.c
 kernel/systask.o: kernel/systask.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+mm/frame_allocator.o : mm/frame_allocator.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+mm/page_table.o : mm/page_table.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 lib/klib.o: lib/klib.c include/type.h include/const.h include/protect.h include/string.h include/proc.h include/proto.h \
 			include/global.h
 	$(CC) $(CFLAGS) -o $@ $<
@@ -140,11 +144,11 @@ lib/klib.o: lib/klib.c include/type.h include/const.h include/protect.h include/
 lib/misc.o: lib/misc.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-kernel/mm.o: kernel/mm.asm
-	$(ASM) $(ASMKFLAGS) -o $@ $<
-
 lib/kliba.o : lib/kliba.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
 lib/string.o : lib/string.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
+
+test/testmm.o : test/testmm.c
+	$(CC) $(CFLAGS) -o $@ $<

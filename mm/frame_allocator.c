@@ -4,9 +4,16 @@
 */
 #include "type.h"
 #include "const.h"
+#include "protect.h"
+#include "string.h"
+#include "rbtree.h"
+#include "proc.h"
+#include "tty.h"
+#include "console.h"
 #include "proto.h"
 #include "mm/aspace.h"
 #include "mm/frame_allocator.h"
+#include "mm/page_table.h"
 #include "global.h"
 
 void init_frametracker()

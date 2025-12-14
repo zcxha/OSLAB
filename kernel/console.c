@@ -20,6 +20,9 @@
 #include "tty.h"
 #include "console.h"
 #include "proto.h"
+#include "mm/aspace.h"
+#include "mm/frame_allocator.h"
+#include "mm/page_table.h"
 #include "global.h"
 
 PRIVATE void set_cursor(unsigned int position);
