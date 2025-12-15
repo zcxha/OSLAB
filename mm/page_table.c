@@ -20,6 +20,9 @@ pgtable_t *pagedir = (pgtable_t)PAGE_DIR_BASE;
     TODO: 只有基本存在检查，后续应该要有权限检查
 */
 
+/*
+    获得二级页表的最后一级页表的页表项
+*/
 pte *get_final_entry(void *la)
 {
     u32 pdidx = ((u32)la >> 22);
@@ -54,12 +57,9 @@ void map(void *la, FrameTracker *ft)
 
     ft->count++;
 
-    u32 pgidx = ((u32)la >> 22);
-    u32 ptentryphyaddr = ((pte *)(u32)(pagedir + pgidx))->paddr & 0xFFFFF000;
-
-    pte *ptentry = (pte *)ptentryphyaddr;
+    pte *final_entry = get_final_entry(la);
     // 默认给这三个权限
-    ptentry->paddr = ft->phybase | PG_P | PG_RWW | PG_USU;
+    final_entry->paddr = ft->phybase | PG_P | PG_RWW | PG_USU;
 }
 
 /*

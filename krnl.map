@@ -71,7 +71,7 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-Address of section .text set to 0x30400
+Address of section .text set to 0x100400
 LOAD kernel/kernel.o
 LOAD kernel/syscall.o
 LOAD kernel/start.o
@@ -160,155 +160,155 @@ LOAD test/testmm.o
 .plt.got
  *(.plt.got)
 
-.text           0x0000000000030400     0x4bdf
+.text           0x0000000000100400     0x4c5b
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
  *(.text.hot .text.hot.*)
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x0000000000030400      0x317 kernel/kernel.o
-                0x0000000000030400                _start
-                0x0000000000030440                hwint00
-                0x0000000000030470                hwint01
-                0x00000000000304a0                hwint02
-                0x00000000000304d0                hwint03
-                0x0000000000030500                hwint04
-                0x0000000000030530                hwint05
-                0x0000000000030560                hwint06
-                0x0000000000030590                hwint07
-                0x00000000000305c0                hwint08
-                0x00000000000305d0                hwint09
-                0x00000000000305e0                hwint10
-                0x00000000000305f0                hwint11
-                0x0000000000030600                hwint12
-                0x0000000000030610                hwint13
-                0x0000000000030620                hwint14
-                0x0000000000030630                hwint15
-                0x000000000003063b                divide_error
-                0x0000000000030641                single_step_exception
-                0x0000000000030647                nmi
-                0x000000000003064d                breakpoint_exception
-                0x0000000000030653                overflow
-                0x0000000000030659                bounds_check
-                0x000000000003065f                inval_opcode
-                0x0000000000030665                copr_not_available
-                0x000000000003066b                double_fault
-                0x000000000003066f                copr_seg_overrun
-                0x0000000000030675                inval_tss
-                0x0000000000030679                segment_not_present
-                0x000000000003067d                stack_exception
-                0x0000000000030681                general_protection
-                0x0000000000030685                page_fault
-                0x0000000000030689                copr_error
-                0x00000000000306d2                sys_call
-                0x00000000000306f2                restart
- *fill*         0x0000000000030717        0x9 
- .text          0x0000000000030720       0x20 kernel/syscall.o
-                0x0000000000030720                sendrec
-                0x0000000000030734                printx
- .text          0x0000000000030740       0x95 kernel/start.o
-                0x0000000000030740                cstart
- .text          0x00000000000307d5      0x35c kernel/main.o
-                0x00000000000307d5                kernel_main
-                0x0000000000030a2b                get_ticks
-                0x0000000000030a5f                TestA
-                0x0000000000030aca                TestB
-                0x0000000000030ad9                TestC
-                0x0000000000030ae8                panic
- .text          0x0000000000030b31      0x196 kernel/clock.o
-                0x0000000000030b31                clock_handler
-                0x0000000000030c35                milli_delay
-                0x0000000000030c6f                init_clock
- .text          0x0000000000030cc7      0x130 kernel/i8259.o
-                0x0000000000030cc7                init_8259A
-                0x0000000000030d9c                spurious_irq
-                0x0000000000030dd3                put_irq_handler
- .text          0x0000000000030df7        0x0 kernel/global.o
- .text          0x0000000000030df7      0x614 kernel/protect.o
-                0x0000000000030df7                init_prot
-                0x0000000000031214                seg2phys
-                0x00000000000312d0                exception_handler
- .text          0x000000000003140b     0x1aaa kernel/proc.o
-                0x000000000003140b                __sched_period
-                0x000000000003142a                sched_slice
-                0x0000000000031466                calc_delta_fair
-                0x0000000000031495                schedule
-                0x000000000003150b                add_task
-                0x0000000000031736                rm_task
-                0x00000000000317c7                sys_sendrec
-                0x00000000000318f0                send_recv
-                0x00000000000319ad                ldt_seg_linear
-                0x00000000000319f7                va2la
-                0x0000000000031a58                reset_msg
-                0x0000000000032a0e                dump_proc
-                0x0000000000032da8                dump_msg
- .text          0x0000000000032eb5      0x72f kernel/rbtree.o
-                0x0000000000032eb5                tree_minimum
-                0x0000000000032ed5                __pick_first_entity
-                0x0000000000032f04                left_rotate
-                0x0000000000032f98                right_rotate
-                0x000000000003302c                rb_insert_fixup
-                0x00000000000331ac                rb_insert
-                0x0000000000033261                rb_transplant
-                0x00000000000332bb                rb_delete_fixup
-                0x00000000000334cf                rb_delete
- .text          0x00000000000335e4      0x687 kernel/keyboard.o
-                0x00000000000335e4                keyboard_handler
-                0x0000000000033644                init_keyboard
-                0x00000000000336e9                keyboard_read
- .text          0x0000000000033c6b      0x516 kernel/tty.o
-                0x0000000000033c6b                task_tty
-                0x0000000000033d25                in_process
-                0x0000000000033f8b                tty_write
-                0x0000000000033fd1                sys_printx
- .text          0x0000000000034181      0x41d kernel/console.o
-                0x0000000000034181                init_screen
-                0x0000000000034298                is_current_console
-                0x00000000000342b3                out_char
-                0x00000000000344fd                select_console
-                0x0000000000034533                scroll_screen
- .text          0x000000000003459e       0x58 kernel/systask.o
-                0x000000000003459e                task_sys
- .text          0x00000000000345f6       0x50 kernel/printf.o
-                0x00000000000345f6                printf
- .text          0x0000000000034646      0x305 kernel/vsprintf.o
-                0x00000000000346a4                vsprintf
-                0x0000000000034925                sprintf
- .text          0x000000000003494b      0x125 mm/frame_allocator.o
-                0x000000000003494b                init_frametracker
-                0x000000000003499c                frame_alloc
-                0x00000000000349f1                frame_dealloc
-                0x0000000000034a24                frame_find
- .text          0x0000000000034a70      0x20d mm/page_table.o
-                0x0000000000034a70                get_final_entry
-                0x0000000000034ae4                la2pa
-                0x0000000000034b51                map
-                0x0000000000034be7                unmap
- *fill*         0x0000000000034c7d        0x3 
- .text          0x0000000000034c80       0xeb lib/kliba.o
-                0x0000000000034c80                disp_str
-                0x0000000000034cbe                disp_color_str
-                0x0000000000034cfd                out_byte
-                0x0000000000034d09                in_byte
-                0x0000000000034d13                disable_irq
-                0x0000000000034d48                enable_irq
-                0x0000000000034d67                disable_int
-                0x0000000000034d69                enable_int
- .text          0x0000000000034d6b      0x119 lib/klib.o
-                0x0000000000034d6b                itoa
-                0x0000000000034e16                disp_int
-                0x0000000000034e3d                delay
- *fill*         0x0000000000034e84        0xc 
- .text          0x0000000000034e90       0x78 lib/string.o
-                0x0000000000034e90                memcpy
-                0x0000000000034eb9                memset
-                0x0000000000034eda                strcpy
-                0x0000000000034ef2                strlen
- .text          0x0000000000034f08       0x54 lib/misc.o
-                0x0000000000034f08                spin
-                0x0000000000034f23                assertion_failure
- .text          0x0000000000034f5c       0x83 test/testmm.o
-                0x0000000000034f5c                testmm
+ .text          0x0000000000100400      0x317 kernel/kernel.o
+                0x0000000000100400                _start
+                0x0000000000100440                hwint00
+                0x0000000000100470                hwint01
+                0x00000000001004a0                hwint02
+                0x00000000001004d0                hwint03
+                0x0000000000100500                hwint04
+                0x0000000000100530                hwint05
+                0x0000000000100560                hwint06
+                0x0000000000100590                hwint07
+                0x00000000001005c0                hwint08
+                0x00000000001005d0                hwint09
+                0x00000000001005e0                hwint10
+                0x00000000001005f0                hwint11
+                0x0000000000100600                hwint12
+                0x0000000000100610                hwint13
+                0x0000000000100620                hwint14
+                0x0000000000100630                hwint15
+                0x000000000010063b                divide_error
+                0x0000000000100641                single_step_exception
+                0x0000000000100647                nmi
+                0x000000000010064d                breakpoint_exception
+                0x0000000000100653                overflow
+                0x0000000000100659                bounds_check
+                0x000000000010065f                inval_opcode
+                0x0000000000100665                copr_not_available
+                0x000000000010066b                double_fault
+                0x000000000010066f                copr_seg_overrun
+                0x0000000000100675                inval_tss
+                0x0000000000100679                segment_not_present
+                0x000000000010067d                stack_exception
+                0x0000000000100681                general_protection
+                0x0000000000100685                page_fault
+                0x0000000000100689                copr_error
+                0x00000000001006d2                sys_call
+                0x00000000001006f2                restart
+ *fill*         0x0000000000100717        0x9 
+ .text          0x0000000000100720       0x20 kernel/syscall.o
+                0x0000000000100720                sendrec
+                0x0000000000100734                printx
+ .text          0x0000000000100740       0x9a kernel/start.o
+                0x0000000000100740                cstart
+ .text          0x00000000001007da      0x35c kernel/main.o
+                0x00000000001007da                kernel_main
+                0x0000000000100a30                get_ticks
+                0x0000000000100a64                TestA
+                0x0000000000100acf                TestB
+                0x0000000000100ade                TestC
+                0x0000000000100aed                panic
+ .text          0x0000000000100b36      0x196 kernel/clock.o
+                0x0000000000100b36                clock_handler
+                0x0000000000100c3a                milli_delay
+                0x0000000000100c74                init_clock
+ .text          0x0000000000100ccc      0x130 kernel/i8259.o
+                0x0000000000100ccc                init_8259A
+                0x0000000000100da1                spurious_irq
+                0x0000000000100dd8                put_irq_handler
+ .text          0x0000000000100dfc        0x0 kernel/global.o
+ .text          0x0000000000100dfc      0x614 kernel/protect.o
+                0x0000000000100dfc                init_prot
+                0x0000000000101219                seg2phys
+                0x00000000001012d5                exception_handler
+ .text          0x0000000000101410     0x1aaa kernel/proc.o
+                0x0000000000101410                __sched_period
+                0x000000000010142f                sched_slice
+                0x000000000010146b                calc_delta_fair
+                0x000000000010149a                schedule
+                0x0000000000101510                add_task
+                0x000000000010173b                rm_task
+                0x00000000001017cc                sys_sendrec
+                0x00000000001018f5                send_recv
+                0x00000000001019b2                ldt_seg_linear
+                0x00000000001019fc                va2la
+                0x0000000000101a5d                reset_msg
+                0x0000000000102a13                dump_proc
+                0x0000000000102dad                dump_msg
+ .text          0x0000000000102eba      0x72f kernel/rbtree.o
+                0x0000000000102eba                tree_minimum
+                0x0000000000102eda                __pick_first_entity
+                0x0000000000102f09                left_rotate
+                0x0000000000102f9d                right_rotate
+                0x0000000000103031                rb_insert_fixup
+                0x00000000001031b1                rb_insert
+                0x0000000000103266                rb_transplant
+                0x00000000001032c0                rb_delete_fixup
+                0x00000000001034d4                rb_delete
+ .text          0x00000000001035e9      0x687 kernel/keyboard.o
+                0x00000000001035e9                keyboard_handler
+                0x0000000000103649                init_keyboard
+                0x00000000001036ee                keyboard_read
+ .text          0x0000000000103c70      0x516 kernel/tty.o
+                0x0000000000103c70                task_tty
+                0x0000000000103d2a                in_process
+                0x0000000000103f90                tty_write
+                0x0000000000103fd6                sys_printx
+ .text          0x0000000000104186      0x41d kernel/console.o
+                0x0000000000104186                init_screen
+                0x000000000010429d                is_current_console
+                0x00000000001042b8                out_char
+                0x0000000000104502                select_console
+                0x0000000000104538                scroll_screen
+ .text          0x00000000001045a3       0x58 kernel/systask.o
+                0x00000000001045a3                task_sys
+ .text          0x00000000001045fb       0x50 kernel/printf.o
+                0x00000000001045fb                printf
+ .text          0x000000000010464b      0x305 kernel/vsprintf.o
+                0x00000000001046a9                vsprintf
+                0x000000000010492a                sprintf
+ .text          0x0000000000104950      0x125 mm/frame_allocator.o
+                0x0000000000104950                init_frametracker
+                0x00000000001049a1                frame_alloc
+                0x00000000001049f6                frame_dealloc
+                0x0000000000104a29                frame_find
+ .text          0x0000000000104a75      0x1f8 mm/page_table.o
+                0x0000000000104a75                get_final_entry
+                0x0000000000104ae9                la2pa
+                0x0000000000104b56                map
+                0x0000000000104bd7                unmap
+ *fill*         0x0000000000104c6d        0x3 
+ .text          0x0000000000104c70       0xeb lib/kliba.o
+                0x0000000000104c70                disp_str
+                0x0000000000104cae                disp_color_str
+                0x0000000000104ced                out_byte
+                0x0000000000104cf9                in_byte
+                0x0000000000104d03                disable_irq
+                0x0000000000104d38                enable_irq
+                0x0000000000104d57                disable_int
+                0x0000000000104d59                enable_int
+ .text          0x0000000000104d5b      0x119 lib/klib.o
+                0x0000000000104d5b                itoa
+                0x0000000000104e06                disp_int
+                0x0000000000104e2d                delay
+ *fill*         0x0000000000104e74        0xc 
+ .text          0x0000000000104e80       0x78 lib/string.o
+                0x0000000000104e80                memcpy
+                0x0000000000104ea9                memset
+                0x0000000000104eca                strcpy
+                0x0000000000104ee2                strlen
+ .text          0x0000000000104ef8       0x54 lib/misc.o
+                0x0000000000104ef8                spin
+                0x0000000000104f13                assertion_failure
+ .text          0x0000000000104f4c      0x10f test/testmm.o
+                0x0000000000104f4c                testmm
  *(.gnu.warning)
 
 .fini
@@ -317,28 +317,29 @@ LOAD test/testmm.o
                 [!provide]                        PROVIDE (_etext, .)
                 [!provide]                        PROVIDE (etext, .)
 
-.rodata         0x0000000000034fe0      0xf8e
+.rodata         0x0000000000105060      0xff0
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x0000000000034fe0       0x4b kernel/start.o
- *fill*         0x000000000003502b        0x1 
- .rodata        0x000000000003502c       0x5a kernel/main.o
- .rodata        0x0000000000035086       0x11 kernel/i8259.o
- *fill*         0x0000000000035097        0x9 
- .rodata        0x00000000000350a0       0xa0 kernel/global.o
-                0x00000000000350a0                sched_prio_to_weight
- .rodata        0x0000000000035140      0x540 kernel/protect.o
- .rodata        0x0000000000035680      0x696 kernel/proc.o
- *fill*         0x0000000000035d16        0x2 
- .rodata        0x0000000000035d18       0x64 kernel/keyboard.o
- .rodata        0x0000000000035d7c       0x90 kernel/tty.o
- .rodata        0x0000000000035e0c       0x11 kernel/systask.o
- .rodata        0x0000000000035e1d       0x56 mm/frame_allocator.o
- *fill*         0x0000000000035e73        0x1 
- .rodata        0x0000000000035e74       0x7e mm/page_table.o
-                0x0000000000035e74                PTECNT
- *fill*         0x0000000000035ef2        0x2 
- .rodata        0x0000000000035ef4       0x61 lib/misc.o
- .rodata        0x0000000000035f55       0x19 test/testmm.o
+ .rodata        0x0000000000105060       0x4b kernel/start.o
+ *fill*         0x00000000001050ab        0x1 
+ .rodata        0x00000000001050ac       0x5a kernel/main.o
+ .rodata        0x0000000000105106       0x11 kernel/i8259.o
+ *fill*         0x0000000000105117        0x9 
+ .rodata        0x0000000000105120       0xa0 kernel/global.o
+                0x0000000000105120                sched_prio_to_weight
+ .rodata        0x00000000001051c0      0x540 kernel/protect.o
+ .rodata        0x0000000000105700      0x696 kernel/proc.o
+ *fill*         0x0000000000105d96        0x2 
+ .rodata        0x0000000000105d98       0x64 kernel/keyboard.o
+ .rodata        0x0000000000105dfc       0x90 kernel/tty.o
+ .rodata        0x0000000000105e8c       0x11 kernel/systask.o
+ .rodata        0x0000000000105e9d       0x56 mm/frame_allocator.o
+ *fill*         0x0000000000105ef3        0x1 
+ .rodata        0x0000000000105ef4       0x7e mm/page_table.o
+                0x0000000000105ef4                PTECNT
+ *fill*         0x0000000000105f72        0x2 
+ .rodata        0x0000000000105f74       0x61 lib/misc.o
+ *fill*         0x0000000000105fd5        0x3 
+ .rodata        0x0000000000105fd8       0x78 test/testmm.o
 
 .rodata1
  *(.rodata1)
@@ -347,42 +348,42 @@ LOAD test/testmm.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x0000000000035f70      0xb18
+.eh_frame       0x0000000000106050      0xb18
  *(.eh_frame)
- .eh_frame      0x0000000000035f70       0x38 kernel/start.o
- .eh_frame      0x0000000000035fa8       0xb0 kernel/main.o
+ .eh_frame      0x0000000000106050       0x38 kernel/start.o
+ .eh_frame      0x0000000000106088       0xb0 kernel/main.o
                                          0xc8 (size before relaxing)
- .eh_frame      0x0000000000036058       0x60 kernel/clock.o
+ .eh_frame      0x0000000000106138       0x60 kernel/clock.o
                                          0x78 (size before relaxing)
- .eh_frame      0x00000000000360b8       0x60 kernel/i8259.o
+ .eh_frame      0x0000000000106198       0x60 kernel/i8259.o
                                          0x78 (size before relaxing)
- .eh_frame      0x0000000000036118       0xb0 kernel/protect.o
+ .eh_frame      0x00000000001061f8       0xb0 kernel/protect.o
                                          0xc8 (size before relaxing)
- .eh_frame      0x00000000000361c8      0x26c kernel/proc.o
+ .eh_frame      0x00000000001062a8      0x26c kernel/proc.o
                                         0x284 (size before relaxing)
- .eh_frame      0x0000000000036434      0x120 kernel/rbtree.o
+ .eh_frame      0x0000000000106514      0x120 kernel/rbtree.o
                                         0x138 (size before relaxing)
- .eh_frame      0x0000000000036554       0xe0 kernel/keyboard.o
+ .eh_frame      0x0000000000106634       0xe0 kernel/keyboard.o
                                          0xf8 (size before relaxing)
- .eh_frame      0x0000000000036634       0xfc kernel/tty.o
+ .eh_frame      0x0000000000106714       0xfc kernel/tty.o
                                         0x114 (size before relaxing)
- .eh_frame      0x0000000000036730      0x100 kernel/console.o
+ .eh_frame      0x0000000000106810      0x100 kernel/console.o
                                         0x118 (size before relaxing)
- .eh_frame      0x0000000000036830       0x1c kernel/systask.o
+ .eh_frame      0x0000000000106910       0x1c kernel/systask.o
                                          0x34 (size before relaxing)
- .eh_frame      0x000000000003684c       0x20 kernel/printf.o
+ .eh_frame      0x000000000010692c       0x20 kernel/printf.o
                                          0x38 (size before relaxing)
- .eh_frame      0x000000000003686c       0x60 kernel/vsprintf.o
+ .eh_frame      0x000000000010694c       0x60 kernel/vsprintf.o
                                          0x78 (size before relaxing)
- .eh_frame      0x00000000000368cc       0x80 mm/frame_allocator.o
+ .eh_frame      0x00000000001069ac       0x80 mm/frame_allocator.o
                                          0x98 (size before relaxing)
- .eh_frame      0x000000000003694c       0x80 mm/page_table.o
+ .eh_frame      0x0000000000106a2c       0x80 mm/page_table.o
                                          0x98 (size before relaxing)
- .eh_frame      0x00000000000369cc       0x60 lib/klib.o
+ .eh_frame      0x0000000000106aac       0x60 lib/klib.o
                                          0x78 (size before relaxing)
- .eh_frame      0x0000000000036a2c       0x3c lib/misc.o
+ .eh_frame      0x0000000000106b0c       0x3c lib/misc.o
                                          0x54 (size before relaxing)
- .eh_frame      0x0000000000036a68       0x20 test/testmm.o
+ .eh_frame      0x0000000000106b48       0x20 test/testmm.o
                                          0x38 (size before relaxing)
  *(.eh_frame.*)
 
@@ -394,7 +395,7 @@ LOAD test/testmm.o
 
 .exception_ranges
  *(.exception_ranges .exception_ranges*)
-                0x0000000000037a88                . = DATA_SEGMENT_ALIGN (0x1000, 0x1000)
+                0x0000000000107b68                . = DATA_SEGMENT_ALIGN (0x1000, 0x1000)
 
 .eh_frame
  *(.eh_frame)
@@ -416,18 +417,18 @@ LOAD test/testmm.o
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x0000000000037a88        0x0
+.preinit_array  0x0000000000107b68        0x0
                 [!provide]                        PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end, .)
 
-.init_array     0x0000000000037a88        0x0
+.init_array     0x0000000000107b68        0x0
                 [!provide]                        PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*) SORT(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end, .)
 
-.fini_array     0x0000000000037a88        0x0
+.fini_array     0x0000000000107b68        0x0
                 [!provide]                        PROVIDE (__fini_array_start, .)
  *(SORT(.fini_array.*) SORT(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -460,112 +461,112 @@ LOAD test/testmm.o
 .got
  *(.got)
  *(.igot)
-                0x0000000000037a88                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0x0000000000107b68                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0x0000000000037a88        0x0
+.got.plt        0x0000000000107b68        0x0
  *(.got.plt)
  *(.igot.plt)
- .igot.plt      0x0000000000037a88        0x0 kernel/kernel.o
+ .igot.plt      0x0000000000107b68        0x0 kernel/kernel.o
 
-.data           0x0000000000037aa0      0x744
+.data           0x0000000000107b80      0x744
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x0000000000037aa0        0x2 kernel/kernel.o
- .data          0x0000000000037aa2        0x0 kernel/start.o
- .data          0x0000000000037aa2        0x0 kernel/main.o
- .data          0x0000000000037aa2        0x0 kernel/clock.o
- .data          0x0000000000037aa2        0x0 kernel/i8259.o
- *fill*         0x0000000000037aa2       0x1e 
- .data          0x0000000000037ac0       0xf0 kernel/global.o
-                0x0000000000037ac0                task_table
-                0x0000000000037b20                user_proc_table
-                0x0000000000037b98                sys_call_table
-                0x0000000000037ba4                sysctl_sched_latency
-                0x0000000000037ba8                sysctl_sched_min_granularity
-                0x0000000000037bac                sched_nr_latency
- .data          0x0000000000037bb0        0x0 kernel/protect.o
- .data          0x0000000000037bb0        0x0 kernel/proc.o
- .data          0x0000000000037bb0       0x1c kernel/rbtree.o
-                0x0000000000037bb0                nil
-                0x0000000000037bc8                root
- *fill*         0x0000000000037bcc       0x14 
- .data          0x0000000000037be0      0x600 kernel/keyboard.o
-                0x0000000000037be0                keymap
- .data          0x00000000000381e0        0x0 kernel/tty.o
- .data          0x00000000000381e0        0x0 kernel/console.o
- .data          0x00000000000381e0        0x0 kernel/systask.o
- .data          0x00000000000381e0        0x0 kernel/printf.o
- .data          0x00000000000381e0        0x0 kernel/vsprintf.o
- .data          0x00000000000381e0        0x0 mm/frame_allocator.o
- .data          0x00000000000381e0        0x4 mm/page_table.o
-                0x00000000000381e0                pagedir
- .data          0x00000000000381e4        0x0 lib/klib.o
- .data          0x00000000000381e4        0x0 lib/misc.o
- .data          0x00000000000381e4        0x0 test/testmm.o
+ .data          0x0000000000107b80        0x2 kernel/kernel.o
+ .data          0x0000000000107b82        0x0 kernel/start.o
+ .data          0x0000000000107b82        0x0 kernel/main.o
+ .data          0x0000000000107b82        0x0 kernel/clock.o
+ .data          0x0000000000107b82        0x0 kernel/i8259.o
+ *fill*         0x0000000000107b82       0x1e 
+ .data          0x0000000000107ba0       0xf0 kernel/global.o
+                0x0000000000107ba0                task_table
+                0x0000000000107c00                user_proc_table
+                0x0000000000107c78                sys_call_table
+                0x0000000000107c84                sysctl_sched_latency
+                0x0000000000107c88                sysctl_sched_min_granularity
+                0x0000000000107c8c                sched_nr_latency
+ .data          0x0000000000107c90        0x0 kernel/protect.o
+ .data          0x0000000000107c90        0x0 kernel/proc.o
+ .data          0x0000000000107c90       0x1c kernel/rbtree.o
+                0x0000000000107c90                nil
+                0x0000000000107ca8                root
+ *fill*         0x0000000000107cac       0x14 
+ .data          0x0000000000107cc0      0x600 kernel/keyboard.o
+                0x0000000000107cc0                keymap
+ .data          0x00000000001082c0        0x0 kernel/tty.o
+ .data          0x00000000001082c0        0x0 kernel/console.o
+ .data          0x00000000001082c0        0x0 kernel/systask.o
+ .data          0x00000000001082c0        0x0 kernel/printf.o
+ .data          0x00000000001082c0        0x0 kernel/vsprintf.o
+ .data          0x00000000001082c0        0x0 mm/frame_allocator.o
+ .data          0x00000000001082c0        0x4 mm/page_table.o
+                0x00000000001082c0                pagedir
+ .data          0x00000000001082c4        0x0 lib/klib.o
+ .data          0x00000000001082c4        0x0 lib/misc.o
+ .data          0x00000000001082c4        0x0 test/testmm.o
 
 .data1
  *(.data1)
-                0x00000000000381e4                _edata = .
+                0x00000000001082c4                _edata = .
                 [!provide]                        PROVIDE (edata, .)
-                0x00000000000381e4                . = .
-                0x00000000000381e4                __bss_start = .
+                0x00000000001082c4                . = .
+                0x00000000001082c4                __bss_start = .
 
-.bss            0x0000000000038200   0x82aa8c
+.bss            0x00000000001082e0   0x82aa8c
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x0000000000038200      0x800 kernel/kernel.o
- .bss           0x0000000000038a00        0x0 kernel/start.o
- .bss           0x0000000000038a00        0x0 kernel/main.o
- .bss           0x0000000000038a00        0x0 kernel/clock.o
- .bss           0x0000000000038a00        0x0 kernel/i8259.o
- .bss           0x0000000000038a00        0xc kernel/global.o
-                0x0000000000038a00                nr_running
-                0x0000000000038a04                sum_weight
-                0x0000000000038a08                has_preempt
- .bss           0x0000000000038a0c        0x0 kernel/protect.o
- .bss           0x0000000000038a0c        0x0 kernel/proc.o
- .bss           0x0000000000038a0c        0x0 kernel/rbtree.o
- *fill*         0x0000000000038a0c       0x14 
- .bss           0x0000000000038a20       0x58 kernel/keyboard.o
- .bss           0x0000000000038a78        0x0 kernel/tty.o
- .bss           0x0000000000038a78        0x0 kernel/console.o
- .bss           0x0000000000038a78        0x0 kernel/systask.o
- .bss           0x0000000000038a78        0x0 kernel/printf.o
- .bss           0x0000000000038a78        0x0 kernel/vsprintf.o
- .bss           0x0000000000038a78        0x0 mm/frame_allocator.o
- .bss           0x0000000000038a78        0x0 mm/page_table.o
- .bss           0x0000000000038a78        0x0 lib/klib.o
- .bss           0x0000000000038a78        0x0 lib/misc.o
- .bss           0x0000000000038a78        0x0 test/testmm.o
+ .bss           0x00000000001082e0      0x800 kernel/kernel.o
+ .bss           0x0000000000108ae0        0x0 kernel/start.o
+ .bss           0x0000000000108ae0        0x0 kernel/main.o
+ .bss           0x0000000000108ae0        0x0 kernel/clock.o
+ .bss           0x0000000000108ae0        0x0 kernel/i8259.o
+ .bss           0x0000000000108ae0        0xc kernel/global.o
+                0x0000000000108ae0                nr_running
+                0x0000000000108ae4                sum_weight
+                0x0000000000108ae8                has_preempt
+ .bss           0x0000000000108aec        0x0 kernel/protect.o
+ .bss           0x0000000000108aec        0x0 kernel/proc.o
+ .bss           0x0000000000108aec        0x0 kernel/rbtree.o
+ *fill*         0x0000000000108aec       0x14 
+ .bss           0x0000000000108b00       0x58 kernel/keyboard.o
+ .bss           0x0000000000108b58        0x0 kernel/tty.o
+ .bss           0x0000000000108b58        0x0 kernel/console.o
+ .bss           0x0000000000108b58        0x0 kernel/systask.o
+ .bss           0x0000000000108b58        0x0 kernel/printf.o
+ .bss           0x0000000000108b58        0x0 kernel/vsprintf.o
+ .bss           0x0000000000108b58        0x0 mm/frame_allocator.o
+ .bss           0x0000000000108b58        0x0 mm/page_table.o
+ .bss           0x0000000000108b58        0x0 lib/klib.o
+ .bss           0x0000000000108b58        0x0 lib/misc.o
+ .bss           0x0000000000108b58        0x0 test/testmm.o
  *(COMMON)
- *fill*         0x0000000000038a78        0x8 
- COMMON         0x0000000000038a80   0x82a20c kernel/global.o
-                0x0000000000038a80                phy_frames
-                0x0000000000838a80                idt_ptr
-                0x0000000000838aa0                task_stack
-                0x0000000000860aa0                k_reenter
-                0x0000000000860ac0                gdt
-                0x0000000000860ec0                tty_table
-                0x0000000000861f10                wait_table
-                0x0000000000861f40                tss
-                0x0000000000861fa8                nr_current_console
-                0x0000000000861fac                disp_pos
-                0x0000000000861fb0                gdt_ptr
-                0x0000000000861fb8                wait_cnt
-                0x0000000000861fc0                idt
-                0x00000000008627c0                se_table
-                0x00000000008628b0                ticks
-                0x00000000008628b4                stat
-                0x00000000008628e0                console_table
-                0x0000000000862920                irq_table
-                0x0000000000862960                p_proc_ready
-                0x0000000000862980                proc_table
-                0x0000000000862c8c                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x0000000000862c8c                . = ALIGN (0x4)
-                0x0000000000862c8c                . = SEGMENT_START ("ldata-segment", .)
-                0x0000000000862c8c                . = ALIGN (0x4)
-                0x0000000000862c8c                _end = .
+ *fill*         0x0000000000108b58        0x8 
+ COMMON         0x0000000000108b60   0x82a20c kernel/global.o
+                0x0000000000108b60                phy_frames
+                0x0000000000908b60                idt_ptr
+                0x0000000000908b80                task_stack
+                0x0000000000930b80                k_reenter
+                0x0000000000930ba0                gdt
+                0x0000000000930fa0                tty_table
+                0x0000000000931ff0                wait_table
+                0x0000000000932020                tss
+                0x0000000000932088                nr_current_console
+                0x000000000093208c                disp_pos
+                0x0000000000932090                gdt_ptr
+                0x0000000000932098                wait_cnt
+                0x00000000009320a0                idt
+                0x00000000009328a0                se_table
+                0x0000000000932990                ticks
+                0x0000000000932994                stat
+                0x00000000009329c0                console_table
+                0x0000000000932a00                irq_table
+                0x0000000000932a40                p_proc_ready
+                0x0000000000932a60                proc_table
+                0x0000000000932d6c                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x0000000000932d6c                . = ALIGN (0x4)
+                0x0000000000932d6c                . = SEGMENT_START ("ldata-segment", .)
+                0x0000000000932d6c                . = ALIGN (0x4)
+                0x0000000000932d6c                _end = .
                 [!provide]                        PROVIDE (end, .)
-                0x0000000000862c8c                . = DATA_SEGMENT_END (.)
+                0x0000000000932d6c                . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)

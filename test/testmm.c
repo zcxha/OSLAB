@@ -20,7 +20,20 @@ void testmm()
     printl("la2pa: %x ", pa);
 
     FrameTracker *ft = unmap(la);
-    printl("unmapped: %x ", ft->phybase);
-    pa = la2pa(la); // 预计panic。、
+    printl("unmapped: %x inuse:%x count:%x ", ft->phybase, ft->in_use, ft->count);
+    // pa = la2pa(la); // 预计panic。、
+    // printl("la2pa: %x ", pa);
+
+    frame_dealloc(ft);
+
+    ft = frame_alloc();
+
+    printl("allocated frame: %x inuse:%x count:%x ", ft->phybase, ft->in_use, ft->count);
+
+    map(la, ft);
+
+    printl("mapped frame: %x inuse:%x count:%x ", ft->phybase, ft->in_use, ft->count);
+
+    pa = la2pa(la);
     printl("la2pa: %x ", pa);
 }

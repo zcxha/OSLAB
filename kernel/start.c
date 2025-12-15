@@ -46,7 +46,7 @@ PUBLIC void cstart()
 
 	init_prot();
 
-
+    init_frametracker();
 	// test_mm();
 
 	// disp_str("\n-----\"test_mm\" ends-----\n");

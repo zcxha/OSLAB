@@ -1,7 +1,7 @@
 /* 沿用几个月前版本的位图法，实现比其他的简单啊，。、 */
 
 #define FRAME_SIZE 4096
-#define FRAME_COUNT 1024*1024
+#define FRAME_COUNT 1024*1024 // 4G
 
 typedef struct FrameTracker{
     u8 count; // 引用计数，用于多任务情况下共享问题。
