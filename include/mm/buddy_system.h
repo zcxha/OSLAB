@@ -23,7 +23,7 @@ typedef struct ListNode {
 
         upd: 同一个id下有多个同大小块也是可以合并的。
     */
-    
+    u32 id;
     u32 addr;
     u32 size;    
 

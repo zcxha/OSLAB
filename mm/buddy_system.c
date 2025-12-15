@@ -73,6 +73,29 @@ void *buddy_list_pop(ListHead *head)
     return res;
 }
 
+void buddy_list_del(ListHead *head, ListNode *node)
+{
+    assert(head->head != NULL);
+    assert(node != NULL);
+
+    head->head = node->next;
+    if (head->head)
+    {
+        head->head->prev = NULL;
+    }
+    ListNode *prev = node->prev;
+    if (prev)
+    {
+        prev->next = node->next;
+    }
+    if (node->next)
+    {
+        node->next->prev = prev;
+    }
+
+    node->prev = node->next = NULL;
+}
+
 /* buddy allocator tree */
 BTree buddy_tree;
 
@@ -84,7 +107,6 @@ void buddy_init()
 #ifdef WINDOWS
     u32 size = 0x10000000;
     u32 node_addr = malloc(size);
-    printf("base: 0x%x\n", node_addr);
 #else
     u32 size = HEAP_SIZE;
     u32 node_addr = HEAP_BASE;
@@ -95,6 +117,8 @@ void buddy_init()
     {
         ListNode *cur = (ListNode *)node_addr;
         cur->id = 1;
+        cur->addr = cur;
+        cur->size = blksz;
         buddy_list_insert(&buddy_tree.nodes[1], cur);
 
         size -= blksz;
@@ -110,9 +134,9 @@ void buddy_init()
 
 int lowbit(int x) { return x & (-x); }
 
-#define MAXBLOCK LEAF_SIZE *pow_2(log_2(BUDDY_ORDER))
+#define MAXBLOCK LEAF_SIZE *pow_2(log_2(BUDDY_ORDER - 1))
 #define maxdepth log_2(BUDDY_ORDER - 1)
-#define blockszofdepth(x) LEAF_SIZE *pow_2(log_2(BUDDY_ORDER) - (x))
+#define blockszofdepth(x) LEAF_SIZE *pow_2(log_2(BUDDY_ORDER - 1) - (x))
 #define depthofnode(id) log_2(id)
 #define blockszofnode(id) blockszofdepth(depthofnode(id))
 /*
@@ -159,7 +183,9 @@ void *buddy_alloc(Layout mm_layout)
                 void *head = buddy_list_pop(&buddy_tree.nodes[split_id]);
 
                 ListNode *left = head, *right = head + blockszofnode(split_id << 1);
-                left->id = split_id << 1, right->id = (split_id << 1) ^ 1;
+                left->id = (split_id << 1), right->id = ((split_id << 1) ^ 1);
+                left->addr = left, right->addr = right;
+                left->size = blockszofnode(split_id << 1), right->size = blockszofnode((split_id << 1) ^ 1);
                 buddy_list_insert(&buddy_tree.nodes[split_id << 1], head);
                 buddy_list_insert(&buddy_tree.nodes[(split_id << 1) ^ 1], head + blockszofnode(split_id << 1));
                 split_id = split_id << 1;
@@ -180,35 +206,73 @@ void *buddy_alloc(Layout mm_layout)
 }
 void *p[4194304];
 
+int lneq(ListNode *p1, ListNode *p2)
+{
+    return (p1->addr == p2->addr && p1->id == p2->id && p1->size == p2->size);
+}
+
 /*
     传入块基址，也就是说，由外层进行-4，然后再在这里进行分配。
 */
 void buddy_dealloc(void *p)
 {
-    u32 id = *((u32 *)p);
-    while (id != 1 && (buddy_tree.nodes[id].head || buddy_tree.nodes[id ^ 1].head))
-    { // 伙伴存在
-        buddy_list_pop(&buddy_tree.nodes[id ^ 1]);
-        if ((id ^ 1) < id)
-        { // 左子树
-            p -= blockszofnode(id);
-        }
-        id = id >> 1;
-    }
-    
+    ListNode *ln = (ListNode *)p;
 
-    buddy_list_insert(&buddy_tree.nodes[id], p);
+    while (buddy_tree.nodes[ln->id ^ 1].head)
+    {
+        ListNode *t = buddy_tree.nodes[ln->id ^ 1].head;
+        ListHead *headnode = &buddy_tree.nodes[ln->id ^ 1];
+        u32 id = ln->id;
+        u32 flag = 0;
+        while (t)
+        {
+            if (t->addr == ln->addr + ln->size)
+            {
+                flag = 1;
+                ln->size = ln->size << 1;
+                ln->id = ln->id >> 1;
+                buddy_list_del(headnode, t);
+                break;
+            }
+            else if (t->addr + t->size == ln->addr)
+            {
+                flag = 1;
+                ln->addr = t->addr;
+                ln->size = ln->size << 1;
+                ln->id = ln->id >> 1;
+
+                buddy_list_del(headnode, t);
+
+                break;
+            }
+            t = t->next;
+        }
+        if (flag == 0)
+        {
+            // 没有合并块则break
+            break;
+        }
+    }
+    buddy_list_insert(&buddy_tree.nodes[ln->id], ln);
 }
 
 #ifdef WINDOWS
 
 void print_table()
 {
-    for (int i = 1; i < BUDDY_ORDER; i++)
+    // for (int i = 1; i < BUDDY_ORDER; i++)
+    // {
+    //     printf("[%d]%10d\t", i, buddy_tree.nodes[i].head);
+    // }
+    // printf("\n");
+    ListNode *p = buddy_tree.nodes[1].head;
+    printf("[");
+    while (p)
     {
-        printf("[%d] %d\t", i, buddy_tree.nodes[i].head);
+        printf("%x,", p->addr);
+        p = p->next;
     }
-    printf("\n");
+    printf("]\n");
 }
 signed main()
 {
@@ -216,46 +280,37 @@ signed main()
 
     Layout mmlay;
     mmlay.size = 64;
-
-    int allocated = 0;
-    int cnt = 0;
-    for (int i = 0; i < 4194304; i++)
-    {
-        void *p;
-        if ((p = buddy_alloc(mmlay)) != NULL)
-        {
-            cnt++;
-            allocated += 64;
-            u32 id = ((ListNode *)p)->id;
-            assert(id >= 8 && id <= 15);
-            // printf("id %d", ((ListNode *)p)->id);
-            buddy_dealloc(p);
-        }
-    }
-    printf("cnt: %d\n", cnt);
-    printf("allocated: 0x%x\n", allocated);
+    // print_table();
+    // int allocated = 0;
+    // int cnt = 0;
+    // for (int i = 0; i < 2; i++)
+    // {
+    //     void *p;
+    //     if ((p = buddy_alloc(mmlay)) != NULL)
+    //     {
+    //         ListNode *ln = ((ListNode *)p);
+    //         printf("addr %x size %d id %d\n", ln->addr, ln->size, ln->id);
+    //         assert(ln->id >= 8 && ln->id < 16);
+    //         cnt++;
+    //         allocated += 64;
+    //         print_table();
+    //         buddy_dealloc(p);
+    //     }
+    // }
+    // printf("cnt: %d\n", cnt);
+    // printf("allocated: 0x%x\n", allocated);
 
     print_table();
-    for (int i = 0; i < 4194304; i++)
+    for (int i = 0; i < 128; i++)
     {
         p[i] = buddy_alloc(mmlay);
     }
-    printf("allocated all heap\n");
-    for (int i = 0; i < 4194304 / 2; i++)
+    // print_table();
+    for (int i = 0; i < 128; i++)
     {
+        // print_table();
         buddy_dealloc(p[i]);
     }
-
     print_table();
-    for (int i = 4194304 / 2; i < 4194304; i++)
-    {
-        print_table();
-        if (p[i + 4194304 / 2] = buddy_alloc(mmlay))
-        {
-            cnt++;
-        }
-    }
-
-    printf("cnt %d ", cnt);
 }
 #endif
