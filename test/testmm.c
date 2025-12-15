@@ -15,25 +15,30 @@
 void testmm()
 {
     // test translation
+    // 测试连续unmap dealloc 连续alloc map
     u32 la = 0x300000;
-    u32 pa = la2pa(la);
-    printl("la2pa: %x ", pa);
-
-    FrameTracker *ft = unmap(la);
-    printl("unmapped: %x inuse:%x count:%x ", ft->phybase, ft->in_use, ft->count);
-    // pa = la2pa(la); // 预计panic。、
-    // printl("la2pa: %x ", pa);
-
+    printl("\ndeallocated: ");
+    for (int i = 0; i < 5; i++)
+    {
+        u32 tmp = la + i * 0x1000;
+        u32 pa = la2pa(tmp);
+        FrameTracker *ft = unmap(tmp);
+        frame_dealloc(ft);
+        printl("0x%x ", ft->phybase);
+    }
+    u32 tmp = 0x290000;
+    u32 pa = la2pa(tmp);
+    FrameTracker *ft = unmap(tmp);
     frame_dealloc(ft);
+    printl("0x%x ", ft->phybase);
+    printl("\nmapped: ");
+    for(int i = 0; i < 5; i++)
+    {
+        u32 tmp = la + i * 0x1000;
+        FrameTracker *ft = frame_alloc();
+        map(tmp, ft);
+        printl("0x%x->0x%x ", tmp, la2pa(tmp));
+    }
 
-    ft = frame_alloc();
 
-    printl("allocated frame: %x inuse:%x count:%x ", ft->phybase, ft->in_use, ft->count);
-
-    map(la, ft);
-
-    printl("mapped frame: %x inuse:%x count:%x ", ft->phybase, ft->in_use, ft->count);
-
-    pa = la2pa(la);
-    printl("la2pa: %x ", pa);
 }
