@@ -21,6 +21,8 @@ typedef	void	(*irq_handler)	(int irq);
 
 typedef void*	system_call;
 
+#define NULL 0
+
 /**
  * MESSAGE mechanism is borrowed from MINIX
  */
