@@ -38,9 +38,11 @@ functions:
 
 堆分配由操作系统管理，所以需要内核实现，而C的堆分配也就是malloc和free。
 
-
+[c - 当你用指向内存分配中间位置的指针调用 free() 函数时会发生什么？ - Stack Overflow --- c - What happens when you call free() with a pointer to the middle of the allocation? - Stack Overflow](https://stackoverflow.com/questions/1957099/what-happens-when-you-call-free-with-a-pointer-to-the-middle-of-the-allocation)
 
 注意，似乎不会自动dealloc FrameTracker，请自行释放
+
+Buddy System有问题，全部分配之后然后再free可能无法重用s
 
 ###### 测试
 

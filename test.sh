@@ -1,3 +1,3 @@
 make all
-make buildimg
+make hdimg
 bochs

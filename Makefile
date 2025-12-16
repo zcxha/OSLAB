@@ -30,6 +30,7 @@ OBJS		= kernel/kernel.o kernel/syscall.o kernel/start.o kernel/main.o kernel/clo
 			kernel/systask.o\
 			kernel/printf.o kernel/vsprintf.o\
 			mm/frame_allocator.o mm/page_table.o\
+			mm/buddy_system.o mm/heap_allocator.o\
 			lib/kliba.o lib/klib.o lib/string.o lib/misc.o\
 			test/testmm.o
 DASMOUTPUT	= kernel.bin.asm
@@ -135,6 +136,12 @@ mm/frame_allocator.o : mm/frame_allocator.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 mm/page_table.o : mm/page_table.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+mm/buddy_system.o : mm/buddy_system.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+mm/heap_allocator.o : mm/heap_allocator.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 lib/klib.o: lib/klib.c include/type.h include/const.h include/protect.h include/string.h include/proc.h include/proto.h \

@@ -17,6 +17,8 @@
 #include "mm/aspace.h"
 #include "mm/frame_allocator.h"
 #include "mm/page_table.h"
+#include "mm/buddy_system.h"
+#include "mm/heap_allocator.h"
 #include "global.h"
 
 
@@ -47,6 +49,7 @@ PUBLIC void cstart()
 	init_prot();
 
     init_frametracker();
+    buddy_init();
 	// test_mm();
 
 	// disp_str("\n-----\"test_mm\" ends-----\n");

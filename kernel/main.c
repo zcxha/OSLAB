@@ -17,6 +17,7 @@
 #include "mm/aspace.h"
 #include "mm/frame_allocator.h"
 #include "mm/page_table.h"
+#include "mm/heap_allocator.h"
 #include "global.h"
 #include "test/testmm.h"
 /*======================================================================*
@@ -144,8 +145,14 @@ void TestA()
 
     while (1)
     {
-        printl("testmm ");
-        testmm();
+        // printl("testmm ");
+        // testmm();
+        u32 *arr = malloc(sizeof(u32) * 64);
+        for(int i = 0; i < 64; i++)
+        {
+            *(arr + i) = 0;
+        }
+        // printf("%x ", arr);
         if (get_ticks() >= 5000 && !flag)
         {
             flag = 1;

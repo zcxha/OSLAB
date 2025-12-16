@@ -12,7 +12,7 @@
 #include "mm/page_table.h"
 #include "global.h"
 #include "test/testmm.h"
-void testmm()
+void test_frame_pgtable()
 {
     // test translation
     // 测试连续unmap dealloc 连续alloc map
@@ -32,13 +32,16 @@ void testmm()
     frame_dealloc(ft);
     printl("0x%x ", ft->phybase);
     printl("\nmapped: ");
-    for(int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++)
     {
         u32 tmp = la + i * 0x1000;
         FrameTracker *ft = frame_alloc();
         map(tmp, ft);
         printl("0x%x->0x%x ", tmp, la2pa(tmp));
     }
+}
 
-
+void testmm()
+{
+    test_frame_pgtable();
 }

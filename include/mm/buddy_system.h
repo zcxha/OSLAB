@@ -32,7 +32,8 @@ typedef struct ListNode {
 }ListNode;
 
 typedef struct ListHead {
-    ListNode *head;
+    ListNode *avail;
+    int count;
 }ListHead;
 
 /*
@@ -59,3 +60,7 @@ typedef struct Layout {
     //  even though that is *also* a requirement of `posix_memalign`.)
     u32 align; // unused
 }Layout;
+
+void *buddy_alloc(Layout mm_layout);
+void buddy_dealloc(void *p);
+void buddy_init();
