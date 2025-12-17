@@ -33,10 +33,7 @@ FrameTracker *frame_alloc()
         if(phy_frames[i].in_use == 0)
         {
             phy_frames[i].in_use = 1;
-            for(int j = 0; j < FRAME_SIZE; j++)
-            { // 清空frame
-                *(u8 *)((void *)phy_frames[i].phybase + j) = 0;
-            }
+            
             return &phy_frames[i];
         }
     }

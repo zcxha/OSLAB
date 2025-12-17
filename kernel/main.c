@@ -71,7 +71,7 @@ PUBLIC int kernel_main()
     // proc_table[3].se->priority = 21;
 
     proc_table[NR_TASKS + 0].nr_tty = 0;
-    proc_table[NR_TASKS + 1].nr_tty = 0;
+    proc_table[NR_TASKS + 1].nr_tty = 1;
     proc_table[NR_TASKS + 2].nr_tty = 1;
 
     sum_weight = 0;
@@ -145,21 +145,19 @@ void TestA()
 
     while (1)
     {
-        // printl("testmm ");
+        // printf("%x ", arr);
+        if (get_ticks() >= 5000 && !flag)
+        {
+            flag = 1;
+            for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
+            {
+                printf("%d ", stat[i]);
+            }
 
-        // // printf("%x ", arr);
-        // if (get_ticks() >= 5000 && !flag)
-        // {
-        //     flag = 1;
-        //     for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
-        //     {
-        //         printf("%d ", stat[i]);
-        //     }
-
-        //     testmm();
-        // }
-        // // printf("A");
-        // // milli_delay(100);
+            testmm();
+        }
+        // printf("A");
+        // milli_delay(100);
     }
 }
 

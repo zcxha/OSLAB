@@ -23,7 +23,9 @@ void test_frame_pgtable()
     {
         u32 tmp = la + i * 0x1000;
         u32 pa = la2pa(tmp);
+        printl("pa: %x ", pa);
         FrameTracker *ft = unmap(tmp);
+        printl("tracker phybase:%x in_use:%x count:%x\n", ft->phybase, ft->in_use, ft->count);
         frame_dealloc(ft);
         printl("0x%x ", ft->phybase);
     }
@@ -32,13 +34,13 @@ void test_frame_pgtable()
     FrameTracker *ft = unmap(tmp);
     frame_dealloc(ft);
     printl("0x%x ", ft->phybase);
-    printl("\nmapped: ");
     for (int i = 0; i < 5; i++)
     {
         u32 tmp = la + i * 0x1000;
         FrameTracker *ft = frame_alloc();
+        printl("got tracker phybase:%x in_use:%x count:%x \n", ft->phybase, ft->in_use, ft->count);
         map(tmp, ft);
-        printl("0x%x->0x%x ", tmp, la2pa(tmp));
+        printl("mapped: 0x%x->0x%x\n", tmp, la2pa(tmp));
     }
 }
 

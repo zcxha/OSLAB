@@ -78,7 +78,7 @@ typedef struct s_proc
                     /*
                         这个进程页目录基地址，在进程切换的时候会负责切换CR3
                     */
-    struct pgtable_t * pg_dir_base; // TODO本该是pg_table 但是不完整类型，见你的导入顺序。
+    pte* pg_dir_base; // TODO本该是pg_table 但是不完整类型，见你的导入顺序。
     int nr_tty;
 } PROCESS;
 

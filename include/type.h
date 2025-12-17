@@ -21,6 +21,8 @@ typedef	void	(*irq_handler)	(int irq);
 
 typedef void*	system_call;
 
+typedef u32 pte;
+
 #define NULL 0
 
 /**

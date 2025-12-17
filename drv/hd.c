@@ -132,15 +132,10 @@ PRIVATE void hd_open(int device)
 {
 	int drive = DRV_OF_DEV(device);
 	assert(drive == 0);	/* only one drive */
-printl("1");
 	hd_identify(drive);
-    printl("2");
 	if (hd_info[drive].open_cnt++ == 0) {
-        printl("3");
 		partition(drive * (NR_PART_PER_DRIVE + 1), P_PRIMARY);
-        printl("4");
 		print_hdinfo(&hd_info[drive]);
-        printl("5");
 	}
 }
 
@@ -465,29 +460,18 @@ PRIVATE void hd_cmd_out(struct hd_cmd* cmd)
 	 */
 	if (!waitfor(STATUS_BSY, 0, HD_TIMEOUT))
 		panic("hd error.");
-    printl(" 1-1-1 ");
 	/* Activate the Interrupt Enable (nIEN) bit */
 	out_byte(REG_DEV_CTRL, 0);
-    printl(" 1-1-1 ");
 	/* Load required parameters in the Command Block Registers */
 	out_byte(REG_FEATURES, cmd->features);
-    printl(" 1-1-2 ");
 	out_byte(REG_NSECTOR,  cmd->count);
-    printl(" 1-1-3 ");
 	out_byte(REG_LBA_LOW,  cmd->lba_low);
-    printl(" 1-1-4 ");
 	out_byte(REG_LBA_MID,  cmd->lba_mid);
-    printl(" 1-1-5 ");
 	out_byte(REG_LBA_HIGH, cmd->lba_high);
-    printl(" 1-1-6 ");
 	out_byte(REG_DEVICE,   cmd->device);
-    printl(" 1-1-7 ");
 	/* Write the command code to the Command Register */
-    __asm__("xchg %bx, %bx");
     enable_int();
 	out_byte(REG_CMD,     cmd->command);
-    __asm__("xchg %bx, %bx");
-    printl(" 1-1-8 ");
 }
 
 /*****************************************************************************

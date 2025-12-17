@@ -14,14 +14,27 @@
 
 const u32 PTECNT = 1024;
 
-pgtable_t *pagedir = (pgtable_t)PAGE_DIR_BASE;
+pte *pagedir = (pte *)PAGE_DIR_BASE;
 
-pgtable_t* new_page_table()
+pte* new_page_table()
 {
     FrameTracker *ft = frame_alloc();
     ft->count++;
-    pgtable_t* new_pgdir = ft->phybase;
-    
+    pte* new_pgdir = ft->phybase;
+    for (int i = 0; i < 1024 /* 一个页目录1024项 */; i++)
+    {
+        /* 初始化二级页表 */
+        FrameTracker *ft = frame_alloc();
+        for (int j = 0; j < FRAME_SIZE; j++)
+        {
+            /* 写0 */
+            *((u8 *)ft->phybase + j) = 0;
+        }
+        
+        pte * pd_entry = (new_pgdir + i);
+        *pd_entry = ft->phybase | PG_USU | PG_P | PG_RWW;
+    }
+    return new_pgdir;
 }
 
 /*
@@ -35,10 +48,12 @@ pte *get_final_entry(void *la)
 {
     u32 pdidx = ((u32)la >> 22);
     u32 ptidx = (((u32)la) & 0b1111111111000000000000) >> 12;
-    assert(((pte *)(u32)(pagedir + pdidx))->paddr & PG_P);
+    pte first_level_entry = *(pagedir + pdidx);
+    assert(first_level_entry & PG_P);
 
-    pgtable_t pt = (pgtable_t)(((pte *)(u32)(pagedir + pdidx))->paddr & 0xFFFFF000);
-    return (pte *)(pt + ptidx);
+    pte *second_level_dir = first_level_entry & 0xFFFFF000;
+    pte *second_level_entry = second_level_dir + ptidx;
+    return second_level_entry;
 }
 
 void *la2pa(void *la)
@@ -46,8 +61,8 @@ void *la2pa(void *la)
     // 对齐
     assert(((u32)la & 0xFFF) == 0);
     pte *final_entry = get_final_entry(la);
-    assert(final_entry->paddr & PG_P);
-    return (final_entry->paddr & 0xFFFFF000);
+    assert(*final_entry & PG_P);
+    return (*final_entry & 0xFFFFF000);
 }
 
 /*
@@ -67,7 +82,7 @@ void map(void *la, FrameTracker *ft)
 
     pte *final_entry = get_final_entry(la);
     // 默认给这三个权限
-    final_entry->paddr = ft->phybase | PG_P | PG_RWW | PG_USU;
+    *final_entry = ft->phybase | PG_P | PG_RWW | PG_USU;
 }
 
 /*
@@ -79,9 +94,9 @@ FrameTracker *unmap(void *la)
 
     pte *final_entry = get_final_entry(la);
 
-    assert(final_entry->paddr & PG_P);
-    FrameTracker *f = frame_find(final_entry->paddr & 0xFFFFF000);
-    final_entry->paddr = 0;
+    assert(*final_entry & PG_P);
+    FrameTracker *f = frame_find(*final_entry & 0xFFFFF000);
+    *final_entry = 0;
 
     f->count--;
 
