@@ -9,6 +9,7 @@
 #include "proto.h"
 #include "mm/aspace.h"
 #include "mm/frame_allocator.h"
+#include "mm/heap_allocator.h"
 #include "mm/page_table.h"
 #include "global.h"
 #include "test/testmm.h"
@@ -41,7 +42,18 @@ void test_frame_pgtable()
     }
 }
 
+void test_malloc_free()
+{
+    u32 *arr = malloc(sizeof(u32) * 64);
+    for (int i = 0; i < 64; i++)
+    {
+        *(arr + i) = 0;
+    }
+    free(arr);
+}
+
 void testmm()
 {
     test_frame_pgtable();
+    test_malloc_free();
 }

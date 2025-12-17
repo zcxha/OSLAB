@@ -19,6 +19,7 @@
 #include "mm/aspace.h"
 #include "mm/frame_allocator.h"
 #include "mm/page_table.h"
+#include "drv/hd.h"
 #include "global.h"
 
 PUBLIC	PROCESS			proc_table[NR_TASKS + NR_PROCS];
@@ -30,7 +31,8 @@ PUBLIC	char			task_stack[STACK_SIZE_TOTAL];
 
 PUBLIC	TASK	task_table[NR_TASKS] = {
 	{task_tty, STACK_SIZE_TTY, "TTY"},
-    {task_sys, STACK_SIZE_SYS, "SYS"}
+    {task_sys, STACK_SIZE_SYS, "SYS"},
+    {task_hd, STACK_SIZE_HD, "HD"}
 };
 
 PUBLIC	TASK	user_proc_table[NR_PROCS] = {

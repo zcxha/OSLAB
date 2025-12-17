@@ -71,7 +71,7 @@ PUBLIC int kernel_main()
     // proc_table[3].se->priority = 21;
 
     proc_table[NR_TASKS + 0].nr_tty = 0;
-    proc_table[NR_TASKS + 1].nr_tty = 1;
+    proc_table[NR_TASKS + 1].nr_tty = 0;
     proc_table[NR_TASKS + 2].nr_tty = 1;
 
     sum_weight = 0;
@@ -146,23 +146,20 @@ void TestA()
     while (1)
     {
         // printl("testmm ");
-        // testmm();
-        u32 *arr = malloc(sizeof(u32) * 64);
-        for(int i = 0; i < 64; i++)
-        {
-            *(arr + i) = 0;
-        }
-        // printf("%x ", arr);
-        if (get_ticks() >= 5000 && !flag)
-        {
-            flag = 1;
-            for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
-            {
-                printf("%d ", stat[i]);
-            }
-        }
-        // printf("A");
-        // milli_delay(100);
+
+        // // printf("%x ", arr);
+        // if (get_ticks() >= 5000 && !flag)
+        // {
+        //     flag = 1;
+        //     for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
+        //     {
+        //         printf("%d ", stat[i]);
+        //     }
+
+        //     testmm();
+        // }
+        // // printf("A");
+        // // milli_delay(100);
     }
 }
 
@@ -172,8 +169,18 @@ void TestA()
 void TestB()
 {
     int i = 0x1000;
+    int flag = 0;
     while (1)
     {
+        if(!flag)
+        {
+            flag = 1;
+            MESSAGE msg;
+            reset_msg(&msg);
+            msg.type = DEV_OPEN;
+            msg.DEVICE = 0;
+            send_recv(BOTH, TASK_HD, &msg);
+        }
         // printf("B");
         // milli_delay(100);
     }

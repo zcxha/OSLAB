@@ -5,7 +5,7 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-/* klib.asm */
+/* kliba.asm */
 PUBLIC void	out_byte(u16 port, u8 value);
 PUBLIC u8	in_byte(u16 port);
 PUBLIC void	disp_str(char * info);
@@ -14,6 +14,10 @@ PUBLIC void	disable_irq(int irq);
 PUBLIC void	enable_irq(int irq);
 PUBLIC void	disable_int();
 PUBLIC void	enable_int();
+PUBLIC void	port_read(u16 port, void* buf, int n);
+PUBLIC void	port_write(u16 port, void* buf, int n);
+PUBLIC void	glitter(int row, int col);
+
 
 /* string.asm */
 PUBLIC char*	strcpy(char* dst, const char* src);
@@ -89,6 +93,12 @@ PUBLIC	void	reset_msg(MESSAGE* p);
 PUBLIC	void	dump_msg(const char * title, MESSAGE* m);
 PUBLIC	void	dump_proc(struct s_proc * p);
 PUBLIC	int	send_recv(int function, int src_dest, MESSAGE* msg);
+PUBLIC void inform_int(int task_nr);
+
+/* hd.c */
+PUBLIC void task_hd();
+PUBLIC void hd_handler(int irq);
+
 
 /* rbtree.c */
 void rb_delete(rbnode *z);
@@ -110,3 +120,4 @@ PUBLIC  void    sys_call();             /* int_handler */
 /* 系统调用 - 用户级 */
 PUBLIC	int	sendrec(int function, int src_dest, MESSAGE* p_msg);
 PUBLIC	int	printx(char* str);
+

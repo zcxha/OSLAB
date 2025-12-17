@@ -21,6 +21,18 @@
 #include "mm/heap_allocator.h"
 #include "global.h"
 
+void dealloc_all_userspace()
+{
+    // user_start 30000000h
+    u32 idx = 192 * 1024; // 从这里开始
+    u32 end = 256 * 1024;
+    for(u32 i = idx; i < end; i++)
+    {
+        assert(phy_frames[i].count == 1);
+        phy_frames[i].count = 0;
+        frame_dealloc(&phy_frames[i]);
+    }
+}
 
 /*======================================================================*
                             cstart
@@ -51,6 +63,8 @@ PUBLIC void cstart()
     init_frametracker();
     buddy_init();
 	// test_mm();
+    dealloc_all_userspace(); // 形式主义的dealloc，内核实际上拥有一个count。但是分配的时候只分配给user
+    disp_str("user space all deallocated! \n");
 
 	// disp_str("\n-----\"test_mm\" ends-----\n");
 

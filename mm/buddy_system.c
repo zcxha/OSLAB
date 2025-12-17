@@ -1,3 +1,9 @@
+/*
+    An implementation of buddy system.
+    It may has many bugs, but it works in kernel.
+    - lsl
+*/
+
 // #define WINDOWS
 #ifndef WINDOWS
 #include "type.h"

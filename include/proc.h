@@ -75,7 +75,10 @@ typedef struct s_proc
 				    * queue (q_sending)
 				    */
 
-
+                    /*
+                        这个进程页目录基地址，在进程切换的时候会负责切换CR3
+                    */
+    struct pgtable_t * pg_dir_base; // TODO本该是pg_table 但是不完整类型，见你的导入顺序。
     int nr_tty;
 } PROCESS;
 
@@ -89,12 +92,13 @@ typedef struct s_task
 #define proc2pid(x) (x - proc_table)
 
 /* Number of tasks */
-#define NR_TASKS 2
+#define NR_TASKS 3
 #define NR_PROCS 3
 
 /* stacks of tasks */
 #define STACK_SIZE_TTY   0x8000
 #define STACK_SIZE_SYS	 0x8000
+#define STACK_SIZE_HD    0x8000
 #define STACK_SIZE_TESTA 0x8000
 #define STACK_SIZE_TESTB 0x8000
 #define STACK_SIZE_TESTC 0x8000
@@ -104,4 +108,5 @@ typedef struct s_task
 						  STACK_SIZE_TESTB + \
 						  STACK_SIZE_TESTC + \
                             STACK_SIZE_TTY + \
-                            STACK_SIZE_SYS)
+                            STACK_SIZE_SYS + \
+                            STACK_SIZE_HD)

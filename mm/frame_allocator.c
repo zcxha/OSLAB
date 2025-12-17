@@ -21,7 +21,8 @@ void init_frametracker()
     for(int i = 0; i < FRAME_COUNT; i++)
     {
         phy_frames[i].count = phy_frames[i].in_use = 1; // 因为ldr默认把所有都direct 映射了一遍
-        phy_frames[i].phybase = i * FRAME_SIZE;
+        phy_frames[i].phybase = i * FRAME_SIZE; // 后续会把用户地址空间直接count--,dealloc。但不unmap
+        // 也就是说内核始终是所有物理地址的恒等映射。
     }
 }
 
@@ -32,6 +33,10 @@ FrameTracker *frame_alloc()
         if(phy_frames[i].in_use == 0)
         {
             phy_frames[i].in_use = 1;
+            for(int j = 0; j < FRAME_SIZE; j++)
+            { // 清空frame
+                *(u8 *)((void *)phy_frames[i].phybase + j) = 0;
+            }
             return &phy_frames[i];
         }
     }
@@ -47,7 +52,7 @@ void frame_dealloc(FrameTracker *ft)
 
 /*
     TODO:本来以为不会再接触到phybase，结果unmap就来了。
-    那么之后考虑用红黑树结点去查找node再释放吧。(线性查找其实也行)
+    那么之后考虑用红黑树结点去查找node再释放吧。(线性查找其实也行（？？？maybe outer O(n), causes O(nm)）)
 */
 FrameTracker *frame_find(void *pa)
 {

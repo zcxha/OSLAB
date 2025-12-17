@@ -16,6 +16,14 @@ const u32 PTECNT = 1024;
 
 pgtable_t *pagedir = (pgtable_t)PAGE_DIR_BASE;
 
+pgtable_t* new_page_table()
+{
+    FrameTracker *ft = frame_alloc();
+    ft->count++;
+    pgtable_t* new_pgdir = ft->phybase;
+    
+}
+
 /*
     TODO: 只有基本存在检查，后续应该要有权限检查
 */
