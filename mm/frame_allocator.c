@@ -1,6 +1,6 @@
 /*
     因为汇编是早期（3个月前）编写，代码难以维护，于是重写成c的形式。 - lsl
-
+    TODO可优化的思路：使用某种优先数据结构(Ping heng shu)组织，以地址为键。
 */
 #include "type.h"
 #include "const.h"
@@ -33,10 +33,11 @@ FrameTracker *frame_alloc()
         if(phy_frames[i].in_use == 0)
         {
             phy_frames[i].in_use = 1;
-            
+
             return &phy_frames[i];
         }
     }
+    disp_str("no phy frame");
     panic("no phy frame to alloc.");
 }
 
@@ -53,12 +54,14 @@ void frame_dealloc(FrameTracker *ft)
 */
 FrameTracker *frame_find(void *pa)
 {
+    // disp_int((u32)pa &0xFFFFF000);
     for(int i = 0; i < FRAME_COUNT; i++)
     {
-        if(phy_frames[i].phybase == (u32)pa)
+        if(phy_frames[i].phybase == ((u32)pa & 0xFFFFF000))
         {
             return &phy_frames[i];
         }
     }
+    disp_str("can't find frame");
     panic("can't find frame to unmap.");
 }

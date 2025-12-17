@@ -163,7 +163,7 @@ LABEL_START:			; <--- 从这里开始 *************
     add word [disk_address_packet + 4], SECT_BUF_SIZE
     add dword [disk_address_packet + 8], TRANS_SECT_NR
     loop .rdld
-    xchg bx, bx
+    ; xchg bx, bx
     .done:
     mov dh, 2
     call real_mode_disp_str

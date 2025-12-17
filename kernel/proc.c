@@ -87,7 +87,7 @@ PUBLIC void schedule()
     主要功能就是设置相关字段、设置一下与se的绑定关系，然后设置第一次add的proc为proc_ready
 */
 PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
-                     u32 table_idx, u32 pid, u8 privilege, u8 rpl, int eflags, int prio)
+                     u32 table_idx, u32 pid, u8 privilege, u8 rpl, int eflags, int prio, u8 is_task)
 {
     // disp_str("at1 ");
     nr_running++;
@@ -98,7 +98,7 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     p_proc->se = &se_table[table_idx];
     se_table[table_idx].proc = p_proc;
     // se_table[table_idx].priority = prio;
-// disp_str("at2 ");
+    // disp_str("at2 ");
     p_proc->ldt_sel = selector_ldt;
     memcpy(&p_proc->ldts[0], &gdt[SELECTOR_KERNEL_CS >> 3],
            sizeof(DESCRIPTOR));
@@ -112,7 +112,7 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     p_proc->regs.fs = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.ss = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
-// disp_str("at3 ");
+    // disp_str("at3 ");
     p_proc->regs.eip = (u32)p_task->initial_eip;
     p_proc->regs.esp = (u32)p_task_stack;
     p_proc->regs.eflags = eflags; /* IF=1, IOPL=1 */
@@ -126,7 +126,24 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     p_proc->next_sending = 0;
 
     p_proc->se->priority = prio;
-
+    /* 给这个进程新建页表 */
+    if (!is_task)
+    {
+        p_proc->pg_dir_base = new_page_table();
+        disp_str("new pgtb ");
+        disp_int(p_proc->pg_dir_base);
+        /* 默认映射一页以及restart部分的代码（不然好像[FETCH ???]） 注意到其实也可以alloc frames and copy.*/
+        // __asm__("xchg %bx, %bx");
+        void *base = 0x100000; // KERN BASE
+        for (int i = 0; base + FRAME_SIZE * i < HEAP_BASE; i++)
+        {
+            kmap(p_proc->pg_dir_base, base + FRAME_SIZE * i, frame_find(base + FRAME_SIZE * i));
+        }
+    }
+    else 
+    {
+        p_proc->pg_dir_base = PAGE_DIR_BASE;
+    }
     if (!p_proc_ready) // 在这里开始设置当前正在运行的进程。，、？
     {
         p_proc_ready = p_proc;
@@ -358,8 +375,6 @@ PRIVATE void block(PROCESS *p)
 
     assert(wait_cnt <= NR_TASKS + NR_PROCS);
 
-
-
     nr_running--;
     sum_weight -= p->se->weight;
     wait_table[wait_cnt++] = p;
@@ -397,10 +412,10 @@ PRIVATE void unblock(PROCESS *p)
     // rb_insert(&wait_table[--wait_cnt]->se->run_node);
 
     // 注意unblock应该是去找那个进程，而不是直接unblk最后入栈的
-    for(int i = 0; i < wait_cnt; i++)
+    for (int i = 0; i < wait_cnt; i++)
     {
         // 这里currently先按照pid来找
-        if(wait_table[i]->pid == p->pid && i != wait_cnt - 1)
+        if (wait_table[i]->pid == p->pid && i != wait_cnt - 1)
         {
             PROCESS *tmp = wait_table[wait_cnt - 1];
             wait_table[wait_cnt - 1] = wait_table[i];
@@ -709,7 +724,6 @@ PRIVATE int msg_receive(PROCESS *current, int src, MESSAGE *m)
         p_who_wanna_recv->p_recvfrom = src;
         block(p_who_wanna_recv);
 
-
         assert(p_who_wanna_recv->p_flags == RECEIVING);
         assert(p_who_wanna_recv->p_msg != 0);
         assert(p_who_wanna_recv->p_recvfrom != NO_TASK);
@@ -719,7 +733,6 @@ PRIVATE int msg_receive(PROCESS *current, int src, MESSAGE *m)
 
     return 0;
 }
-
 
 /*****************************************************************************
  *                                inform_int

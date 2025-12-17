@@ -31,12 +31,11 @@ PUBLIC int kernel_main()
     PROCESS *p_proc = proc_table;
     char *p_task_stack = task_stack + STACK_SIZE_TOTAL;
     u16 selector_ldt = SELECTOR_LDT_FIRST;
-    // disp_str("1 ");
+    disp_str(" adding all tasks... ");
 
     int i;
     for (i = 0; i < NR_TASKS + NR_PROCS; i++)
     {
-        // disp_str("2 ");
         /*---TEST---*/
         stat[i] = 0;
         /*---TEST---*/
@@ -44,7 +43,7 @@ PUBLIC int kernel_main()
         if (i < NR_TASKS)
         { // 添加TASK
             p_task = task_table + i;
-            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_TASK, RPL_TASK, 0x1202, 15);
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_TASK, RPL_TASK, 0x1202, 15, 1);
         }
         else
         { // 添加用户态进程
@@ -58,12 +57,13 @@ PUBLIC int kernel_main()
             {
                 prio = 25;
             }
-            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202, prio);
+            add_task(p_task, p_task_stack, selector_ldt, i, i, PRIVILEGE_USER, RPL_USER, 0x202, prio, 0);
         }
         p_task_stack -= p_task->stacksize;
         selector_ldt += 1 << 3;
+        disp_str(" added one task ");
     }
-    // disp_str("3 ");
+    disp_str(" added all tasks. ");
     // 设置进程优先级
     // proc_table[0].se->priority = 15;
     // proc_table[1].se->priority = 19;

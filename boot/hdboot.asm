@@ -43,7 +43,7 @@ boot_start:
 
     ; 假设根目录占8sector
     mov ecx, 4
-    xchg bx, bx
+    ; xchg bx, bx
     mov	dword [disk_address_packet +  8], ROOT_BASE
     .getent:
     xor esi, esi
@@ -98,7 +98,7 @@ boot_start:
     sub ax, 2
     mov ecx, 8
     mul ecx
-    xchg bx, bx
+    ; xchg bx, bx
     add eax, ROOT_BASE
     ; 此时eax为loader的数据地址lba(sector)
     push eax
@@ -126,7 +126,7 @@ boot_start:
     
     mov dh, 1
     call disp_str
-    xchg bx, bx
+    ; xchg bx, bx
     jmp BaseOfLoader:OffsetOfLoader
 
     jmp $

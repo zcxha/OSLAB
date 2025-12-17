@@ -28,6 +28,8 @@ EXTERN  int     nr_current_console;
 
 EXTERN  u32             wait_cnt;
 
+EXTERN pte *p_cur_pagedir;
+
 extern PROCESS proc_table[];
 extern PROCESS* wait_table[];
 extern  sched_entity se_table[];

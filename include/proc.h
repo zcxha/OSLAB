@@ -42,7 +42,8 @@ typedef struct s_proc
 	STACK_FRAME regs; /* process registers saved in stack frame */
 
 	u16 ldt_sel;			   /* gdt selector giving ldt base and limit */
-	DESCRIPTOR ldts[LDT_SIZE]; /* local descriptors for code and data */
+    pte* pg_dir_base; // TODO本该是pg_table 但是不完整类型，见你的导入顺序。
+    DESCRIPTOR ldts[LDT_SIZE]; /* local descriptors for code and data */
 
 	struct sched_entity *se; /* sched_entity */
 
@@ -78,7 +79,6 @@ typedef struct s_proc
                     /*
                         这个进程页目录基地址，在进程切换的时候会负责切换CR3
                     */
-    pte* pg_dir_base; // TODO本该是pg_table 但是不完整类型，见你的导入顺序。
     int nr_tty;
 } PROCESS;
 

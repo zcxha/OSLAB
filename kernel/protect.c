@@ -291,5 +291,10 @@ PUBLIC void exception_handler(int vec_no, int err_code, int eip, int cs, int efl
 		disp_color_str("Error code:", text_color);
 		disp_int(err_code);
 	}
+
+    if(vec_no == 14)
+    {
+        
+    }
 }
 

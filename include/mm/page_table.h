@@ -10,8 +10,12 @@ typedef u32 pte;// 0..11位为其他位，12..31为baseaddr
 /*
     模仿proc.c的va2la，都用void* 代表地址
 */
-void* la2pa(void* la);
+void* la2pa(pte* pagedir, void* la);
 
-void map(void *la, FrameTracker *ft);
+void map(pte* pagedir, void *la, FrameTracker *ft);
+void kmap(pte* pagedir, void *la, FrameTracker *ft);
 
-FrameTracker *unmap(void *la);
+
+FrameTracker *unmap(pte* pagedir, void *la);
+
+pte* new_page_table();

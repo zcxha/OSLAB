@@ -14,7 +14,9 @@
 #include "mm/page_table.h"
 #include "global.h"
 
-
+/*
+    TODO: add search, traverse
+*/
 typedef unsigned int u32;
 
 rbnode nil = {RB_BLACK, 0, &nil, &nil, &nil};
@@ -29,6 +31,33 @@ rbnode *tree_minimum(rbnode *x)
 	}
 	return x;
 }
+
+// rbnode *rb_next(rbnode *node)
+// {
+//     rbnode *parent;
+//     if(node == &nil)
+//     {
+//         return &nil;
+//     }
+
+//     if(node->right)
+//     {
+//         node = node->right;
+//         while (node->left)
+//         {
+//             node = node->left;
+//         }
+//         return node;
+//     }
+
+//     while ((parent = node->p) != &nil && node == parent->right)
+//     {
+//         /* code */
+//         node = parent;
+//     }
+//     return parent;
+    
+// }
 
 sched_entity *__pick_first_entity()
 {
@@ -317,4 +346,5 @@ void rb_delete(rbnode *z)
 //     printf("d: %d %d %d %d %d %d\n", d.color, d.key, d.left, d.p, d.right, d.se);
 
 //     printf("mini: %d\n", tree_minimum(root)->key);
+//     printf("nex: %d\n", rb_next(tree_minimum(root))->key);
 // }

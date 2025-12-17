@@ -14,7 +14,6 @@
 
 const u32 PTECNT = 1024;
 
-pte *pagedir = (pte *)PAGE_DIR_BASE;
 
 pte* new_page_table()
 {
@@ -44,7 +43,7 @@ pte* new_page_table()
 /*
     获得二级页表的最后一级页表的页表项
 */
-pte *get_final_entry(void *la)
+pte *get_final_entry(pte *pagedir, void *la)
 {
     u32 pdidx = ((u32)la >> 22);
     u32 ptidx = (((u32)la) & 0b1111111111000000000000) >> 12;
@@ -56,11 +55,26 @@ pte *get_final_entry(void *la)
     return second_level_entry;
 }
 
-void *la2pa(void *la)
+/*
+    获得二级页表的最后一级页表的页表项
+*/
+pte *kget_final_entry(pte *pagedir, void *la)
+{
+    u32 pdidx = ((u32)la >> 22);
+    u32 ptidx = (((u32)la) & 0b1111111111000000000000) >> 12;
+    pte first_level_entry = *(pagedir + pdidx);
+    // assert(first_level_entry & PG_P);
+
+    pte *second_level_dir = first_level_entry & 0xFFFFF000;
+    pte *second_level_entry = second_level_dir + ptidx;
+    return second_level_entry;
+}
+
+void *la2pa(pte* pagedir, void *la)
 {
     // 对齐
     assert(((u32)la & 0xFFF) == 0);
-    pte *final_entry = get_final_entry(la);
+    pte *final_entry = get_final_entry(pagedir, la);
     assert(*final_entry & PG_P);
     return (*final_entry & 0xFFFFF000);
 }
@@ -73,26 +87,44 @@ void *la2pa(void *la)
 /*
     map linear address to FrameTracker which has been allocated.
 */
-void map(void *la, FrameTracker *ft)
+void map(pte* pagedir, void *la, FrameTracker *ft)
 {
     assert(((u32)la & 0xFFF) == 0);
     assert(ft->in_use);
 
     ft->count++;
 
-    pte *final_entry = get_final_entry(la);
+    pte *final_entry = get_final_entry(pagedir, la);
     // 默认给这三个权限
     *final_entry = ft->phybase | PG_P | PG_RWW | PG_USU;
 }
 
 /*
+    map linear address to FrameTracker which has been allocated.
+    k 前缀版本用于内核（因为内核不是进程用不了prinx）
+*/
+void kmap(pte* pagedir, void *la, FrameTracker *ft)
+{
+    // assert(((u32)la & 0xFFF) == 0);
+    // assert(ft->in_use);
+    la = (u32)la & 0xFFFFF000;
+
+    ft->count++;
+
+    pte *final_entry = kget_final_entry(pagedir, la);
+    // 默认给这三个权限
+    *final_entry = ft->phybase | PG_P | PG_RWW | PG_USU;
+}
+
+
+/*
     unmap the page table entry
 */
-FrameTracker *unmap(void *la)
+FrameTracker *unmap(pte* pagedir, void *la)
 {
-    assert(((u32)la & 0xFFF) == 0);
+    la = (u32)la & 0xFFFFF000;
 
-    pte *final_entry = get_final_entry(la);
+    pte *final_entry = get_final_entry(pagedir, la);
 
     assert(*final_entry & PG_P);
     FrameTracker *f = frame_find(*final_entry & 0xFFFFF000);

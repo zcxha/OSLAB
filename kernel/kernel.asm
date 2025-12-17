@@ -26,6 +26,7 @@ extern	tss
 extern	disp_pos
 extern	k_reenter
 extern	sys_call_table
+extern  p_cur_pagedir
 
 bits 32
 
@@ -142,6 +143,7 @@ csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<O
 	ltr	ax
 
 	;sti
+    ; xchg bx, bx
 	jmp	kernel_main
 
 	;hlt
@@ -330,7 +332,7 @@ save:
         push    es      ;  | 保存原寄存器值
         push    fs      ;  |
         push    gs      ; /
-
+    
 	;; 注意，从这里开始，一直到 `mov esp, StackTop'，中间坚决不能用 push/pop 指令，
 	;; 因为当前 esp 指向 proc_table 里的某个位置，push 会破坏掉进程表，导致灾难性后果！
 
@@ -342,6 +344,9 @@ save:
 	mov	fs, dx
 
 	mov	edx, esi	; 恢复 edx
+
+    mov esi, PageDirBase
+    mov cr3, esi
 
         mov     esi, esp                    ;esi = 进程表起始地址
 
@@ -388,6 +393,10 @@ restart:
 	lldt	[esp + P_LDT_SEL] 
 	lea	eax, [esp + P_STACKTOP]
 	mov	dword [tss + TSS3_S_SP0], eax
+    mov eax, [esp + P_PG_DIR_BASE]
+    xchg bx, bx
+    mov cr3, eax
+    mov [p_cur_pagedir], eax
 restart_reenter:
 	dec	dword [k_reenter]
 	pop	gs

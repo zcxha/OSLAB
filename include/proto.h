@@ -82,7 +82,7 @@ PUBLIC	int	sprintf(char *buf, const char *fmt, ...);
 /* proc.c */
 
 PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
-     u32 table_idx, u32 pid, u8 privilege, u8 rpl, int eflags, int prio);
+     u32 table_idx, u32 pid, u8 privilege, u8 rpl, int eflags, int prio, u8 is_task);
 PUBLIC  u32     __sched_period(unsigned long nr_running);
 PUBLIC  u32     sched_slice(sched_entity *se);
 PUBLIC  u32     calc_delta_fair(u32 delta, sched_entity *se);
