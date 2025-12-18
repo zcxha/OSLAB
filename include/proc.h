@@ -20,6 +20,7 @@ typedef struct s_stackframe
 	u32 ecx;		/* ┃						│			*/
 	u32 eax;		/* ┛						│			*/
 	u32 retaddr;	/* return address for assembly code save()	│			*/
+    u32 err_code;   /* err code pushed by CPU when exception occurs */
 	u32 eip;		/*  ┓						│			*/
 	u32 cs;			/*  ┃						│			*/
 	u32 eflags;		/*  ┣ these are pushed by CPU during interrupt	│			*/

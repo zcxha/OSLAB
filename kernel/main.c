@@ -121,8 +121,8 @@ PUBLIC int kernel_main()
     FrameTracker *shrft = frame_alloc();
     disp_int(proc_table[NR_TASKS+0].pg_dir_base);
     disp_int(dbg_first_entry(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000));
-    kmap(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000, shrft);
-    kmap(proc_table[NR_TASKS + 1].pg_dir_base, 0x30000000, shrft);
+    // kmap(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000, shrft);
+    // kmap(proc_table[NR_TASKS + 1].pg_dir_base, 0x30000000, shrft);
     disp_int(*kget_final_entry(proc_table[NR_TASKS+0].pg_dir_base, 0x30000000));
     // *((char *)0x30000000) = 'S';
     __asm__("xchg %bx, %bx");
@@ -171,6 +171,7 @@ void TestA()
             }
             else
             {
+                /* shm */
                 char *p = 0x30000000;
                 printf("shr:%c /", *p);
             }
@@ -198,6 +199,8 @@ void TestB()
             msg.type = DEV_OPEN;
             msg.DEVICE = 0;
             send_recv(BOTH, TASK_HD, &msg);
+
+            /* shm */
             char *p = 0x30000000;
             *p = 'S';
             printf("shr: %c /", *p);

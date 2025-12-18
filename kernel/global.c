@@ -44,8 +44,18 @@ PUBLIC  sched_entity se_table[NR_TASKS+NR_PROCS];
 
 PUBLIC	irq_handler		irq_table[NR_IRQ];
 
+PUBLIC 
+
 PUBLIC	TTY		tty_table[NR_CONSOLES];
 PUBLIC	CONSOLE		console_table[NR_CONSOLES];
+
+PUBLIC  exp_handler     exp_handler_table[17] = {
+    exception_handler,exception_handler,exception_handler,exception_handler,
+    exception_handler,exception_handler,exception_handler,exception_handler,
+    exception_handler,exception_handler,exception_handler,exception_handler,
+    exception_handler,exception_handler,page_fault_handler,exception_handler,
+    exception_handler
+};
 
 PUBLIC	system_call		sys_call_table[NR_SYS_CALL] = {sys_printx, sys_sendrec};
 

@@ -39,7 +39,7 @@ extern  TASK            user_proc_table[];
 extern	irq_handler	irq_table[];
 extern  TTY     tty_table[];
 extern CONSOLE  console_table[];
-
+extern exp_handler exp_handler_table[];
 /*---TEST---*/
 extern int stat[];
 /*---TEST---*/

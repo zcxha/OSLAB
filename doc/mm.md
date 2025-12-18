@@ -124,3 +124,5 @@ la2pa即线性地址到物理地址的转换，这里直接查找页表进行转
 
 本来想做请求调页，但是要做这个就要做文件系统，然后就要做fork、exec什么的。由于时间问题就没搞了。
 
+![image-20251218125813594](C:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20251218125813594.png)
+

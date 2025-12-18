@@ -244,7 +244,7 @@ PRIVATE void init_descriptor(struct s_descriptor * p_desc, u32 base, u32 limit, 
  *----------------------------------------------------------------------*
  异常处理
  *======================================================================*/
-PUBLIC void exception_handler(int vec_no, int err_code, int eip, int cs, int eflags)
+PUBLIC void exception_handler(int __unused, int vec_no, int __unused1, PROCESS* p_proc)
 {
 	int i;
 	int text_color = 0x74; /* 灰底红字 */
@@ -281,20 +281,25 @@ PUBLIC void exception_handler(int vec_no, int err_code, int eip, int cs, int efl
 	disp_color_str(err_description[vec_no], text_color);
 	disp_color_str("\n\n", text_color);
 	disp_color_str("EFLAGS:", text_color);
-	disp_int(eflags);
+	disp_int(p_proc->regs.eflags);
 	disp_color_str("CS:", text_color);
-	disp_int(cs);
+	disp_int(p_proc->regs.cs);
 	disp_color_str("EIP:", text_color);
-	disp_int(eip);
+	disp_int(p_proc->regs.eip);
 
-	if(err_code != 0xFFFFFFFF){
+	if(p_proc->regs.err_code != 0xFFFFFFFF){
 		disp_color_str("Error code:", text_color);
-		disp_int(err_code);
+		disp_int(p_proc->regs.err_code);
 	}
-
-    if(vec_no == 14)
-    {
-        
-    }
 }
 
+PUBLIC void page_fault_handler(int cr2, int vec_no, int __unused1, PROCESS *p_proc)
+{
+    if(k_reenter > 0)
+    {
+        return;
+    }
+    disp_pos = 0;
+    printl("page fault: %x", cr2);
+    // printl(cr2);
+}

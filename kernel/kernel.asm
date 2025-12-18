@@ -27,6 +27,7 @@ extern	disp_pos
 extern	k_reenter
 extern	sys_call_table
 extern  p_cur_pagedir
+extern  exp_handler_table
 
 bits 32
 
@@ -152,6 +153,7 @@ csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<O
 ; 中断和异常 -- 硬件中断
 ; ---------------------------------
 %macro	hwint_master	1
+    push 0; err_code unused
 	call	save
 	in	al, INT_M_CTLMASK	; `.
 	or	al, (1 << %1)		;  | 屏蔽当前中断
@@ -204,6 +206,7 @@ hwint07:		; Interrupt routine for irq 7 (printer)
 
 ; ---------------------------------
 %macro	hwint_slave	1
+    push 0; err_code unused
 	call	save
 	in	al, INT_S_CTLMASK	; `.
 	or	al, (1 << (%1 - 8))	;  | 屏蔽当前中断
@@ -311,7 +314,10 @@ general_protection:
 	push	13		; vector_no	= D
 	jmp	exception
 page_fault:
-	push	14		; vector_no	= E
+    ; xchg bx, bx
+    call save
+    mov eax, 14 ; vec_no = E
+    mov edx, cr2
 	jmp	exception
 copr_error:
 	push	0xFFFFFFFF	; no err code
@@ -319,10 +325,14 @@ copr_error:
 	jmp	exception
 
 exception:
-    
-	call	exception_handler
-	add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
-	hlt
+    push dword [p_proc_ready]
+    push ecx ; unused
+    push eax ; vec_no
+    push edx ; cr2
+	call	[exp_handler_table + 4*eax]
+    add esp, 4*4
+	; add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
+	ret
 
 ; =============================================================================
 ;                                   save
@@ -346,7 +356,7 @@ save:
 
 	mov	edx, esi	; 恢复 edx
 
-    mov esi, PageDirBase
+    mov esi, PageDirBase ; 切换kern页表
     mov cr3, esi
 
         mov     esi, esp                    ;esi = 进程表起始地址
@@ -367,6 +377,7 @@ save:
 ;                                 sys_call
 ; =============================================================================
 sys_call:
+        push 0; err_code unused
         call    save
 
         sti
@@ -405,6 +416,6 @@ restart_reenter:
 	pop	es
 	pop	ds
 	popad
-	add	esp, 4
+	add	esp, 8
 	iretd
 

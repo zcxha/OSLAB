@@ -210,7 +210,6 @@ PUBLIC int sys_printx(int _unused1, int _unused2, char* s, struct s_proc* p_proc
 		p = s;
 	else	/* this should NOT happen */
 		p = reenter_err;
-
 	/**
 	 * @note if assertion fails in any TASK, the system will be halted;
 	 * if it fails in a USER PROC, it'll return like any normal syscall
