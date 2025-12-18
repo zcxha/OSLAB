@@ -64,10 +64,18 @@ pte *kget_final_entry(pte *pagedir, void *la)
     u32 ptidx = (((u32)la) & 0b1111111111000000000000) >> 12;
     pte first_level_entry = *(pagedir + pdidx);
     // assert(first_level_entry & PG_P);
-
+    // disp_int(first_level_entry);
     pte *second_level_dir = first_level_entry & 0xFFFFF000;
     pte *second_level_entry = second_level_dir + ptidx;
     return second_level_entry;
+}
+
+pte* dbg_first_entry(pte *pagedir, void *la)
+{
+    u32 pdidx = ((u32)la >> 22);
+    u32 ptidx = (((u32)la) & 0b1111111111000000000000) >> 12;
+    pte* first_level_entry = (pagedir + pdidx);
+    return first_level_entry;
 }
 
 void *la2pa(pte* pagedir, void *la)
@@ -112,6 +120,7 @@ void kmap(pte* pagedir, void *la, FrameTracker *ft)
     ft->count++;
 
     pte *final_entry = kget_final_entry(pagedir, la);
+    // disp_int(*final_entry);
     // 默认给这三个权限
     *final_entry = ft->phybase | PG_P | PG_RWW | PG_USU;
 }

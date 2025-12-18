@@ -10,3 +10,8 @@
 */
 #define HEAP_BASE        0x8000000
 #define HEAP_SIZE        0x10000000
+
+#define MEM_SIZE 0x40000000
+
+/* 是否开启虚拟内存 */
+#define vmem_en 1

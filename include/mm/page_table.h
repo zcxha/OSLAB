@@ -16,6 +16,11 @@ void map(pte* pagedir, void *la, FrameTracker *ft);
 void kmap(pte* pagedir, void *la, FrameTracker *ft);
 
 
+
 FrameTracker *unmap(pte* pagedir, void *la);
 
 pte* new_page_table();
+
+
+pte *kget_final_entry(pte *pagedir, void *la);
+pte *dbg_first_entry(pte *pagedir, void *la);

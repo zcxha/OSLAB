@@ -115,6 +115,17 @@ PUBLIC int kernel_main()
     init_clock();
     init_keyboard();
 
+    /*
+        A and B shr mem
+    */
+    FrameTracker *shrft = frame_alloc();
+    disp_int(proc_table[NR_TASKS+0].pg_dir_base);
+    disp_int(dbg_first_entry(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000));
+    kmap(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000, shrft);
+    kmap(proc_table[NR_TASKS + 1].pg_dir_base, 0x30000000, shrft);
+    disp_int(*kget_final_entry(proc_table[NR_TASKS+0].pg_dir_base, 0x30000000));
+    // *((char *)0x30000000) = 'S';
+    __asm__("xchg %bx, %bx");
     disp_str("-----\"kernel_main\" ends-----\n");
     restart();
 
@@ -146,7 +157,7 @@ void TestA()
     while (1)
     {
         // printf("%x ", arr);
-        printf("A");
+        // printf("A");
         if (get_ticks() >= 5000 && !flag)
         {
             flag = 1;
@@ -154,11 +165,18 @@ void TestA()
             {
                 printf("%d ", stat[i]);
             }
-
-            // testmm();
+            if (!vmem_en)
+            {
+                // testmm(); // 需要在不开启虚拟内存的情况下测试
+            }
+            else
+            {
+                char *p = 0x30000000;
+                printf("shr:%c /", *p);
+            }
         }
         // printf("A");
-        // milli_delay(100);
+        milli_delay(100);
     }
 }
 
@@ -167,11 +185,12 @@ void TestA()
  *======================================================================*/
 void TestB()
 {
+    /* HD Driver */
     int i = 0x1000;
     int flag = 0;
     while (1)
     {
-        if(!flag)
+        if (!flag)
         {
             flag = 1;
             MESSAGE msg;
@@ -179,9 +198,12 @@ void TestB()
             msg.type = DEV_OPEN;
             msg.DEVICE = 0;
             send_recv(BOTH, TASK_HD, &msg);
+            char *p = 0x30000000;
+            *p = 'S';
+            printf("shr: %c /", *p);
         }
         // printf("B");
-        // milli_delay(100);
+        milli_delay(100);
     }
 }
 
@@ -193,8 +215,8 @@ void TestC()
     int i = 0x2000;
     while (1)
     {
-        // printf("C");
-        // milli_delay(100);
+        printf("C");
+        milli_delay(100);
     }
 }
 

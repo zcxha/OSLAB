@@ -127,18 +127,19 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
 
     p_proc->se->priority = prio;
     /* 给这个进程新建页表 */
-    if (!is_task)
+    if (!is_task && vmem_en)
     {
         p_proc->pg_dir_base = new_page_table();
         disp_str("new pgtb ");
         disp_int(p_proc->pg_dir_base);
+
         /* 默认映射一页以及restart部分的代码（不然好像[FETCH ???]） 注意到其实也可以alloc frames and copy.*/
-        // __asm__("xchg %bx, %bx");
         void *base = 0x100000; // KERN BASE
         for (int i = 0; base + FRAME_SIZE * i < HEAP_BASE; i++)
         {
             kmap(p_proc->pg_dir_base, base + FRAME_SIZE * i, frame_find(base + FRAME_SIZE * i));
         }
+
     }
     else 
     {

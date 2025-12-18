@@ -39,6 +39,7 @@ FrameTracker *frame_alloc()
     }
     else
     {
+        ft->in_use = 1;
         rb_delete(&frame_tree, &ft->run_node);
     }
     return ft;
@@ -62,6 +63,7 @@ FrameTracker *frame_find(void *pa)
     // disp_int((u32)pa &0xFFFFF000);
     pa = (u32)pa & 0xFFFFF000;
     u32 idx = (u32)pa / FRAME_SIZE;
+    if(pa != phy_frames[idx].phybase) panic("not eq");
     if(idx >= FRAME_COUNT) panic("can't find frame.");
     return &phy_frames[idx];
 }

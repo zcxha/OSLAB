@@ -29,11 +29,11 @@ void test_frame_pgtable()
         frame_dealloc(ft);
         printl("0x%x ", ft->phybase);
     }
-    u32 tmp = 0x290000;
-    u32 pa = la2pa(PAGE_DIR_BASE, tmp);
-    FrameTracker *ft = unmap(PAGE_DIR_BASE, tmp);
-    frame_dealloc(ft);
-    printl("0x%x ", ft->phybase);
+    // u32 tmp = 0x290000;
+    // u32 pa = la2pa(PAGE_DIR_BASE, tmp);
+    // FrameTracker *ft = unmap(PAGE_DIR_BASE, tmp);
+    // frame_dealloc(ft);
+    // printl("0x%x ", ft->phybase);
     for (int i = 0; i < 5; i++)
     {
         u32 tmp = la + i * 0x1000;
