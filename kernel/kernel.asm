@@ -394,7 +394,7 @@ restart:
 	lea	eax, [esp + P_STACKTOP]
 	mov	dword [tss + TSS3_S_SP0], eax
     mov eax, [esp + P_PG_DIR_BASE]
-    xchg bx, bx
+    ; xchg bx, bx
     mov cr3, eax
     mov [p_cur_pagedir], eax
 restart_reenter:

@@ -23,22 +23,25 @@ void init_frametracker()
         phy_frames[i].count = phy_frames[i].in_use = 1; // 因为ldr默认把所有都direct 映射了一遍
         phy_frames[i].phybase = i * FRAME_SIZE; // 后续会把用户地址空间直接count--,dealloc。但不unmap
         // 也就是说内核始终是所有物理地址的恒等映射。
+        phy_frames[i].run_node.key = phy_frames[i].phybase;
+        phy_frames[i].run_node.entity = &phy_frames[i];
     }
 }
 
 FrameTracker *frame_alloc()
 {
-    for(int i = 0; i < FRAME_COUNT; i++)
+    FrameTracker *ft = __pick_first_entity(&frame_tree);
+    
+    if(ft == NULL)
     {
-        if(phy_frames[i].in_use == 0)
-        {
-            phy_frames[i].in_use = 1;
-
-            return &phy_frames[i];
-        }
+        disp_str("no ft");
+        panic("no frame tracker in rbtree.");
     }
-    disp_str("no phy frame");
-    panic("no phy frame to alloc.");
+    else
+    {
+        rb_delete(&frame_tree, &ft->run_node);
+    }
+    return ft;
 }
 
 void frame_dealloc(FrameTracker *ft)
@@ -46,6 +49,8 @@ void frame_dealloc(FrameTracker *ft)
     assert(ft->count == 0);
 
     ft->in_use = 0;
+
+    rb_insert(&frame_tree, &ft->run_node);
 }
 
 /*
@@ -55,13 +60,8 @@ void frame_dealloc(FrameTracker *ft)
 FrameTracker *frame_find(void *pa)
 {
     // disp_int((u32)pa &0xFFFFF000);
-    for(int i = 0; i < FRAME_COUNT; i++)
-    {
-        if(phy_frames[i].phybase == ((u32)pa & 0xFFFFF000))
-        {
-            return &phy_frames[i];
-        }
-    }
-    disp_str("can't find frame");
-    panic("can't find frame to unmap.");
+    pa = (u32)pa & 0xFFFFF000;
+    u32 idx = (u32)pa / FRAME_SIZE;
+    if(idx >= FRAME_COUNT) panic("can't find frame.");
+    return &phy_frames[idx];
 }

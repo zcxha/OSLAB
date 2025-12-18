@@ -72,12 +72,12 @@ PUBLIC void schedule()
         p_proc_ready->se->exec_time = 0;
         p_proc_ready->se->run_node.key = p_proc_ready->se->vruntime;
 
-        rb_insert(&p_proc_ready->se->run_node);
+        rb_insert(&sched_tree, &p_proc_ready->se->run_node);
     }
 
-    sched_entity *se = __pick_first_entity();
+    sched_entity *se = __pick_first_entity(&sched_tree);
 
-    rb_delete(&se->run_node);
+    rb_delete(&sched_tree, &se->run_node);
     p_proc_ready = se->proc;
 }
 
@@ -383,7 +383,7 @@ PRIVATE void block(PROCESS *p)
     }
     else
     {
-        rb_delete(&p->se->run_node);
+        rb_delete(&sched_tree, &p->se->run_node);
     }
 
     schedule();
@@ -423,7 +423,7 @@ PRIVATE void unblock(PROCESS *p)
         }
     }
 
-    rb_insert(&wait_table[--wait_cnt]->se->run_node);
+    rb_insert(&sched_tree, &wait_table[--wait_cnt]->se->run_node);
 }
 
 /*****************************************************************************

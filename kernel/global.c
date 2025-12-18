@@ -98,5 +98,11 @@ PUBLIC u32 nr_running = 0;
 PUBLIC u32 sum_weight = 0;
 PUBLIC u32 has_preempt = 0;
 
+// PUBLIC rbnode nil = {RB_BLACK, 0, &nil, &nil, &nil};
+PUBLIC rbtree sched_tree = {{RB_BLACK, 0, &sched_tree.nil, &sched_tree.nil, &sched_tree.nil}, &sched_tree.nil};
+PUBLIC rbtree frame_tree = {{RB_BLACK, 0, &frame_tree.nil, &frame_tree.nil, &frame_tree.nil}, &frame_tree.nil};
+
+
+
 /* Frame Tracker */
 PUBLIC FrameTracker phy_frames[FRAME_COUNT];

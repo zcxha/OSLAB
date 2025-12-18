@@ -51,7 +51,7 @@ PUBLIC void clock_handler(int irq)
 		return;
 	}
 
-	sched_entity *se = __pick_first_entity();
+	sched_entity *se = __pick_first_entity(&sched_tree);
 
 	int delta = (int)p_proc_ready->se->vruntime - (int)se->vruntime;
 

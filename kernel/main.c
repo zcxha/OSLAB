@@ -91,10 +91,10 @@ PUBLIC int kernel_main()
         se->exec_time = 0;
         se->start_time = ticks;
         se->vruntime = 0;
-        se->run_node.se = proc_table[i].se;
+        se->run_node.entity = proc_table[i].se;
         se->run_node.key = se->vruntime;
 
-        rb_insert(&se->run_node);
+        rb_insert(&sched_tree, &se->run_node);
     }
 
     wait_cnt = 0;
@@ -107,7 +107,7 @@ PUBLIC int kernel_main()
     // so deque entity
 
     // 因为进程开始运行了，那么就要从红黑树中删去
-    rb_delete(&proc_table[0].se->run_node);
+    rb_delete(&sched_tree, &proc_table[0].se->run_node);
     // disp_str("6");
     k_reenter = 0;
     ticks = 0;
@@ -146,6 +146,7 @@ void TestA()
     while (1)
     {
         // printf("%x ", arr);
+        printf("A");
         if (get_ticks() >= 5000 && !flag)
         {
             flag = 1;
@@ -154,7 +155,7 @@ void TestA()
                 printf("%d ", stat[i]);
             }
 
-            testmm();
+            // testmm();
         }
         // printf("A");
         // milli_delay(100);

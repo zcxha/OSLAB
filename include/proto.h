@@ -101,8 +101,10 @@ PUBLIC void hd_handler(int irq);
 
 
 /* rbtree.c */
-void rb_delete(rbnode *z);
-void rb_insert(rbnode *z);
+void* __pick_first_entity(rbtree *tree);
+
+void rb_delete(rbtree *tree, rbnode *z);
+void rb_insert(rbtree *tree, rbnode *z);
 
 /* lib/misc.c */
 PUBLIC void spin(char * func_name);

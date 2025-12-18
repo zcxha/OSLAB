@@ -7,6 +7,7 @@ typedef struct FrameTracker{
     u8 count; // 引用计数，用于多任务情况下共享问题。
     u8 in_use; // 这个4k的块是否正在使用
     u32 phybase; // 这个frame对应的物理地址
+    struct rbnode run_node;
 }FrameTracker;
 
 /*

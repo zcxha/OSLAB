@@ -53,5 +53,8 @@ extern u32 nr_running;
 extern u32 sum_weight;
 extern u32 has_preempt;
 
+extern rbtree sched_tree;
+extern rbtree frame_tree;
+
 /* Frame Allocator */
 extern FrameTracker phy_frames[FRAME_COUNT];
