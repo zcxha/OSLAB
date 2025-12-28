@@ -2,30 +2,30 @@
 #include "string.h"
 
 /**
- * æ˜¾ç¤ºæ–‡ä»¶å†…å®¹çš„å‘½ä»¤å®ç°
- * æ”¯æŒæ˜¾ç¤ºæ–‡ä»¶å†…å®¹ï¼Œå¯åŒæ—¶å¤„ç†å¤šä¸ªæ–‡ä»¶
+ * ÏÔÊ¾ÎÄ¼şÄÚÈİµÄÃüÁîÊµÏÖ
+ * Ö§³ÖÏÔÊ¾ÎÄ¼şÄÚÈİ£¬¿ÉÍ¬Ê±´¦Àí¶à¸öÎÄ¼ş
  * 
- * @param argc å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @param argv å‘½ä»¤å‚æ•°æ•°ç»„
- * @return æ‰§è¡Œç»“æœï¼Œ0è¡¨ç¤ºæˆåŠŸï¼Œé0è¡¨ç¤ºå¤±è´¥
+ * @param argc ÃüÁî²ÎÊı¸öÊı
+ * @param argv ÃüÁî²ÎÊıÊı×é
+ * @return Ö´ĞĞ½á¹û£¬0±íÊ¾³É¹¦£¬·Ç0±íÊ¾Ê§°Ü
  */
 int main(int argc, char *argv[])
 {
     int file_desc;
-    char buffer[1024];  // 1024å­—èŠ‚ç¼“å†²åŒº
+    char buffer[1024];  // 1024×Ö½Ú»º³åÇø
     int i;
     
-    // æ£€æŸ¥æ˜¯å¦æœ‰æ–‡ä»¶å‚æ•°
+    // ¼ì²éÊÇ·ñÓĞÎÄ¼ş²ÎÊı
     if (argc < 2) {
         printf("cat: Missing file parameter!\n");
         printf("To use: cat <filename> [filename...]\n");
         return 1;
     }
     
-    // å¾ªç¯å¤„ç†æ‰€æœ‰æŒ‡å®šçš„æ–‡ä»¶
+    // Ñ­»·´¦ÀíËùÓĞÖ¸¶¨µÄÎÄ¼ş
     for (i = 1; i < argc; i++)
     {
-        // æ‰“å¼€æ–‡ä»¶
+        // ´ò¿ªÎÄ¼ş
         file_desc = open(argv[i], O_RDWR);
         
         if (file_desc < 0)
@@ -34,12 +34,13 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        // æ‰‹å·¥æ¸…ç©ºç¼“å†²åŒºï¼Œé¿å…æ®‹ç•™æ•°æ®å½±å“
-        for (int j = 0; j < sizeof(buffer); j++) {
+        // ÊÖ¹¤Çå¿Õ»º³åÇø£¬±ÜÃâ²ĞÁôÊı¾İÓ°Ïì
+        int j;
+        for (j = 0; j < sizeof(buffer); j++) {
             buffer[j] = '\0';
 	}
 
-        // è¯»å–æ–‡ä»¶å†…å®¹å¹¶è¾“å‡ºï¼Œç›´åˆ°æ–‡ä»¶ç»“æŸ
+        // ¶ÁÈ¡ÎÄ¼şÄÚÈİ²¢Êä³ö£¬Ö±µ½ÎÄ¼ş½áÊø
         int bytes_read = read(file_desc, buffer, sizeof(buffer));
         if (bytes_read > 0)
         {
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
             printf("\n");
         }
 
-        // æ£€æŸ¥è¯»å–é”™è¯¯
+        // ¼ì²é¶ÁÈ¡´íÎó
         if (bytes_read < 0) {
             printf("cat: %s: Read failed!\n", argv[i]);
         }

@@ -53,7 +53,8 @@ PUBLIC	CONSOLE		console_table[NR_CONSOLES];
 PUBLIC	irq_handler	irq_table[NR_IRQ];
 
 PUBLIC	system_call	sys_call_table[NR_SYS_CALL] = {sys_printx,
-						       sys_sendrec};
+						       sys_sendrec,
+						       sys_logcontrol};
 
 /* FS related below */
 /*****************************************************************************/
@@ -91,8 +92,9 @@ PUBLIC	const int	MMBUF_SIZE	= 0x100000;
 /**
  * 8MB~10MB: buffer for log (debug)
  */
-PUBLIC	char *		logbuf		= (char*)0x800000;
-PUBLIC	const int	LOGBUF_SIZE	= 0x100000;
+/* PUBLIC	char *		logbuf		= (char*)0x800000; */
+/* PUBLIC	const int	LOGBUF_SIZE	= 0x100000; */
+
 PUBLIC	char *		logdiskbuf	= (char*)0x900000;
 PUBLIC	const int	LOGDISKBUF_SIZE	= 0x100000;
 

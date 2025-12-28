@@ -12,7 +12,7 @@ CFLAGS		= -I ../include/ -c -fno-builtin -fno-stack-protector -Wall
 LDFLAGS		= -Ttext $(ENTRYPOINT)
 DASMFLAGS	= -D
 LIB		= ../lib/orangescrt.a
-BIN		= echo pwd ls touch remove edit cat ps kill
+BIN		= echo pwd ls touch remove edit cat ps kill log
 
 # All Phony Targets
 .PHONY : everything final clean realclean disasm all install libc
@@ -23,7 +23,7 @@ everything : $(BIN)
 install : all clean
 	cp ../kernel.bin ./ -v
 	tar vcf inst.tar kernel.bin $(BIN)
-	dd if=inst.tar of=$(HD) seek=`echo "obase=10;ibase=16;(\`egrep -e '^ROOT_BASE' ../boot/include/load.inc | sed -e 's/.*0x//g'\`+\`egrep -e '#define[[:space:]]*INSTALL_START_SECT' ../include/sys/config.h | sed -e 's/.*0x//g'\`)*200" | bc` bs=1 count=`ls -l inst.tar | awk -F " " '{print $$5}'` conv=notrunc
+	dd if=inst.tar of=$(HD) seek=`echo "obase=10;ibase=16;(\`egrep -e '^ROOT_BASE' ../boot/include/load.inc | sed -e 's/.*0x//g' | tr -d '\r'\`+\`egrep -e '#define[[:space:]]*INSTALL_START_SECT' ../include/sys/config.h | sed -e 's/.*0x//g' | tr -d '\r'\`)*200" | bc` bs=1 count=`ls -l inst.tar | awk -F " " '{print $$5}' | tr -d '\r'` conv=notrunc
 
 all : realclean libc everything
 
@@ -94,3 +94,10 @@ kill.o : kill.c ../include/type.h ../include/stdio.h
 
 kill : kill.o start.o $(LIB)
 	 $(LD) $(LDFLAGS) -o $@ $?
+
+log.o : log.c ../include/type.h ../include/stdio.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+log : log.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+

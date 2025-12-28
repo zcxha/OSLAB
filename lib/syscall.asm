@@ -10,10 +10,12 @@
 INT_VECTOR_SYS_CALL equ 0x90
 _NR_printx	    equ 0
 _NR_sendrec	    equ 1
+_NR_logcontrol	    equ 2
 
 ; 导出符号
 global	printx
 global	sendrec
+global	logcontrol
 
 bits 32
 [section .text]
@@ -53,3 +55,22 @@ printx:
 
 	ret
 
+; ====================================================================================
+;                          int logcontrol(int what, int status, void *buf);
+; ====================================================================================
+logcontrol:
+	push	ebx
+	push	ecx
+	push	edx
+
+	mov	eax, _NR_logcontrol
+	mov	ebx, [esp + 12 + 4]	; what
+	mov	ecx, [esp + 12 + 8]	; status
+	mov	edx, [esp + 12 + 12]	; buf
+	int	INT_VECTOR_SYS_CALL
+
+	pop	edx
+	pop	ecx
+	pop	ebx
+
+	ret

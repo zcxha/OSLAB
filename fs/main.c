@@ -22,6 +22,8 @@
 
 #include "hd.h"
 
+extern int logcontrol(int what, int status, void *buf);
+
 PRIVATE void init_fs();
 PRIVATE void mkfs();
 PRIVATE void read_super_block(int dev);
@@ -379,6 +381,15 @@ PUBLIC int rw_sector(int io_type, int dev, u64 pos, int bytes, int proc_nr,
 	driver_msg.CNT		= bytes;
 	driver_msg.PROC_NR	= proc_nr;
 	assert(dd_map[MAJOR(dev)].driver_nr != INVALID_DRIVER);
+
+	{
+		char buf[256];
+		sprintf(buf, "{DEVICE} %s dev:%d pos:%d bytes:%d\n",
+			io_type == DEV_READ ? "READ" : "WRITE",
+			dev, (int)pos, bytes);
+		logcontrol(8884, strlen(buf), buf);
+	}
+
 	send_recv(BOTH, dd_map[MAJOR(dev)].driver_nr, &driver_msg);
 
 	return 0;

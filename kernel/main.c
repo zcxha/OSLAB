@@ -242,12 +242,12 @@ void shabby_shell(const char * tty_name)
 	char rdbuf[128];
 
 	while (1) {
-		// ç¡®ä¿æç¤ºç¬¦æ­£ç¡®æ˜¾ç¤ºåœ¨æ–°è¡Œ
+		// È·±£ÌáÊ¾·ûÕıÈ·ÏÔÊ¾ÔÚĞÂĞĞ
 		write(1, "\n$ ", 3);
 		int r = read(0, rdbuf, 70);
 		rdbuf[r] = 0;
 
-		// è·³è¿‡ç©ºè¾“å…¥
+		// Ìø¹ı¿ÕÊäÈë
 		if (r == 0 || (r == 1 && rdbuf[0] == '\n')) {
 			continue;
 		}
@@ -273,14 +273,14 @@ void shabby_shell(const char * tty_name)
 		} while(ch);
 		argv[argc] = 0;
 
-		// æ£€æŸ¥æ˜¯å¦æœ‰åå°æ‰§è¡Œæ ‡å¿— "&"
+		// ¼ì²éÊÇ·ñÓĞºóÌ¨Ö´ĞĞ±êÖ¾ "&"
 		int background = 0;
 		if (argc > 0 && strcmp(argv[argc-1], "&") == 0) {
 			background = 1;
-			argv[--argc] = 0; // ç§»é™¤ "&" æ ‡å¿—
+			argv[--argc] = 0; // ÒÆ³ı "&" ±êÖ¾
 		}
 
-		// è·³è¿‡ç©ºå‘½ä»¤
+		// Ìø¹ı¿ÕÃüÁî
 		if (argc == 0) {
 			continue;
 		}
@@ -298,18 +298,18 @@ void shabby_shell(const char * tty_name)
 			int pid = fork();
 			if (pid != 0) { /* parent */
 				if (!background) {
-					// å‰å°ä»»åŠ¡ï¼Œç­‰å¾…æ‰§è¡Œå®Œæˆ
+					// Ç°Ì¨ÈÎÎñ£¬µÈ´ıÖ´ĞĞÍê³É
 					int s;
 					wait(&s);
 				} else {
-					// åå°ä»»åŠ¡ï¼Œç«‹å³è¿”å›å¹¶æ˜¾ç¤ºè¿›ç¨‹ID
+					// ºóÌ¨ÈÎÎñ£¬Á¢¼´·µ»Ø²¢ÏÔÊ¾½ø³ÌID
 					char pid_str[20];
 					sprintf(pid_str, "[%d] Background process started\n", pid);
 					write(1, pid_str, strlen(pid_str));
 				}
 			}
 			else {	/* child */
-				// å­è¿›ç¨‹æ‰§è¡Œå‘½ä»¤
+				// ×Ó½ø³ÌÖ´ĞĞÃüÁî
 				execv(argv[0], argv);
 			}
 		}
@@ -396,13 +396,12 @@ void TestC()
  *****************************************************************************/
 PUBLIC void panic(const char *fmt, ...)
 {
-	int i;
 	char buf[256];
 
 	/* 4 is the size of fmt in the stack */
 	va_list arg = (va_list)((char*)&fmt + 4);
 
-	i = vsprintf(buf, fmt, arg);
+	vsprintf(buf, fmt, arg);
 
 	printl("%c !!panic!! %s", MAG_CH_PANIC, buf);
 

@@ -1,38 +1,38 @@
 typedef unsigned long ssize_t;
 const char *cmd[] = {"echo", "ls", "pwd", "touch", "rm", "ps", "cat"};
 
-// å®šä¹‰NULLå¸¸é‡ï¼ˆå¦‚æœæœªå®šä¹‰ï¼‰
+// ¶¨ÒåNULL³£Á¿£¨Èç¹ûÎ´¶¨Òå£©
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
 
-// editå‘½ä»¤å®ç°
-// ç”¨äºæŸ¥çœ‹ã€ç¼–è¾‘æ–‡æœ¬æ–‡ä»¶ï¼Œè¿è¡Œshellå‘½ä»¤
+// editÃüÁîÊµÏÖ
+// ÓÃÓÚ²é¿´¡¢±à¼­ÎÄ±¾ÎÄ¼ş£¬ÔËĞĞshellÃüÁî
 #include "stdio.h"
 #include "string.h"
 #include "sys/fs.h"
-#include "../include/ls.h" // åŒ…å«ç³»ç»Ÿå¸¸é‡å®šä¹‰
+#include "../include/ls.h" // °üº¬ÏµÍ³³£Á¿¶¨Òå
 
-// å®šä¹‰O_TRUNCå¸¸é‡ï¼ˆå¦‚æœæœªå®šä¹‰ï¼‰
+// ¶¨ÒåO_TRUNC³£Á¿£¨Èç¹ûÎ´¶¨Òå£©
 #ifndef O_TRUNC
 #define O_TRUNC 0x0200 /* truncate to zero length */
 #endif
 
-// å¯æ‰§è¡Œæ–‡ä»¶åˆ—è¡¨ï¼ˆshellå‘½ä»¤ï¼‰
+// ¿ÉÖ´ĞĞÎÄ¼şÁĞ±í£¨shellÃüÁî£©
 const char *executable_files[] = {"cat", "echo", "kill", "ls", "ps", "pwd", "remove", "touch"};
 const int executable_count = 8;
 
-// å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°çš„å‡½æ•°ï¼ˆä»kill.cå¤åˆ¶ï¼‰
+// ×Ö·û´®×ª»»ÎªÕûÊıµÄº¯Êı£¨´Ókill.c¸´ÖÆ£©
 int my_atoi(const char *str) {
     int pid = 0;
     int sign = 1;
 
-    // è·³è¿‡ç©ºç™½å­—ç¬¦
+    // Ìø¹ı¿Õ°××Ö·û
     while (*str == ' ' || *str == '\t' || *str == '\n') {
         str++;
     }
 
-    // æ£€æŸ¥ç¬¦å·
+    // ¼ì²é·ûºÅ
     if (*str == '-') {
         sign = -1;
         str++;
@@ -40,7 +40,7 @@ int my_atoi(const char *str) {
         str++;
     }
 
-    // è½¬æ¢æ•°å­—
+    // ×ª»»Êı×Ö
     while (*str >= '0' && *str <= '9') {
         pid = pid * 10 + (*str - '0');
         str++;
@@ -49,7 +49,7 @@ int my_atoi(const char *str) {
     return sign * pid;
 }
 
-// æ‰“å°killå‘½ä»¤å¸®åŠ©ä¿¡æ¯çš„å‡½æ•°ï¼ˆä»kill.cå¤åˆ¶ï¼‰
+// ´òÓ¡killÃüÁî°ïÖúĞÅÏ¢µÄº¯Êı£¨´Ókill.c¸´ÖÆ£©
 void print_help() {
     printf("kill - terminate a process\n\n");
     printf("Usage: kill [PID]\n\n");
@@ -58,13 +58,13 @@ void print_help() {
     printf("PID must be between 0 and %d\n", NR_TASKS + NR_PROCS - 1);
 }
 
-// æ£€æŸ¥æ–‡ä»¶æ˜¯å¦ä¸ºæ–‡æœ¬æ–‡ä»¶
+// ¼ì²éÎÄ¼şÊÇ·ñÎªÎÄ±¾ÎÄ¼ş
 int is_text_file(const char *filename)
 {
     int fd = open(filename, O_RDWR);
     if (fd == -1)
     {
-        return 1; // æ–‡ä»¶ä¸å­˜åœ¨ï¼Œé»˜è®¤ä¸ºæ–‡æœ¬æ–‡ä»¶
+        return 1; // ÎÄ¼ş²»´æÔÚ£¬Ä¬ÈÏÎªÎÄ±¾ÎÄ¼ş
     }
 
     char buffer[1024];
@@ -73,33 +73,34 @@ int is_text_file(const char *filename)
 
     if (bytes_read <= 0)
     {
-        return 1; // ç©ºæ–‡ä»¶æˆ–è¯»å–å¤±è´¥ï¼Œé»˜è®¤ä¸ºæ–‡æœ¬æ–‡ä»¶
+        return 1; // ¿ÕÎÄ¼ş»ò¶ÁÈ¡Ê§°Ü£¬Ä¬ÈÏÎªÎÄ±¾ÎÄ¼ş
     }
 
-    // æ£€æŸ¥æ˜¯å¦åŒ…å«éæ‰“å°å­—ç¬¦
-    for (int i = 0; i < bytes_read; i++)
+    // ¼ì²éÊÇ·ñ°üº¬·Ç´òÓ¡×Ö·û
+    int i;
+    for (i = 0; i < bytes_read; i++)
     {
         if (buffer[i] == '\0' || (buffer[i] < 32 && buffer[i] != '\n' && buffer[i] != '\r' && buffer[i] != '\t'))
         {
-            return 0; // åŒ…å«éæ‰“å°å­—ç¬¦ï¼Œä¸æ˜¯æ–‡æœ¬æ–‡ä»¶
+            return 0; // °üº¬·Ç´òÓ¡×Ö·û£¬²»ÊÇÎÄ±¾ÎÄ¼ş
         }
     }
 
-    return 1; // æ˜¯æ–‡æœ¬æ–‡ä»¶
+    return 1; // ÊÇÎÄ±¾ÎÄ¼ş
 }
 
-// æ‰§è¡Œshellå‘½ä»¤
+// Ö´ĞĞshellÃüÁî
 void execute_command(const char *cmd, int argc, char *argv[])
 {
-    // æ ¹æ®å‘½ä»¤åæ‰§è¡Œç›¸åº”çš„å‘½ä»¤
+    // ¸ù¾İÃüÁîÃûÖ´ĞĞÏàÓ¦µÄÃüÁî
     if (strcmp(cmd, "cat") == 0)
     {
-        // ç›´æ¥æ‰§è¡Œcatå‘½ä»¤ï¼ˆä»cat.cå¤åˆ¶ï¼‰
+        // Ö±½ÓÖ´ĞĞcatÃüÁî£¨´Ócat.c¸´ÖÆ£©
         int file_desc;
-        char buffer[1024]; // 1024å­—èŠ‚ç¼“å†²åŒº
-        int i;
+        char buffer[1024]; // 1024×Ö½Ú»º³åÇø
+        int i, j;
 
-        // æ£€æŸ¥æ˜¯å¦æœ‰æ–‡ä»¶å‚æ•°
+        // ¼ì²éÊÇ·ñÓĞÎÄ¼ş²ÎÊı
         if (argc < 2)
         {
             printf("cat: Missing file parameter!\n");
@@ -107,10 +108,10 @@ void execute_command(const char *cmd, int argc, char *argv[])
             return;
         }
 
-        // å¾ªç¯å¤„ç†æ‰€æœ‰æŒ‡å®šçš„æ–‡ä»¶
+        // Ñ­»·´¦ÀíËùÓĞÖ¸¶¨µÄÎÄ¼ş
         for (i = 1; i < argc; i++)
         {
-            // æ‰“å¼€æ–‡ä»¶
+            // ´ò¿ªÎÄ¼ş
             file_desc = open(argv[i], O_RDWR);
 
             if (file_desc < 0)
@@ -119,13 +120,13 @@ void execute_command(const char *cmd, int argc, char *argv[])
                 continue;
             }
 
-            // æ‰‹å·¥æ¸…ç©ºç¼“å†²åŒºï¼Œé¿å…æ®‹ç•™æ•°æ®å½±å“
-            for (int j = 0; j < sizeof(buffer); j++)
+            // ÊÖ¹¤Çå¿Õ»º³åÇø£¬±ÜÃâ²ĞÁôÊı¾İÓ°Ïì
+            for (j = 0; j < sizeof(buffer); j++)
             {
                 buffer[j] = '\0';
             }
 
-            // è¯»å–æ–‡ä»¶å†…å®¹å¹¶è¾“å‡ºï¼Œç›´åˆ°æ–‡ä»¶ç»“æŸ
+            // ¶ÁÈ¡ÎÄ¼şÄÚÈİ²¢Êä³ö£¬Ö±µ½ÎÄ¼ş½áÊø
             int bytes_read = read(file_desc, buffer, sizeof(buffer));
             if (bytes_read > 0)
             {
@@ -137,7 +138,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
                 printf("\n");
             }
 
-            // æ£€æŸ¥è¯»å–é”™è¯¯
+            // ¼ì²é¶ÁÈ¡´íÎó
             if (bytes_read < 0)
             {
                 printf("cat: %s: Read failed!\n", argv[i]);
@@ -149,7 +150,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
     }
     else if (strcmp(cmd, "echo") == 0)
     {
-        // ç›´æ¥æ‰§è¡Œechoå‘½ä»¤ï¼ˆä»echo.cå¤åˆ¶ï¼‰
+        // Ö±½ÓÖ´ĞĞechoÃüÁî£¨´Óecho.c¸´ÖÆ£©
         int i;
         for (i = 1; i < argc; i++)
             printf("%s%s", i == 1 ? "" : " ", argv[i]);
@@ -157,7 +158,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
     }
     else if (strcmp(cmd, "kill") == 0)
     {
-        // ç›´æ¥æ‰§è¡Œkillå‘½ä»¤ï¼ˆä»kill.cå¤åˆ¶ï¼‰
+        // Ö±½ÓÖ´ĞĞkillÃüÁî£¨´Ókill.c¸´ÖÆ£©
         if (argc < 2)
         {
             printf("Error: No PID specified\n\n");
@@ -171,10 +172,10 @@ void execute_command(const char *cmd, int argc, char *argv[])
             return;
         }
 
-        // å°†å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°
+        // ½«×Ö·û´®×ª»»ÎªÕûÊı
         int pid = my_atoi(argv[1]);
 
-        // æ£€æŸ¥PIDæ˜¯å¦åœ¨æœ‰æ•ˆèŒƒå›´å†…
+        // ¼ì²éPIDÊÇ·ñÔÚÓĞĞ§·¶Î§ÄÚ
         if (pid < 0 || pid >= NR_TASKS + NR_PROCS)
         {
             printf("Error: Invalid PID %d\n", pid);
@@ -182,12 +183,12 @@ void execute_command(const char *cmd, int argc, char *argv[])
             return;
         }
 
-        // å‘é€ç»ˆæ­¢è¿›ç¨‹æ¶ˆæ¯
+        // ·¢ËÍÖÕÖ¹½ø³ÌÏûÏ¢
         MESSAGE msg;
         msg.PID = pid;
         msg.type = END_WHICH_PROC;
 
-        // å‘é€æ¶ˆæ¯å¹¶æ£€æŸ¥ç»“æœ
+        // ·¢ËÍÏûÏ¢²¢¼ì²é½á¹û
         int result = send_recv(BOTH, TASK_SYS, &msg);
         if (result != 0)
         {
@@ -195,14 +196,14 @@ void execute_command(const char *cmd, int argc, char *argv[])
             return;
         }
 
-        // æ£€æŸ¥killæ“ä½œæ˜¯å¦æˆåŠŸ
+        // ¼ì²ékill²Ù×÷ÊÇ·ñ³É¹¦
         if (msg.RETVAL != 0)
         {
             printf("Error: Failed to kill process %d (RETVAL: %d)\n", pid, msg.RETVAL);
             return;
         }
 
-        // éªŒè¯è¿›ç¨‹æ˜¯å¦çœŸçš„è¢«ç»ˆæ­¢
+        // ÑéÖ¤½ø³ÌÊÇ·ñÕæµÄ±»ÖÕÖ¹
         struct proc p;
         MESSAGE check_msg;
         check_msg.PID = pid;
@@ -229,10 +230,10 @@ void execute_command(const char *cmd, int argc, char *argv[])
     }
     else if (strcmp(cmd, "ls") == 0)
     {
-        // å®šä¹‰ç›®å½•è·¯å¾„ï¼Œé»˜è®¤ä¸ºå½“å‰ç›®å½•
+        // ¶¨ÒåÄ¿Â¼Â·¾¶£¬Ä¬ÈÏÎªµ±Ç°Ä¿Â¼
         char *dir_path = ".";
 
-        // æ£€æŸ¥å‘½ä»¤å‚æ•°
+        // ¼ì²éÃüÁî²ÎÊı
         if (argc > 2)
         {
             printf("ls: Too many arguments\n");
@@ -241,7 +242,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
         }
         else if (argc == 2)
         {
-            // å¦‚æœæŒ‡å®šäº†ç›®å½•è·¯å¾„
+            // Èç¹ûÖ¸¶¨ÁËÄ¿Â¼Â·¾¶
             if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
             {
                 printf("ls - List directory contents\n");
@@ -253,7 +254,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
             dir_path = argv[1];
         }
 
-        // æ‰“å¼€ç›®å½•
+        // ´ò¿ªÄ¿Â¼
         int fd = open(dir_path, O_RDWR);
         if (fd == -1)
         {
@@ -261,14 +262,14 @@ void execute_command(const char *cmd, int argc, char *argv[])
             return;
         }
 
-        // å®šä¹‰ç›®å½•æ¡ç›®ç»“æ„å’Œæ•°ç»„
+        // ¶¨ÒåÄ¿Â¼ÌõÄ¿½á¹¹ºÍÊı×é
         struct dir_entry
         {
             int inode_nr;
             char name[12];
         } dir_entries[64];
 
-        // è¯»å–ç›®å½•å†…å®¹
+        // ¶ÁÈ¡Ä¿Â¼ÄÚÈİ
         int n = read(fd, dir_entries, sizeof(dir_entries));
         if (n == -1)
         {
@@ -277,16 +278,17 @@ void execute_command(const char *cmd, int argc, char *argv[])
             return;
         }
 
-        // è®¡ç®—æœ‰æ•ˆæ¡ç›®æ•°é‡
+        // ¼ÆËãÓĞĞ§ÌõÄ¿ÊıÁ¿
         int entry_count = n / sizeof(struct dir_entry);
 
-        // ç»Ÿè®¡æ–‡ä»¶å’Œç›®å½•æ•°é‡
+        // Í³¼ÆÎÄ¼şºÍÄ¿Â¼ÊıÁ¿
         int file_count = 0, dir_count = 0, total_size = 0;
 
         struct dir_entry valid_entries[64];
         int valid_count = 0;
+        int i, j;
 
-        for (int i = 0; i < entry_count; i++)
+        for (i = 0; i < entry_count; i++)
         {
             if (dir_entries[i].inode_nr != 0)
             {
@@ -294,10 +296,10 @@ void execute_command(const char *cmd, int argc, char *argv[])
             }
         }
 
-        for (int i = 0; i < valid_count - 1; i++)
+        for (i = 0; i < valid_count - 1; i++)
         {
             int min_index = i;
-            for (int j = i + 1; j < valid_count; j++)
+            for (j = i + 1; j < valid_count; j++)
             {
                 if (strcmp(valid_entries[j].name, valid_entries[min_index].name) < 0)
                 {
@@ -312,21 +314,21 @@ void execute_command(const char *cmd, int argc, char *argv[])
             }
         }
 
-        // æ‰“å°ç›®å½•ä¿¡æ¯
+        // ´òÓ¡Ä¿Â¼ĞÅÏ¢
         printf("Directory: %s\n", dir_path);
         printf("===============================================\n");
 
-        // æ‰“å°è¡¨å¤´ï¼ˆä½¿ç”¨æ‰‹åŠ¨å¯¹é½ï¼‰
+        // ´òÓ¡±íÍ·£¨Ê¹ÓÃÊÖ¶¯¶ÔÆë£©
         printf("Name          Type        Size(bytes)     Perms\n");
         printf("------------- ----------- ------------    --------\n");
 
-        // éå†å¹¶æ˜¾ç¤ºç›®å½•æ¡ç›®
-        for (int i = 0; i < valid_count; i++)
+        // ±éÀú²¢ÏÔÊ¾Ä¿Â¼ÌõÄ¿
+        for (i = 0; i < valid_count; i++)
         {
             struct stat file_stat;
             if (stat(valid_entries[i].name, &file_stat) == 0)
             {
-                // ç¡®å®šæ–‡ä»¶ç±»å‹
+                // È·¶¨ÎÄ¼şÀàĞÍ
                 char type_str[12] = "File";
                 if ((file_stat.st_mode & I_TYPE_MASK) == I_DIRECTORY)
                 {
@@ -339,10 +341,10 @@ void execute_command(const char *cmd, int argc, char *argv[])
                     total_size += file_stat.st_size;
                 }
 
-                // ç®€å•çš„æƒé™æ˜¾ç¤º
+                // ¼òµ¥µÄÈ¨ÏŞÏÔÊ¾
                 char perm_str[4] = "rwx";
 
-                // æ‰“å°æ ¼å¼åŒ–è¾“å‡ºï¼ˆä½¿ç”¨æ‰‹åŠ¨ç©ºæ ¼å¯¹é½ï¼‰
+                // ´òÓ¡¸ñÊ½»¯Êä³ö£¨Ê¹ÓÃÊÖ¶¯¿Õ¸ñ¶ÔÆë£©
                 printf("%13s ", valid_entries[i].name);
                 printf("%11s ", type_str);
                 printf("%12d ", file_stat.st_size);
@@ -357,20 +359,21 @@ void execute_command(const char *cmd, int argc, char *argv[])
             }
         }
 
-        // æ‰“å°ç›®å½•ç»Ÿè®¡ä¿¡æ¯
+        // ´òÓ¡Ä¿Â¼Í³¼ÆĞÅÏ¢
         printf("===============================================\n");
         printf("Total entries: %d\n", valid_count);
         printf("Directories: %d\n", dir_count);
         printf("Files: %d\n", file_count);
         printf("Total file size: %d bytes\n", total_size);
 
-        // å…³é—­ç›®å½•æ–‡ä»¶æè¿°ç¬¦
+        // ¹Ø±ÕÄ¿Â¼ÎÄ¼şÃèÊö·û
         close(fd);
     }
     else if (strcmp(cmd, "ps") == 0)
     {
-        // å¤„ç†å¸®åŠ©é€‰é¡¹
-        for (int i = 1; i < argc; i++)
+        // ´¦Àí°ïÖúÑ¡Ïî
+        int i;
+        for (i = 1; i < argc; i++)
         {
             if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
             {
@@ -399,19 +402,18 @@ void execute_command(const char *cmd, int argc, char *argv[])
         MESSAGE msg;
         struct proc p;
 
-        // æ‰“å°è¡¨å¤´
+        // ´òÓ¡±íÍ·
         printf("PID   NAME       STATUS  FLAGS\n");
         printf("--------------------------------\n");
 
-        // éå†æ‰€æœ‰è¿›ç¨‹æ§½ä½
-        int i;
+        // ±éÀúËùÓĞ½ø³Ì²ÛÎ»
         for (i = 0; i < NR_TASKS + NR_PROCS; i++)
         {
             msg.PID = i;
             msg.type = GET_PROC_INFO;
             msg.BUF = &p;
 
-            // å‘é€æ¶ˆæ¯è·å–è¿›ç¨‹ä¿¡æ¯
+            // ·¢ËÍÏûÏ¢»ñÈ¡½ø³ÌĞÅÏ¢
             int ret = send_recv(BOTH, TASK_SYS, &msg);
             if (ret != 0)
             {
@@ -419,10 +421,10 @@ void execute_command(const char *cmd, int argc, char *argv[])
                 continue;
             }
 
-            // æ£€æŸ¥è¿›ç¨‹æ§½ä½æ˜¯å¦è¢«ä½¿ç”¨
+            // ¼ì²é½ø³Ì²ÛÎ»ÊÇ·ñ±»Ê¹ÓÃ
             if (p.p_flags != FREE_SLOT)
             {
-                // ç¡®å®šè¿›ç¨‹çŠ¶æ€
+                // È·¶¨½ø³Ì×´Ì¬
                 char status = '?';
                 if (p.p_flags & HANGING)
                 {
@@ -441,7 +443,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
                     status = 'S'; // Sleeping/Idle
                 }
 
-                // æ‰“å°è¿›ç¨‹ä¿¡æ¯ï¼Œä½¿ç”¨å›ºå®šå®½åº¦æ ¼å¼
+                // ´òÓ¡½ø³ÌĞÅÏ¢£¬Ê¹ÓÃ¹Ì¶¨¿í¶È¸ñÊ½
                 printf("%5d %10s %c       0x%04X\n",
                        i, p.name, status, p.p_flags);
             }
@@ -449,13 +451,13 @@ void execute_command(const char *cmd, int argc, char *argv[])
     }
     else if (strcmp(cmd, "pwd") == 0)
     {
-        // ç›´æ¥æ‰§è¡Œpwdå‘½ä»¤ï¼ˆä»pwd.cå¤åˆ¶ï¼‰
+        // Ö±½ÓÖ´ĞĞpwdÃüÁî£¨´Ópwd.c¸´ÖÆ£©
         printf("/\n");
     }
     else if (strcmp(cmd, "touch") == 0)
     {
-        // ç›´æ¥æ‰§è¡Œtouchå‘½ä»¤ï¼ˆä»touch.cå¤åˆ¶ï¼‰
-        // æ£€æŸ¥å‘½ä»¤å‚æ•°
+        // Ö±½ÓÖ´ĞĞtouchÃüÁî£¨´Ótouch.c¸´ÖÆ£©
+        // ¼ì²éÃüÁî²ÎÊı
         if (argc < 2)
         {
             printf("touch: Missing file operand\n");
@@ -465,7 +467,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
         }
         else if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0))
         {
-            // æ˜¾ç¤ºå¸®åŠ©ä¿¡æ¯
+            // ÏÔÊ¾°ïÖúĞÅÏ¢
             printf("touch - Create empty files or update file timestamps\n");
             printf("Usage: touch [OPTION]... FILE...\n");
             printf("Options:\n");
@@ -480,23 +482,24 @@ void execute_command(const char *cmd, int argc, char *argv[])
         int success_count = 0;
         int failure_count = 0;
 
-        // å¤„ç†æ¯ä¸ªæ–‡ä»¶å‚æ•°
-        for (int i = 1; i < argc; i++)
+        // ´¦ÀíÃ¿¸öÎÄ¼ş²ÎÊı
+        int i;
+        for (i = 1; i < argc; i++)
         {
             const char *filename = argv[i];
 
-            // å°è¯•ä»¥è¯»å†™æ¨¡å¼æ‰“å¼€æ–‡ä»¶
+            // ³¢ÊÔÒÔ¶ÁĞ´Ä£Ê½´ò¿ªÎÄ¼ş
             int fd = open(filename, O_RDWR);
             if (fd != -1)
             {
-                // æ–‡ä»¶å·²å­˜åœ¨ï¼Œæ›´æ–°æ—¶é—´æˆ³ï¼ˆè¿™é‡Œç®€åŒ–å¤„ç†ï¼Œå®é™…åº”ä½¿ç”¨utimeç³»ç»Ÿè°ƒç”¨ï¼‰
+                // ÎÄ¼şÒÑ´æÔÚ£¬¸üĞÂÊ±¼ä´Á£¨ÕâÀï¼ò»¯´¦Àí£¬Êµ¼ÊÓ¦Ê¹ÓÃutimeÏµÍ³µ÷ÓÃ£©
                 close(fd);
                 printf("Updated timestamp for '%s'\n", filename);
                 success_count++;
             }
             else
             {
-                // æ–‡ä»¶ä¸å­˜åœ¨ï¼Œåˆ›å»ºæ–°æ–‡ä»¶
+                // ÎÄ¼ş²»´æÔÚ£¬´´½¨ĞÂÎÄ¼ş
                 fd = open(filename, O_CREAT);
                 if (fd != -1)
                 {
@@ -512,7 +515,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
             }
         }
 
-        // æ‰“å°æ“ä½œç»“æœæ‘˜è¦
+        // ´òÓ¡²Ù×÷½á¹ûÕªÒª
         if (success_count > 0)
         {
             printf("touch: Successfully processed %d file(s)\n", success_count);
@@ -524,8 +527,8 @@ void execute_command(const char *cmd, int argc, char *argv[])
     }
     else if (strcmp(cmd, "remove") == 0 || strcmp(cmd, "rm") == 0)
     {
-        // ç›´æ¥æ‰§è¡Œremoveå‘½ä»¤ï¼ˆä»remove.cå¤åˆ¶ï¼‰
-        // æ£€æŸ¥å‘½ä»¤å‚æ•°
+        // Ö±½ÓÖ´ĞĞremoveÃüÁî£¨´Óremove.c¸´ÖÆ£©
+        // ¼ì²éÃüÁî²ÎÊı
         if (argc < 2)
         {
             printf("remove: Missing file operand\n");
@@ -535,7 +538,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
         }
         else if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0))
         {
-            // æ˜¾ç¤ºå¸®åŠ©ä¿¡æ¯
+            // ÏÔÊ¾°ïÖúĞÅÏ¢
             printf("remove - Remove files or directories\n");
             printf("Usage: remove [OPTION]... FILE...\n");
             printf("Options:\n");
@@ -550,12 +553,13 @@ void execute_command(const char *cmd, int argc, char *argv[])
         int success_count = 0;
         int failure_count = 0;
 
-        // å¤„ç†æ¯ä¸ªæ–‡ä»¶å‚æ•°
-        for (int i = 1; i < argc; i++)
+        // ´¦ÀíÃ¿¸öÎÄ¼ş²ÎÊı
+        int i;
+        for (i = 1; i < argc; i++)
         {
             const char *filename = argv[i];
 
-            // å°è¯•åˆ é™¤æ–‡ä»¶
+            // ³¢ÊÔÉ¾³ıÎÄ¼ş
             if (unlink(filename) == 0)
             {
                 printf("Removed '%s'\n", filename);
@@ -568,7 +572,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
             }
         }
 
-        // æ‰“å°æ“ä½œç»“æœæ‘˜è¦
+        // ´òÓ¡²Ù×÷½á¹ûÕªÒª
         if (success_count > 0)
         {
             printf("remove: Successfully removed %d file(s)\n", success_count);
@@ -587,6 +591,7 @@ void execute_command(const char *cmd, int argc, char *argv[])
 
 int main(int args, char *argv[])
 {
+    int i, j;
     if (args < 2)
     {
         printf("illegal commmand!!!\n");
@@ -594,33 +599,33 @@ int main(int args, char *argv[])
         return 0;
     }
 
-    // æ£€æŸ¥æ˜¯å¦ä¸ºå¯æ‰§è¡Œæ–‡ä»¶ï¼ˆshellå‘½ä»¤ï¼‰
-    for (int i = 0; i < executable_count; i++)
-    {
-        if (strcmp(argv[1], executable_files[i]) == 0)
+    // ¼ì²éÊÇ·ñÎª¿ÉÖ´ĞĞÎÄ¼ş£¨shellÃüÁî£©
+        for (i = 0; i < executable_count; i++)
         {
-            // è°ƒæ•´argvæ•°ç»„ï¼Œä½¿argv[0]æˆä¸ºå‘½ä»¤å
-            char *new_argv[args];
-            new_argv[0] = argv[1];
-            for (int j = 1; j < args - 1; j++)
+            if (strcmp(argv[1], executable_files[i]) == 0)
             {
-                new_argv[j] = argv[j + 1];
-            }
+                // µ÷ÕûargvÊı×é£¬Ê¹argv[0]³ÉÎªÃüÁîÃû
+                char *new_argv[args];
+                new_argv[0] = argv[1];
+                for (j = 1; j < args - 1; j++)
+                {
+                    new_argv[j] = argv[j + 1];
+                }
             new_argv[args - 1] = NULL;
-            // è°ƒç”¨execute_commandï¼Œæ³¨æ„å‚æ•°æ•°é‡è¦å‡1
+            // µ÷ÓÃexecute_command£¬×¢Òâ²ÎÊıÊıÁ¿Òª¼õ1
             execute_command(argv[1], args - 1, new_argv);
             return 0;
         }
     }
 
-    // å…ˆå¤„ç†æ–‡ä»¶åˆ›å»ºå’Œç¼–è¾‘æ“ä½œ
+    // ÏÈ´¦ÀíÎÄ¼ş´´½¨ºÍ±à¼­²Ù×÷
     if (args == 2)
     {
-        // æŸ¥çœ‹æ–‡ä»¶å†…å®¹æˆ–åˆ›å»ºç©ºæ–‡ä»¶
+        // ²é¿´ÎÄ¼şÄÚÈİ»ò´´½¨¿ÕÎÄ¼ş
         int fd = open(argv[1], O_RDWR);
         if (fd != -1)
         {
-            // æ–‡ä»¶å­˜åœ¨ï¼ŒæŸ¥çœ‹å†…å®¹
+            // ÎÄ¼ş´æÔÚ£¬²é¿´ÄÚÈİ
             char buffer[1024];
             int bytes_read = read(fd, buffer, sizeof(buffer));
             if (bytes_read > 0)
@@ -639,7 +644,7 @@ int main(int args, char *argv[])
         }
         else
         {
-            // æ–‡ä»¶ä¸å­˜åœ¨ï¼Œåˆ›å»ºç©ºæ–‡ä»¶
+            // ÎÄ¼ş²»´æÔÚ£¬´´½¨¿ÕÎÄ¼ş
             fd = open(argv[1], O_CREAT | O_RDWR);
             if (fd == -1)
             {
@@ -653,22 +658,22 @@ int main(int args, char *argv[])
     }
     else if (args == 3)
     {
-        // ç¼–è¾‘æ–‡ä»¶å†…å®¹æˆ–åˆ›å»ºå¸¦å†…å®¹çš„æ–‡ä»¶
-        // é¦–å…ˆæ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨
+        // ±à¼­ÎÄ¼şÄÚÈİ»ò´´½¨´øÄÚÈİµÄÎÄ¼ş
+        // Ê×ÏÈ¼ì²éÎÄ¼şÊÇ·ñ´æÔÚ
         int fd = open(argv[1], O_RDWR);
         if (fd != -1) {
-            // æ–‡ä»¶å­˜åœ¨ï¼Œå…ˆå…³é—­å®ƒ
+            // ÎÄ¼ş´æÔÚ£¬ÏÈ¹Ø±ÕËü
             close(fd);
-            // åˆ é™¤æ–‡ä»¶
+            // É¾³ıÎÄ¼ş
             unlink(argv[1]);
         }
-        // åˆ›å»ºæ–°æ–‡ä»¶
+        // ´´½¨ĞÂÎÄ¼ş
         fd = open(argv[1], O_CREAT | O_RDWR);
         if (fd == -1) {
             printf("Failed to open %s for writing.\n", argv[1]);
             return 1;
         }
-        // å†™å…¥å†…å®¹
+        // Ğ´ÈëÄÚÈİ
         write(fd, argv[2], strlen(argv[2]));
         close(fd);
         printf("Successfully updated %s with content: %s\n", argv[1], argv[2]);
@@ -676,11 +681,11 @@ int main(int args, char *argv[])
     }
     else if (args == 4 && strcmp(argv[2], "-a") == 0)
     {
-        // è¿½åŠ å†…å®¹åˆ°æ–‡ä»¶ï¼ˆå¦‚æœæ–‡ä»¶ä¸å­˜åœ¨åˆ™åˆ›å»ºï¼‰
+        // ×·¼ÓÄÚÈİµ½ÎÄ¼ş£¨Èç¹ûÎÄ¼ş²»´æÔÚÔò´´½¨£©
         int fd = open(argv[1], O_RDWR);
         if (fd == -1)
         {
-            // æ–‡ä»¶ä¸å­˜åœ¨ï¼Œåˆ›å»ºæ–°æ–‡ä»¶
+            // ÎÄ¼ş²»´æÔÚ£¬´´½¨ĞÂÎÄ¼ş
             fd = open(argv[1], O_CREAT | O_RDWR);
             if (fd == -1)
             {
@@ -688,7 +693,7 @@ int main(int args, char *argv[])
                 return 1;
             }
             
-            // æ–°æ–‡ä»¶ç›´æ¥å†™å…¥å†…å®¹
+            // ĞÂÎÄ¼şÖ±½ÓĞ´ÈëÄÚÈİ
             const char *content = argv[3];
             ssize_t written = write(fd, content, strlen(content));
             if (written == -1)
@@ -702,22 +707,22 @@ int main(int args, char *argv[])
             return 0;
         }
         
-        // æ–‡ä»¶å­˜åœ¨ï¼Œè¯»å–æ–‡ä»¶å†…å®¹
+        // ÎÄ¼ş´æÔÚ£¬¶ÁÈ¡ÎÄ¼şÄÚÈİ
         char buffer[4096] = {0};
         ssize_t total_size = 0;
         ssize_t read_size;
         
-        // è¯»å–æ–‡ä»¶å†…å®¹ï¼ˆæœ€å¤š4095å­—èŠ‚ï¼‰
+        // ¶ÁÈ¡ÎÄ¼şÄÚÈİ£¨×î¶à4095×Ö½Ú£©
         read_size = read(fd, buffer, sizeof(buffer) - 1);
         if (read_size > 0)
         {
             total_size = read_size;
         }
         
-        // å…³é—­æ–‡ä»¶
+        // ¹Ø±ÕÎÄ¼ş
         close(fd);
         
-        // é‡æ–°æ‰“å¼€æ–‡ä»¶ï¼ˆæˆªæ–­æ¨¡å¼ï¼‰
+        // ÖØĞÂ´ò¿ªÎÄ¼ş£¨½Ø¶ÏÄ£Ê½£©
         fd = open(argv[1], O_RDWR | O_TRUNC);
         if (fd == -1)
         {
@@ -725,7 +730,7 @@ int main(int args, char *argv[])
             return 1;
         }
         
-        // å…ˆå†™å…¥åŸå†…å®¹
+        // ÏÈĞ´ÈëÔ­ÄÚÈİ
         if (total_size > 0)
         {
             ssize_t written = write(fd, buffer, total_size);
@@ -737,7 +742,7 @@ int main(int args, char *argv[])
             }
         }
         
-        // å†å†™å…¥æ–°å†…å®¹
+        // ÔÙĞ´ÈëĞÂÄÚÈİ
         const char *content = argv[3];
         ssize_t written = write(fd, content, strlen(content));
         if (written == -1)

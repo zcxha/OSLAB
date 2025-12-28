@@ -98,6 +98,10 @@ PUBLIC int		search_file(char * path);
 
 /* fs/disklog.c */
 PUBLIC int		do_disklog();
+
+/* log */
+PUBLIC int		sys_logcontrol(int what, int status, int buf_ptr, struct proc* p);
+PUBLIC void		do_log_syscall(int eax, int ebx, int ecx, int edx);
 PUBLIC int		disklog(char * logstr); /* for debug */
 PUBLIC void		dump_fd_graph(const char * fmt, ...);
 
@@ -122,8 +126,9 @@ PUBLIC void init_screen(TTY* p_tty);
 PUBLIC int  is_current_console(CONSOLE* p_con);
 
 /* proc.c */
-PUBLIC	void	schedule();
-PUBLIC	void*	va2la(int pid, void* va);
+PUBLIC void	schedule();
+PUBLIC void	klog_kernel(const char *fmt, ...);
+PUBLIC void*	va2la(int pid, void* va);
 PUBLIC	int	ldt_seg_linear(struct proc* p, int idx);
 PUBLIC	void	reset_msg(MESSAGE* p);
 PUBLIC	void	dump_msg(const char * title, MESSAGE* m);
@@ -134,16 +139,18 @@ PUBLIC void	inform_int(int task_nr);
 /* lib/misc.c */
 PUBLIC void spin(char * func_name);
 
-/* ä»¥ä¸‹æ˜¯ç³»ç»Ÿè°ƒç”¨ç›¸å…³ */
+/* ÒÔÏÂÊÇÏµÍ³µ÷ÓÃÏà¹Ø */
 
-/* ç³»ç»Ÿè°ƒç”¨ - ç³»ç»Ÿçº§ */
+/* ÏµÍ³µ÷ÓÃ - ÏµÍ³¼¶ */
 /* proc.c */
 PUBLIC	int	sys_sendrec(int function, int src_dest, MESSAGE* m, struct proc* p);
 PUBLIC	int	sys_printx(int _unused1, int _unused2, char* s, struct proc * p_proc);
+PUBLIC	int	sys_logcontrol(int what, int status, int buf_ptr, struct proc* p);
+PUBLIC	void	do_log_syscall(int eax, int ebx, int ecx, int edx);
 
 /* syscall.asm */
 PUBLIC  void    sys_call();             /* int_handler */
 
-/* ç³»ç»Ÿè°ƒç”¨ - ç”¨æˆ·çº§ */
+/* ÏµÍ³µ÷ÓÃ - ÓÃ»§¼¶ */
 PUBLIC	int	sendrec(int function, int src_dest, MESSAGE* p_msg);
 PUBLIC	int	printx(char* str);

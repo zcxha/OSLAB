@@ -48,6 +48,11 @@ EXTERN	int			memory_size;
 
 /* FS */
 EXTERN	struct file_desc	f_desc_table[NR_FILE_DESC];
+
+/* LOG */
+#define LOGBUF_SIZE 4096
+EXTERN  char    logbuf[LOGBUF_SIZE];
+EXTERN  int     logbuf_pos;
 EXTERN	struct inode		inode_table[NR_INODE];
 EXTERN	struct super_block	super_block[NR_SUPER_BLOCK];
 extern	u8 *			fsbuf;
@@ -58,7 +63,13 @@ EXTERN	struct inode *		root_inode;
 extern	struct dev_drv_map	dd_map[];
 
 /* for test only */
-extern	char *			logbuf;
-extern	const int		LOGBUF_SIZE;
+/* extern	char *			logbuf; */
+/* extern	const int		LOGBUF_SIZE; */
 extern	char *			logdiskbuf;
 extern	const int		LOGDISKBUF_SIZE;
+
+/* Logging Flags */
+EXTERN int log_process;
+EXTERN int log_file;
+EXTERN int log_syscall;
+EXTERN int log_device;

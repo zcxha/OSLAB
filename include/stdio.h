@@ -71,8 +71,8 @@ struct time {
  *   printf:
  *
  *           [send msg]                WRITE           DEV_WRITE
- *                      USER_PROC ------------‚Üí FS -------------‚Üí TTY
- *                              ‚Üñ______________‚Üô‚Üñ_______________/
+ *                      USER_PROC ------------ùù FS -------------ùù TTY
+ *                              ùI______________ùLùI_______________/
  *           [recv msg]             SYSCALL_RET       SYSCALL_RET
  *
  *----------------------------------------------------------------------
@@ -95,13 +95,16 @@ struct time {
 /* printf.c */
 PUBLIC  int     printf(const char *fmt, ...);
 PUBLIC  int     printl(const char *fmt, ...);
+PUBLIC  int     sprintf(char *buf, const char *fmt, ...);
 
 /* vsprintf.c */
 PUBLIC  int     vsprintf(char *buf, const char *fmt, va_list args);
-PUBLIC	int	sprintf(char *buf, const char *fmt, ...);
+
+/* syscall.asm */
+PUBLIC  int     logcontrol(int what, int status, void *buf);
 
 /*--------*/
-/* Â∫ìÂáΩÊï∞ */
+/* ù?ùù */
 /*--------*/
 
 #ifdef ENABLE_DISK_LOG

@@ -1,20 +1,20 @@
-// rmå‘½ä»¤å®ç°
-// ç”¨äºåˆ é™¤ä¸€ä¸ªæˆ–å¤šä¸ªæ–‡ä»¶
+// rmÃüÁîÊµÏÖ
+// ÓÃÓÚÉ¾³ıÒ»¸ö»ò¶à¸öÎÄ¼ş
 #include "stdio.h"
 #include "string.h"
 #include "sys/fs.h"
 
 /**
- * rmå‘½ä»¤çš„ä¸»å‡½æ•°
- * åˆ é™¤æŒ‡å®šçš„ä¸€ä¸ªæˆ–å¤šä¸ªæ–‡ä»¶
+ * rmÃüÁîµÄÖ÷º¯Êı
+ * É¾³ıÖ¸¶¨µÄÒ»¸ö»ò¶à¸öÎÄ¼ş
  * 
- * @param args å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @param argv å‘½ä»¤å‚æ•°æ•°ç»„
- * @return æ‰§è¡Œç»“æœï¼Œ0è¡¨ç¤ºæˆåŠŸï¼Œé0è¡¨ç¤ºå¤±è´¥
+ * @param args ÃüÁî²ÎÊı¸öÊı
+ * @param argv ÃüÁî²ÎÊıÊı×é
+ * @return Ö´ĞĞ½á¹û£¬0±íÊ¾³É¹¦£¬·Ç0±íÊ¾Ê§°Ü
  */
 int main(int args, char* argv[])
 {
-    // æ£€æŸ¥å‘½ä»¤å‚æ•°
+    // ¼ì²éÃüÁî²ÎÊı
     if (args < 2)
     {
         printf("rm: Missing file operand\n");
@@ -23,7 +23,7 @@ int main(int args, char* argv[])
         return 1;
     }
     
-    // å¤„ç†å¸®åŠ©é€‰é¡¹
+    // ´¦Àí°ïÖúÑ¡Ïî
     if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
     {
         printf("rm - Remove files\n");
@@ -40,23 +40,24 @@ int main(int args, char* argv[])
         return 0;
     }
     
-    // åˆå§‹åŒ–ç»Ÿè®¡å˜é‡
+    // ³õÊ¼»¯Í³¼Æ±äÁ¿
     int success_count = 0;
     int failure_count = 0;
+    int i;
     
-    // å¤„ç†æ¯ä¸ªæ–‡ä»¶å‚æ•°
-    for (int i = 1; i < args; i++)
+    // ´¦ÀíÃ¿¸öÎÄ¼ş²ÎÊı
+    for (i = 1; i < args; i++)
     {
-        // è·³è¿‡å¸®åŠ©é€‰é¡¹ï¼ˆå·²ç»å¤„ç†è¿‡ï¼‰
+        // Ìø¹ı°ïÖúÑ¡Ïî£¨ÒÑ¾­´¦Àí¹ı£©
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
         {
             continue;
         }
         
-        // å°è¯•åˆ é™¤æ–‡ä»¶
+        // ³¢ÊÔÉ¾³ıÎÄ¼ş
         printf("rm: Removing '%s'...\n", argv[i]);
         
-        // ç›´æ¥è°ƒç”¨unlinkåˆ é™¤æ–‡ä»¶
+        // Ö±½Óµ÷ÓÃunlinkÉ¾³ıÎÄ¼ş
         int result = unlink(argv[i]);
         if (result == -1)
         {
@@ -69,13 +70,13 @@ int main(int args, char* argv[])
             success_count++;
         }
         
-        // è°ƒç”¨getpidç³»ç»Ÿè°ƒç”¨è§¦å‘è¿›ç¨‹åˆ‡æ¢ï¼Œç»™æ–‡ä»¶ç³»ç»Ÿè¿›ç¨‹è¶³å¤Ÿçš„æ—¶é—´å¤„ç†åˆ é™¤æ“ä½œ
-        // è¿™æ ·å¯ä»¥ç¡®ä¿æ–‡ä»¶ç³»ç»Ÿè¿›ç¨‹å’Œç£ç›˜é©±åŠ¨æœ‰è¶³å¤Ÿçš„æ—¶é—´å®Œæˆå½“å‰çš„åˆ é™¤æ“ä½œ
+        // µ÷ÓÃgetpidÏµÍ³µ÷ÓÃ´¥·¢½ø³ÌÇĞ»»£¬¸øÎÄ¼şÏµÍ³½ø³Ì×ã¹»µÄÊ±¼ä´¦ÀíÉ¾³ı²Ù×÷
+        // ÕâÑù¿ÉÒÔÈ·±£ÎÄ¼şÏµÍ³½ø³ÌºÍ´ÅÅÌÇı¶¯ÓĞ×ã¹»µÄÊ±¼äÍê³Éµ±Ç°µÄÉ¾³ı²Ù×÷
         getpid();
         getpid();
     }
     
-    // è¾“å‡ºæ“ä½œæ€»ç»“
+    // Êä³ö²Ù×÷×Ü½á
     if (failure_count == 0)
     {
         printf("rm: Successfully removed %d file(s)\n", success_count);
@@ -85,6 +86,6 @@ int main(int args, char* argv[])
         printf("rm: Removed %d file(s), %d failed\n", success_count, failure_count);
     }
     
-    // è¿”å›æ‰§è¡Œç»“æœ
+    // ·µ»ØÖ´ĞĞ½á¹û
     return failure_count > 0 ? 1 : 0;
 }

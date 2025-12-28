@@ -20,6 +20,7 @@
 #include "keyboard.h"
 #include "proto.h"
 
+extern int logcontrol(int what, int status, void *buf);
 
 /*****************************************************************************
  *                                do_rdwt
@@ -39,6 +40,14 @@ PUBLIC int do_rdwt()
 	int len = fs_msg.CNT;	/**< r/w bytes */
 
 	int src = fs_msg.source;		/* caller proc nr. */
+
+	{
+		char buf[256];
+		sprintf(buf, "{FILE} %s %s fd:%d len:%d\n", 
+			fs_msg.type == READ ? "READ" : "WRITE",
+			proc_table[src].name, fd, len);
+		logcontrol(8882, strlen(buf), buf);
+	}
 
 	assert((pcaller->filp[fd] >= &f_desc_table[0]) &&
 	       (pcaller->filp[fd] < &f_desc_table[NR_FILE_DESC]));

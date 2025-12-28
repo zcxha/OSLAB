@@ -17,6 +17,24 @@
 #include "global.h"
 #include "proto.h"
 
+PRIVATE void append_log(char *buf, int len)
+{
+	int i;
+	for (i = 0; i < len; i++) {
+		logbuf[logbuf_pos] = buf[i];
+		logbuf_pos = (logbuf_pos + 1) % LOGBUF_SIZE;
+	}
+}
+
+PUBLIC void klog_kernel(const char *fmt, ...)
+{
+	char buf[256];
+	va_list args = (va_list)((char*)&fmt + 4);
+	vsprintf(buf, fmt, args);
+
+	append_log(buf, strlen(buf));
+}
+
 PRIVATE void block(struct proc* p);
 PRIVATE void unblock(struct proc* p);
 PRIVATE int  msg_send(struct proc* current, int dest, MESSAGE* m);
@@ -34,6 +52,7 @@ PUBLIC void schedule()
 {
 	struct proc*	p;
 	int		greatest_ticks = 0;
+	struct proc*	old_proc = p_proc_ready;
 
 	while (!greatest_ticks) {
 		for (p = &FIRST_PROC; p <= &LAST_PROC; p++) {
@@ -49,6 +68,11 @@ PUBLIC void schedule()
 			for (p = &FIRST_PROC; p <= &LAST_PROC; p++)
 				if (p->p_flags == 0)
 					p->ticks = p->priority;
+	}
+
+	if (log_process && p_proc_ready != old_proc) {
+		klog_kernel("{SCHEDULE} PID:%d NAME:%s TICKS:%d\n",
+			proc2pid(p_proc_ready), p_proc_ready->name, p_proc_ready->ticks);
 	}
 }
 
@@ -583,5 +607,63 @@ PUBLIC void dump_msg(const char * title, MESSAGE* m)
 	       packed ? "" : "\n",
 	       packed ? "" : "\n"/* , */
 		);
+}
+
+/*****************************************************************************
+ *                                sys_logcontrol
+ *****************************************************************************/
+PUBLIC int sys_logcontrol(int what, int status, int buf_ptr, struct proc* p)
+{
+	if (what == 999) { /* READ LOG */
+		/* status is buffer size */
+		int size = status;
+		if (size > LOGBUF_SIZE) size = LOGBUF_SIZE;
+		
+		/* We copy the whole logbuf to user */
+		phys_copy(va2la(proc2pid(p), (void*)buf_ptr),
+			  (void*)logbuf, /* Kernel buffer is in kernel space, linear addr if Ring0 is Flat */
+			  size);
+		
+		return logbuf_pos;
+	}
+    
+    /* WRITE LOG: File (8882) or Device (8884) or Generic (888) */
+    if (what == 888 || what == 8882 || what == 8884) {
+        if (what == 8882 && !log_file) return 0;
+        if (what == 8884 && !log_device) return 0;
+
+        int len = status;
+        if (len > 256) len = 256;
+        char buf[256];
+        
+        phys_copy((void*)buf,
+                  va2la(proc2pid(p), (void*)buf_ptr),
+                  len);
+        buf[len] = 0;
+        append_log(buf, len);
+        return 0;
+    }
+
+	switch(what) {
+		case 1: log_process = status; break;
+		case 2: log_file = status; break;
+		case 3: log_syscall = status; break;
+		case 4: log_device = status; break;
+		default: return -1;
+	}
+	return 0;
+}
+
+/*****************************************************************************
+ *                                do_log_syscall
+ *****************************************************************************/
+PUBLIC void do_log_syscall(int eax, int ebx, int ecx, int edx)
+{
+	if (log_syscall) {
+		/* avoid recursive logging: printx (0) and logcontrol (2) */
+		if (eax == 0 || eax == 2) return;
+		klog_kernel("{SYSCALL} PID:%d EAX:%d EBX:%d ECX:%d EDX:%d\n",
+		       proc2pid(p_proc_ready), eax, ebx, ecx, edx);
+	}
 }
 

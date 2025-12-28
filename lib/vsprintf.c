@@ -40,7 +40,7 @@ PRIVATE char* i2a(int val, int base, char ** ps)
                                 vsprintf
  *======================================================================*/
 /*
- *  ä¸ºæ›´å¥½åœ°ç†è§£æ­¤å‡½æ•°çš„åŸç†ï¼Œå¯å‚è€ƒ printf çš„æ³¨é‡Šéƒ¨åˆ†ã€‚
+ *  Îª¸üºÃµØÀí½â´Ëº¯ÊıµÄÔ­Àí£¬¿É²Î¿¼ printf µÄ×¢ÊÍ²¿·Ö¡£
  */
 PUBLIC int vsprintf(char *buf, const char *fmt, va_list args)
 {
@@ -128,11 +128,3 @@ PUBLIC int vsprintf(char *buf, const char *fmt, va_list args)
 }
 
 
-/*======================================================================*
-                                 sprintf
- *======================================================================*/
-int sprintf(char *buf, const char *fmt, ...)
-{
-	va_list arg = (va_list)((char*)(&fmt) + 4);        /* 4 æ˜¯å‚æ•° fmt æ‰€å å †æ ˆä¸­çš„å¤§å° */
-	return vsprintf(buf, fmt, arg);
-}

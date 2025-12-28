@@ -1,19 +1,19 @@
-// touchå‘½ä»¤å®žçŽ°
-// ç”¨äºŽåˆ›å»ºæ–°æ–‡ä»¶æˆ–æ›´æ–°çŽ°æœ‰æ–‡ä»¶çš„æ—¶é—´æˆ³
+// touchÃüÁîÊµÏÖ
+// ÓÃÓÚ´´½¨ÐÂÎÄ¼þ»ò¸üÐÂÏÖÓÐÎÄ¼þµÄÊ±¼ä´Á
 #include "stdio.h"
 #include "string.h"
 
 /**
- * touchå‘½ä»¤çš„ä¸»å‡½æ•°
- * æ”¯æŒåˆ›å»ºæ–°æ–‡ä»¶æˆ–æ›´æ–°çŽ°æœ‰æ–‡ä»¶çš„æ—¶é—´æˆ³
+ * touchÃüÁîµÄÖ÷º¯Êý
+ * Ö§³Ö´´½¨ÐÂÎÄ¼þ»ò¸üÐÂÏÖÓÐÎÄ¼þµÄÊ±¼ä´Á
  * 
- * @param argc å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @param argv å‘½ä»¤å‚æ•°æ•°ç»„
- * @return æ‰§è¡Œç»“æžœï¼Œ0è¡¨ç¤ºæˆåŠŸï¼Œéž0è¡¨ç¤ºå¤±è´¥
+ * @param argc ÃüÁî²ÎÊý¸öÊý
+ * @param argv ÃüÁî²ÎÊýÊý×é
+ * @return Ö´ÐÐ½á¹û£¬0±íÊ¾³É¹¦£¬·Ç0±íÊ¾Ê§°Ü
  */
 int main(int argc, char *argv[]) 
 {
-    // æ£€æŸ¥å‘½ä»¤å‚æ•°
+    // ¼ì²éÃüÁî²ÎÊý
     if (argc < 2) 
     {
         printf("touch: Missing file operand\n");
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     }
     else if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) 
     {
-        // æ˜¾ç¤ºå¸®åŠ©ä¿¡æ¯
+        // ÏÔÊ¾°ïÖúÐÅÏ¢
         printf("touch - Create empty files or update file timestamps\n");
         printf("Usage: touch [OPTION]... FILE...\n");
         printf("Options:\n");
@@ -37,24 +37,25 @@ int main(int argc, char *argv[])
     
     int success_count = 0;
     int failure_count = 0;
+    int i;
     
-    // å¤„ç†æ¯ä¸ªæ–‡ä»¶å‚æ•°
-    for (int i = 1; i < argc; i++) 
+    // ´¦ÀíÃ¿¸öÎÄ¼þ²ÎÊý
+    for (i = 1; i < argc; i++) 
     {
         const char *filename = argv[i];
         
-        // å°è¯•ä»¥è¯»å†™æ¨¡å¼æ‰“å¼€æ–‡ä»¶
+        // ³¢ÊÔÒÔ¶ÁÐ´Ä£Ê½´ò¿ªÎÄ¼þ
         int fd = open(filename, O_RDWR);
         if (fd != -1) 
         {
-            // æ–‡ä»¶å·²å­˜åœ¨ï¼Œæ›´æ–°æ—¶é—´æˆ³
+            // ÎÄ¼þÒÑ´æÔÚ£¬¸üÐÂÊ±¼ä´Á
             close(fd);
             printf("Updated timestamp for '%s'\n", filename);
             success_count++;
         }
         else 
         {
-            // æ–‡ä»¶ä¸å­˜åœ¨ï¼Œåˆ›å»ºæ–°æ–‡ä»¶
+            // ÎÄ¼þ²»´æÔÚ£¬´´½¨ÐÂÎÄ¼þ
             fd = open(filename, O_CREAT);
             if (fd != -1) 
             {
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    // æ‰“å°æ“ä½œæ€»ç»“
+    // ´òÓ¡²Ù×÷×Ü½á
     if (failure_count == 0) 
     {
         printf("touch: Successfully processed %d file(s)\n", success_count);

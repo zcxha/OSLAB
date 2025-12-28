@@ -1,19 +1,20 @@
-// pså‘½ä»¤å®ç°
-// ç”¨äºæ˜¾ç¤ºå½“å‰ç³»ç»Ÿä¸­çš„è¿›ç¨‹ä¿¡æ¯
+// psÃüÁîÊµÏÖ
+// ÓÃÓÚÏÔÊ¾µ±Ç°ÏµÍ³ÖĞµÄ½ø³ÌĞÅÏ¢
 #include "../include/ls.h"
 
 /**
- * pså‘½ä»¤çš„ä¸»å‡½æ•°
- * æ˜¾ç¤ºå½“å‰ç³»ç»Ÿä¸­çš„è¿›ç¨‹ä¿¡æ¯
+ * psÃüÁîµÄÖ÷º¯Êı
+ * ÏÔÊ¾µ±Ç°ÏµÍ³ÖĞµÄ½ø³ÌĞÅÏ¢
  * 
- * @param argc å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @param argv å‘½ä»¤å‚æ•°æ•°ç»„
- * @return æ‰§è¡Œç»“æœï¼Œ0è¡¨ç¤ºæˆåŠŸï¼Œé0è¡¨ç¤ºå¤±è´¥
+ * @param argc ÃüÁî²ÎÊı¸öÊı
+ * @param argv ÃüÁî²ÎÊıÊı×é
+ * @return Ö´ĞĞ½á¹û£¬0±íÊ¾³É¹¦£¬·Ç0±íÊ¾Ê§°Ü
  */
 int main(int argc, char* argv[]) 
 {
-    // å¤„ç†å¸®åŠ©é€‰é¡¹
-    for (int i = 1; i < argc; i++) {
+    // ´¦Àí°ïÖúÑ¡Ïî
+    int i;
+    for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             printf("ps - Report a snapshot of the current processes\n");
             printf("Usage: ps [OPTION]...\n");
@@ -40,29 +41,28 @@ int main(int argc, char* argv[])
     MESSAGE msg;
     struct proc p;
     
-    // æ‰“å°è¡¨å¤´
+    // ´òÓ¡±íÍ·
     printf("PID   NAME       STATUS  FLAGS\n");
     printf("--------------------------------\n");
     
-    // éå†æ‰€æœ‰è¿›ç¨‹æ§½ä½
-    int i;
+    // ±éÀúËùÓĞ½ø³Ì²ÛÎ»
     for (i = 0; i < NR_TASKS + NR_PROCS; i++) 
     {
         msg.PID = i;
         msg.type = GET_PROC_INFO;
         msg.BUF = &p;
         
-        // å‘é€æ¶ˆæ¯è·å–è¿›ç¨‹ä¿¡æ¯
+        // ·¢ËÍÏûÏ¢»ñÈ¡½ø³ÌĞÅÏ¢
         int ret = send_recv(BOTH, TASK_SYS, &msg);
         if (ret != 0) {
             printf("Error: Failed to get process information for PID %d\n", i);
             continue;
         }
         
-        // æ£€æŸ¥è¿›ç¨‹æ§½ä½æ˜¯å¦è¢«ä½¿ç”¨
+        // ¼ì²é½ø³Ì²ÛÎ»ÊÇ·ñ±»Ê¹ÓÃ
         if (p.p_flags != FREE_SLOT) 
         {
-            // ç¡®å®šè¿›ç¨‹çŠ¶æ€
+            // È·¶¨½ø³Ì×´Ì¬
             char status = '?';
             if (p.p_flags & HANGING) {
                 status = 'Z'; // Zombie
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
                 status = 'S'; // Sleeping/Idle
             }
             
-            // æ‰“å°è¿›ç¨‹ä¿¡æ¯ï¼Œä½¿ç”¨å›ºå®šå®½åº¦æ ¼å¼
+            // ´òÓ¡½ø³ÌĞÅÏ¢£¬Ê¹ÓÃ¹Ì¶¨¿í¶È¸ñÊ½
             printf("%5d %10s %c       0x%04X\n", 
                    i, p.name, status, p.p_flags);
         }

@@ -1,19 +1,19 @@
 #include "../include/ls.h"
 
 /**
- * åˆ—å‡ºç›®å½•å†…å®¹çš„å‘½ä»¤å®ç°
- * æ”¯æŒåˆ—å‡ºæŒ‡å®šç›®å½•çš„å†…å®¹ï¼Œæ˜¾ç¤ºæ–‡ä»¶åã€å¤§å°ç­‰ä¿¡æ¯
+ * ÁĞ³öÄ¿Â¼ÄÚÈİµÄÃüÁîÊµÏÖ
+ * Ö§³ÖÁĞ³öÖ¸¶¨Ä¿Â¼µÄÄÚÈİ£¬ÏÔÊ¾ÎÄ¼şÃû¡¢´óĞ¡µÈĞÅÏ¢
  * 
- * @param argc å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @param argv å‘½ä»¤å‚æ•°æ•°ç»„
- * @return æ‰§è¡Œç»“æœï¼Œ0è¡¨ç¤ºæˆåŠŸï¼Œé0è¡¨ç¤ºå¤±è´¥
+ * @param argc ÃüÁî²ÎÊı¸öÊı
+ * @param argv ÃüÁî²ÎÊıÊı×é
+ * @return Ö´ĞĞ½á¹û£¬0±íÊ¾³É¹¦£¬·Ç0±íÊ¾Ê§°Ü
  */
 int main(int argc, char *argv[]) 
 {
-    // å®šä¹‰ç›®å½•è·¯å¾„ï¼Œé»˜è®¤ä¸ºå½“å‰ç›®å½•
+    // ¶¨ÒåÄ¿Â¼Â·¾¶£¬Ä¬ÈÏÎªµ±Ç°Ä¿Â¼
     char *dir_path = ".";
     
-    // æ£€æŸ¥å‘½ä»¤å‚æ•°
+    // ¼ì²éÃüÁî²ÎÊı
     if (argc > 2) 
     {
         printf("ls: Too many arguments\n");
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     }
     else if (argc == 2) 
     {
-        // å¦‚æœæŒ‡å®šäº†ç›®å½•è·¯å¾„
+        // Èç¹ûÖ¸¶¨ÁËÄ¿Â¼Â·¾¶
         if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) 
         {
             printf("ls - List directory contents\n");
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         dir_path = argv[1];
     }
     
-    // æ‰“å¼€ç›®å½•
+    // ´ò¿ªÄ¿Â¼
     int fd = open(dir_path, O_RDWR);
     if (fd == -1) 
     {
@@ -42,14 +42,14 @@ int main(int argc, char *argv[])
         return 1;
     }
     
-    // å®šä¹‰ç›®å½•æ¡ç›®ç»“æ„å’Œæ•°ç»„
+    // ¶¨ÒåÄ¿Â¼ÌõÄ¿½á¹¹ºÍÊı×é
     struct dir_entry 
     {
         int inode_nr;
         char name[12];
     } dir_entries[64];
     
-    // è¯»å–ç›®å½•å†…å®¹
+    // ¶ÁÈ¡Ä¿Â¼ÄÚÈİ
     int n = read(fd, dir_entries, sizeof(dir_entries));
     if (n == -1) 
     {
@@ -58,17 +58,18 @@ int main(int argc, char *argv[])
         return 1;
     }
     
-    // è®¡ç®—æœ‰æ•ˆæ¡ç›®æ•°é‡
+    // ¼ÆËãÓĞĞ§ÌõÄ¿ÊıÁ¿
     int entry_count = n / sizeof(struct dir_entry);
     
-    // ç»Ÿè®¡æ–‡ä»¶å’Œç›®å½•æ•°é‡
+    // Í³¼ÆÎÄ¼şºÍÄ¿Â¼ÊıÁ¿
     int file_count = 0, dir_count = 0, total_size = 0;
     
-    // ä¼˜åŒ–ï¼šå…ˆæ”¶é›†æœ‰æ•ˆæ¡ç›®ï¼Œæé«˜åç»­å¤„ç†æ•ˆç‡
+    // ÓÅ»¯£ºÏÈÊÕ¼¯ÓĞĞ§ÌõÄ¿£¬Ìá¸ßºóĞø´¦ÀíĞ§ÂÊ
     struct dir_entry valid_entries[64];
     int valid_count = 0;
+    int i, j;
     
-    for (int i = 0; i < entry_count; i++) 
+    for (i = 0; i < entry_count; i++) 
     {
         if (dir_entries[i].inode_nr != 0) 
         {
@@ -76,11 +77,11 @@ int main(int argc, char *argv[])
         }
     }
     
-    // ä¼˜åŒ–ï¼šä½¿ç”¨é€‰æ‹©æ’åºä»£æ›¿å†’æ³¡æ’åºï¼Œæé«˜æ’åºæ•ˆç‡
-    for (int i = 0; i < valid_count - 1; i++) 
+    // ÓÅ»¯£ºÊ¹ÓÃÑ¡ÔñÅÅĞò´úÌæÃ°ÅİÅÅĞò£¬Ìá¸ßÅÅĞòĞ§ÂÊ
+    for (i = 0; i < valid_count - 1; i++) 
     {
         int min_index = i;
-        for (int j = i + 1; j < valid_count; j++) 
+        for (j = i + 1; j < valid_count; j++) 
         {
             if (strcmp(valid_entries[j].name, valid_entries[min_index].name) < 0) 
             {
@@ -95,21 +96,21 @@ int main(int argc, char *argv[])
         }
     }
     
-    // æ‰“å°ç›®å½•ä¿¡æ¯
+    // ´òÓ¡Ä¿Â¼ĞÅÏ¢
     printf("Directory: %s\n", dir_path);
     printf("===============================================\n");
     
-    // æ‰“å°è¡¨å¤´ï¼ˆä½¿ç”¨æ‰‹åŠ¨å¯¹é½ï¼‰
+    // ´òÓ¡±íÍ·£¨Ê¹ÓÃÊÖ¶¯¶ÔÆë£©
     printf("Name          Type        Size(bytes)     Perms\n");
     printf("------------- ----------- ------------    --------\n");
     
-    // éå†å¹¶æ˜¾ç¤ºç›®å½•æ¡ç›®
-    for (int i = 0; i < valid_count; i++) 
+    // ±éÀú²¢ÏÔÊ¾Ä¿Â¼ÌõÄ¿
+    for (i = 0; i < valid_count; i++) 
     {
         struct stat file_stat;
         if (stat(valid_entries[i].name, &file_stat) == 0) 
         {
-            // ç¡®å®šæ–‡ä»¶ç±»å‹
+            // È·¶¨ÎÄ¼şÀàĞÍ
             char type_str[12] = "File";
             if ((file_stat.st_mode & I_TYPE_MASK) == I_DIRECTORY) 
             {
@@ -122,10 +123,10 @@ int main(int argc, char *argv[])
                 total_size += file_stat.st_size;
             }
             
-            // ç®€å•çš„æƒé™æ˜¾ç¤º
+            // ¼òµ¥µÄÈ¨ÏŞÏÔÊ¾
             char perm_str[4] = "rwx";
             
-            // æ‰“å°æ ¼å¼åŒ–è¾“å‡ºï¼ˆä½¿ç”¨æ‰‹åŠ¨ç©ºæ ¼å¯¹é½ï¼‰
+            // ´òÓ¡¸ñÊ½»¯Êä³ö£¨Ê¹ÓÃÊÖ¶¯¿Õ¸ñ¶ÔÆë£©
             printf("%13s ", valid_entries[i].name);
             printf("%11s ", type_str);
             printf("%12d ", file_stat.st_size);
@@ -140,14 +141,14 @@ int main(int argc, char *argv[])
         }
     }
     
-    // æ‰“å°ç›®å½•ç»Ÿè®¡ä¿¡æ¯
+    // ´òÓ¡Ä¿Â¼Í³¼ÆĞÅÏ¢
     printf("===============================================\n");
     printf("Total entries: %d\n", valid_count);
     printf("Directories: %d\n", dir_count);
     printf("Files: %d\n", file_count);
     printf("Total file size: %d bytes\n", total_size);
     
-    // å…³é—­ç›®å½•æ–‡ä»¶æè¿°ç¬¦
+    // ¹Ø±ÕÄ¿Â¼ÎÄ¼şÃèÊö·û
     close(fd);
     return 0;
 }
