@@ -273,6 +273,7 @@ enum msgtype {
 
 #define	NR_DEFAULT_FILE_SECTS	2048 /* 2048 * 512 = 1MB */
 
-
+/* Security: Integrity check */
+#define CHK_RUN_PROG_LEN 0x1000 /* 完整性检查的固定长度 */
 
 #endif /* _ORANGES_CONST_H_ */

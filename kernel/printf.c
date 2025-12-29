@@ -57,6 +57,8 @@ int printf(const char *fmt, ...)
 	va_list arg = (va_list)((char*)(&fmt) + 4); /*4是参数fmt所占堆栈中的大小*/
 	i = vsprintf(buf, fmt, arg);
 	buf[i] = 0;
+    // __asm__("xchg %bx, %bx");
+    int asldkjw = strlen(buf);
 	printx(buf);
 
 	return i;

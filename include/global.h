@@ -58,3 +58,6 @@ extern rbtree frame_tree;
 
 /* Frame Allocator */
 extern FrameTracker phy_frames[FRAME_COUNT];
+
+/* gcc canary */
+extern unsigned long __stack_chk_guard;

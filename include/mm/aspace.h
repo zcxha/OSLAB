@@ -2,6 +2,10 @@
     这个文件定义一些内存固定位置
 */
 
+#define KERNEL_SECURITY_AREA 0x4000
+
+#define KERNEL_BASE 0x100000
+
 #define PAGE_DIR_BASE    0x20000000
 #define PAGE_TABLE_BASE  0x20001000
 /*

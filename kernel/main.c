@@ -69,10 +69,10 @@ PUBLIC int kernel_main()
     // proc_table[1].se->priority = 19;
     // proc_table[2].se->priority = 20; // nice0
     // proc_table[3].se->priority = 21;
-
+    proc_table[NR_TASKS - 1].nr_tty = 0;
     proc_table[NR_TASKS + 0].nr_tty = 0;
     proc_table[NR_TASKS + 1].nr_tty = 1;
-    proc_table[NR_TASKS + 2].nr_tty = 1;
+    proc_table[NR_TASKS + 2].nr_tty = 0;
 
     sum_weight = 0;
 
@@ -102,7 +102,7 @@ PUBLIC int kernel_main()
     // PROCESS* tmp = __pick_first_entity()->proc;
     // sched_entity *se1 = __pick_first_entity();
     // disp_int(se1->proc->pid);
-    // __asm__("xchg %bx, %bx");
+    // //__asm__("xchg %bx, %bx");
     // add_task(0) has set A to be curr
     // so deque entity
 
@@ -125,7 +125,7 @@ PUBLIC int kernel_main()
     // kmap(proc_table[NR_TASKS + 1].pg_dir_base, 0x30000000, shrft);
     disp_int(*kget_final_entry(proc_table[NR_TASKS+0].pg_dir_base, 0x30000000));
     // *((char *)0x30000000) = 'S';
-    __asm__("xchg %bx, %bx");
+    //__asm__("xchg %bx, %bx");
     disp_str("-----\"kernel_main\" ends-----\n");
     restart();
 
@@ -163,6 +163,7 @@ void TestA()
             flag = 1;
             for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
             {
+
                 printf("%d ", stat[i]);
             }
             if (!vmem_en)
@@ -172,8 +173,8 @@ void TestA()
             else
             {
                 /* shm */
-                char *p = 0x30000000;
-                printf("shr:%c /", *p);
+                // char *p = 0x30000000;
+                // printf("shr:%c /", *p);
             }
         }
         // printf("A");
@@ -200,10 +201,10 @@ void TestB()
             msg.DEVICE = 0;
             send_recv(BOTH, TASK_HD, &msg);
 
-            /* shm */
-            char *p = 0x30000000;
-            *p = 'S';
-            printf("shr: %c /", *p);
+            /* shm : and this is a function which checks page fault handler. */
+            // char *p = 0x30000000;
+            // *p = 'S';
+            // printf("shr: %c /", *p);
         }
         // printf("B");
         milli_delay(100);
@@ -215,12 +216,48 @@ void TestB()
  *======================================================================*/
 void TestC()
 {
+    /* Change executable program in memory */
     int i = 0x2000;
     while (1)
     {
-        printf("C");
+        /* POC1. change prog .text data */
+        // void *baseA = TestA;
+        /* change A prog data! */
+        // *((char *)baseA) = '0';
+
+        /* POC2.  */
+
+
+
+        /* POC3. Stack overflow */
+        __asm__("xchg %bx, %bx");
+        void *pdst = stackoverflowdest;
+        char src[27] = "thisisstackoverflow   ";
+        src[22] = (int)pdst & 0xFF;
+        src[23] = ((int)pdst >> 8) & 0xFF;
+        src[24] = ((int)pdst >> 16) & 0xFF;
+        src[25] = ((int)pdst >> 24) & 0xFF;
+        testStackoverflow(src);
+
+
         milli_delay(100);
     }
+}
+
+void stackoverflowdest()  
+{
+    panic("stack overflow jmp success!");
+    while(1)
+    {
+        
+    }
+}
+
+void testStackoverflow(const char *src)
+{
+    char dst[10];
+    strcpy(dst, src);
+    __asm__("xchg %bx,%bx");
 }
 
 /*****************************************************************************
@@ -235,9 +272,22 @@ PUBLIC void panic(const char *fmt, ...)
     va_list arg = (va_list)((char *)&fmt + 4);
 
     i = vsprintf(buf, fmt, arg);
-
+    //__asm__("xchg %bx,%bx");
     printl("%c !!panic!! %s", MAG_CH_PANIC, buf);
 
     /* should never arrive here */
-    __asm__ __volatile__("ud2");
+    //__asm__ __volatile__("ud2");
+}
+
+/* gcc canary fail handler */
+PUBLIC void __stack_chk_fail(void)
+{
+    __asm__("xchg %bx, %bx");
+    disp_str("stack chk failed! ");
+    __asm__("ud2");
+    while (1)
+    {
+        /* code */
+    }
+    
 }

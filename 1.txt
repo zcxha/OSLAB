@@ -1,0 +1,281 @@
+In file included from kernel/start.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/main.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+kernel/main.c: In function ‘kernel_main’:
+kernel/main.c:122:14: warning: passing argument 1 of ‘disp_int’ makes integer from pointer without a cast [-Wint-conversion]
+     disp_int(proc_table[NR_TASKS+0].pg_dir_base);
+              ^
+In file included from kernel/main.c:16:0:
+include/proto.h:33:13: note: expected ‘int’ but argument is of type ‘pte * {aka unsigned int *}’
+ PUBLIC void disp_int(int input);
+             ^
+kernel/main.c:123:68: warning: passing argument 2 of ‘dbg_first_entry’ makes pointer from integer without a cast [-Wint-conversion]
+     disp_int(dbg_first_entry(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000));
+                                                                    ^
+In file included from kernel/main.c:19:0:
+include/mm/page_table.h:26:6: note: expected ‘void *’ but argument is of type ‘int’
+ pte *dbg_first_entry(pte *pagedir, void *la);
+      ^
+kernel/main.c:123:14: warning: passing argument 1 of ‘disp_int’ makes integer from pointer without a cast [-Wint-conversion]
+     disp_int(dbg_first_entry(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000));
+              ^
+In file included from kernel/main.c:16:0:
+include/proto.h:33:13: note: expected ‘int’ but argument is of type ‘pte * {aka unsigned int *}’
+ PUBLIC void disp_int(int input);
+             ^
+kernel/main.c:126:68: warning: passing argument 2 of ‘kget_final_entry’ makes pointer from integer without a cast [-Wint-conversion]
+     disp_int(*kget_final_entry(proc_table[NR_TASKS+0].pg_dir_base, 0x30000000));
+                                                                    ^
+In file included from kernel/main.c:19:0:
+include/mm/page_table.h:25:6: note: expected ‘void *’ but argument is of type ‘int’
+ pte *kget_final_entry(pte *pagedir, void *la);
+      ^
+In file included from kernel/clock.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/clock.c:17:0:
+kernel/clock.c: In function ‘check_integrity’:
+include/mm/aspace.h:5:30: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+ #define KERNEL_SECURITY_AREA 0x4000
+                              ^
+kernel/clock.c:77:22: note: in expansion of macro ‘KERNEL_SECURITY_AREA’
+         int *p_rel = KERNEL_SECURITY_AREA + i * sizeof(int);
+                      ^
+In file included from kernel/i8259.c:14:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/global.c:15:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/protect.c:14:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/proc.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/proc.c:17:0:
+kernel/proc.c: In function ‘add_task’:
+include/mm/aspace.h:5:30: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+ #define KERNEL_SECURITY_AREA 0x4000
+                              ^
+kernel/proc.c:110:18: note: in expansion of macro ‘KERNEL_SECURITY_AREA’
+     int *sec_p = KERNEL_SECURITY_AREA + pid * sizeof(int);
+                  ^
+kernel/proc.c:153:18: warning: passing argument 1 of ‘disp_int’ makes integer from pointer without a cast [-Wint-conversion]
+         disp_int(p_proc->pg_dir_base);
+                  ^
+In file included from kernel/proc.c:16:0:
+include/proto.h:33:13: note: expected ‘int’ but argument is of type ‘pte * {aka unsigned int *}’
+ PUBLIC void disp_int(int input);
+             ^
+kernel/proc.c:156:22: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+         void *base = 0x100000; // KERN BASE
+                      ^
+kernel/proc.c:157:47: warning: comparison between pointer and integer
+         for (int i = 0; base + FRAME_SIZE * i < HEAP_BASE; i++)
+                                               ^
+kernel/proc.c:165:29: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+         p_proc->pg_dir_base = PAGE_DIR_BASE;
+                             ^
+In file included from kernel/rbtree.c:8:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/keyboard.c:12:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/tty.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/console.c:19:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from kernel/systask.c:15:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+kernel/printf.c: In function ‘printf’:
+kernel/printf.c:58:6: warning: implicit declaration of function ‘vsprintf’ [-Wimplicit-function-declaration]
+  i = vsprintf(buf, fmt, arg);
+      ^
+kernel/printf.c:60:2: warning: implicit declaration of function ‘printx’ [-Wimplicit-function-declaration]
+  printx(buf);
+  ^
+In file included from kernel/vsprintf.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from mm/frame_allocator.c:10:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+mm/frame_allocator.c: In function ‘frame_find’:
+mm/frame_allocator.c:64:8: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+     pa = (u32)pa & 0xFFFFF000;
+        ^
+mm/frame_allocator.c:66:11: warning: comparison between pointer and integer
+     if(pa != phy_frames[idx].phybase) panic("not eq");
+           ^
+In file included from mm/page_table.c:6:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+mm/page_table.c: In function ‘new_page_table’:
+mm/page_table.c:22:22: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+     pte* new_pgdir = ft->phybase;
+                      ^
+mm/page_table.c: In function ‘get_final_entry’:
+mm/page_table.c:53:29: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+     pte *second_level_dir = first_level_entry & 0xFFFFF000;
+                             ^
+mm/page_table.c: In function ‘kget_final_entry’:
+mm/page_table.c:68:29: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+     pte *second_level_dir = first_level_entry & 0xFFFFF000;
+                             ^
+mm/page_table.c: In function ‘la2pa’:
+mm/page_table.c:87:12: warning: return makes pointer from integer without a cast [-Wint-conversion]
+     return (*final_entry & 0xFFFFF000);
+            ^
+mm/page_table.c: In function ‘kmap’:
+mm/page_table.c:118:8: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+     la = (u32)la & 0xFFFFF000;
+        ^
+mm/page_table.c: In function ‘unmap’:
+mm/page_table.c:134:8: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+     la = (u32)la & 0xFFFFF000;
+        ^
+mm/page_table.c:139:34: warning: passing argument 1 of ‘frame_find’ makes pointer from integer without a cast [-Wint-conversion]
+     FrameTracker *f = frame_find(*final_entry & 0xFFFFF000);
+                                  ^
+In file included from mm/page_table.c:11:0:
+include/mm/frame_allocator.h:32:15: note: expected ‘void *’ but argument is of type ‘pte {aka unsigned int}’
+ FrameTracker *frame_find(void *pa);
+               ^
+In file included from mm/buddy_system.c:14:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+mm/buddy_system.c: In function ‘buddy_init’:
+mm/buddy_system.c:154:19: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+         cur->addr = cur;
+                   ^
+mm/buddy_system.c: In function ‘buddy_alloc’:
+mm/buddy_system.c:226:28: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+                 left->addr = left, right->addr = right;
+                            ^
+mm/buddy_system.c:226:48: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+                 left->addr = left, right->addr = right;
+                                                ^
+mm/buddy_system.c: In function ‘buddy_dealloc’:
+mm/buddy_system.c:282:20: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+                 ln = t->addr;
+                    ^
+In file included from mm/heap_allocator.c:6:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from drv/hd.c:17:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from lib/klib.c:13:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from lib/misc.c:15:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from test/testmm.c:6:0:
+include/proc.h:108:46: warning: backslash-newline at end of file
+ #define STACK_SIZE_TOTAL (STACK_SIZE_TESTA + \
+                                              ^
+In file included from test/testmm.c:10:0:
+test/testmm.c: In function ‘test_frame_pgtable’:
+include/mm/aspace.h:9:26: warning: passing argument 1 of ‘la2pa’ makes pointer from integer without a cast [-Wint-conversion]
+ #define PAGE_DIR_BASE    0x20000000
+                          ^
+test/testmm.c:25:24: note: in expansion of macro ‘PAGE_DIR_BASE’
+         u32 pa = la2pa(PAGE_DIR_BASE, tmp);
+                        ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:13:7: note: expected ‘pte * {aka unsigned int *}’ but argument is of type ‘int’
+ void* la2pa(pte* pagedir, void* la);
+       ^
+test/testmm.c:25:39: warning: passing argument 2 of ‘la2pa’ makes pointer from integer without a cast [-Wint-conversion]
+         u32 pa = la2pa(PAGE_DIR_BASE, tmp);
+                                       ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:13:7: note: expected ‘void *’ but argument is of type ‘u32 {aka unsigned int}’
+ void* la2pa(pte* pagedir, void* la);
+       ^
+test/testmm.c:25:18: warning: initialization makes integer from pointer without a cast [-Wint-conversion]
+         u32 pa = la2pa(PAGE_DIR_BASE, tmp);
+                  ^
+In file included from test/testmm.c:10:0:
+include/mm/aspace.h:9:26: warning: passing argument 1 of ‘unmap’ makes pointer from integer without a cast [-Wint-conversion]
+ #define PAGE_DIR_BASE    0x20000000
+                          ^
+test/testmm.c:27:34: note: in expansion of macro ‘PAGE_DIR_BASE’
+         FrameTracker *ft = unmap(PAGE_DIR_BASE, tmp);
+                                  ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:20:15: note: expected ‘pte * {aka unsigned int *}’ but argument is of type ‘int’
+ FrameTracker *unmap(pte* pagedir, void *la);
+               ^
+test/testmm.c:27:49: warning: passing argument 2 of ‘unmap’ makes pointer from integer without a cast [-Wint-conversion]
+         FrameTracker *ft = unmap(PAGE_DIR_BASE, tmp);
+                                                 ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:20:15: note: expected ‘void *’ but argument is of type ‘u32 {aka unsigned int}’
+ FrameTracker *unmap(pte* pagedir, void *la);
+               ^
+In file included from test/testmm.c:10:0:
+include/mm/aspace.h:9:26: warning: passing argument 1 of ‘map’ makes pointer from integer without a cast [-Wint-conversion]
+ #define PAGE_DIR_BASE    0x20000000
+                          ^
+test/testmm.c:42:13: note: in expansion of macro ‘PAGE_DIR_BASE’
+         map(PAGE_DIR_BASE, tmp, ft);
+             ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:15:6: note: expected ‘pte * {aka unsigned int *}’ but argument is of type ‘int’
+ void map(pte* pagedir, void *la, FrameTracker *ft);
+      ^
+test/testmm.c:42:28: warning: passing argument 2 of ‘map’ makes pointer from integer without a cast [-Wint-conversion]
+         map(PAGE_DIR_BASE, tmp, ft);
+                            ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:15:6: note: expected ‘void *’ but argument is of type ‘u32 {aka unsigned int}’
+ void map(pte* pagedir, void *la, FrameTracker *ft);
+      ^
+In file included from test/testmm.c:10:0:
+include/mm/aspace.h:9:26: warning: passing argument 1 of ‘la2pa’ makes pointer from integer without a cast [-Wint-conversion]
+ #define PAGE_DIR_BASE    0x20000000
+                          ^
+test/testmm.c:43:51: note: in expansion of macro ‘PAGE_DIR_BASE’
+         printl("mapped: 0x%x->0x%x\n", tmp, la2pa(PAGE_DIR_BASE, tmp));
+                                                   ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:13:7: note: expected ‘pte * {aka unsigned int *}’ but argument is of type ‘int’
+ void* la2pa(pte* pagedir, void* la);
+       ^
+test/testmm.c:43:66: warning: passing argument 2 of ‘la2pa’ makes pointer from integer without a cast [-Wint-conversion]
+         printl("mapped: 0x%x->0x%x\n", tmp, la2pa(PAGE_DIR_BASE, tmp));
+                                                                  ^
+In file included from test/testmm.c:13:0:
+include/mm/page_table.h:13:7: note: expected ‘void *’ but argument is of type ‘u32 {aka unsigned int}’
+ void* la2pa(pte* pagedir, void* la);
+       ^

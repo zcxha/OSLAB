@@ -126,6 +126,8 @@ PUBLIC int vsprintf(char *buf, const char *fmt, va_list args)
 
 	*p = 0;
 
+    //__asm__("xchg %bx,%bx");
+
 	return (p - buf);
 }
 

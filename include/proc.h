@@ -76,7 +76,7 @@ typedef struct s_proc
 				    * next proc in the sending
 				    * queue (q_sending)
 				    */
-
+    void *p_base; /* .text base addr of this process, maybe for integrity check */
                     /*
                         这个进程页目录基地址，在进程切换的时候会负责切换CR3
                     */

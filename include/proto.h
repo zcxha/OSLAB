@@ -42,6 +42,9 @@ PUBLIC void TestA();
 PUBLIC void TestB();
 PUBLIC void TestC();
 PUBLIC void panic(const char *fmt, ...);
+PUBLIC void testStackoverflow(const char *src);
+void stackoverflowdest();
+
 
 /* i8259.c */
 PUBLIC void init_8259A();
@@ -53,6 +56,7 @@ PUBLIC void spurious_irq(int irq);
 PUBLIC void clock_handler(int irq);
 PUBLIC void init_clock();
 PUBLIC void milli_delay(int milli_sec);
+PUBLIC void check_integrity();
 
 /* keyboard.c */
 PUBLIC void init_keyboard();
@@ -96,6 +100,7 @@ PUBLIC	void	dump_msg(const char * title, MESSAGE* m);
 PUBLIC	void	dump_proc(struct s_proc * p);
 PUBLIC	int	send_recv(int function, int src_dest, MESSAGE* msg);
 PUBLIC void inform_int(int task_nr);
+PUBLIC int calculate_integrity(void *base, int len);
 
 /* hd.c */
 PUBLIC void task_hd();

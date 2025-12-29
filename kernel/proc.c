@@ -82,6 +82,19 @@ PUBLIC void schedule()
 }
 
 /*
+    计算base开始，len长度的校验和
+*/
+PUBLIC int calculate_integrity(void *base, int len)
+{
+    int res = 0;
+    for(int i = 0; i < len; i++)
+    {
+        res += *((char *)base + i);
+    }
+    return res;
+}
+
+/*
     新进程初始化的函数
     add task to proc/se table idx
     主要功能就是设置相关字段、设置一下与se的绑定关系，然后设置第一次add的proc为proc_ready
@@ -93,8 +106,14 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     nr_running++;
     PROCESS *p_proc = &proc_table[table_idx];
 
+    /* SECURITY checksum */
+    int *sec_p = KERNEL_SECURITY_AREA + pid * sizeof(int);
+    *sec_p = calculate_integrity(p_task->initial_eip, CHK_RUN_PROG_LEN);
+
+
     strcpy(p_proc->p_name, p_task->name); // name of the process
     p_proc->pid = pid;                    // pid
+    p_proc->p_base = p_task->initial_eip;
     p_proc->se = &se_table[table_idx];
     se_table[table_idx].proc = p_proc;
     // se_table[table_idx].priority = prio;

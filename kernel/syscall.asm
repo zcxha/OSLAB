@@ -48,7 +48,6 @@ printx:
 	mov	eax, _NR_printx
 	mov	edx, [esp + 4 + 4]	; s
 	int	INT_VECTOR_SYS_CALL
-
 	pop	edx
 
 	ret

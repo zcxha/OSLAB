@@ -187,8 +187,8 @@ PUBLIC int sys_printx(int _unused1, int _unused2, char* s, struct s_proc* p_proc
 	const char * p;
 	char ch;
 
-	char reenter_err[] = "? k_reenter is incorrect for unknown reason";
-	reenter_err[0] = MAG_CH_PANIC;
+	// char reenter_err[] = "? k_reenter is incorrect for unknown reason";
+	// reenter_err[0] = MAG_CH_PANIC;
 
 	/**
 	 * @note Code in both Ring 0 and Ring 1~3 may invoke printx().
@@ -209,7 +209,8 @@ PUBLIC int sys_printx(int _unused1, int _unused2, char* s, struct s_proc* p_proc
 	else if (k_reenter > 0) /* printx() called in Ring<0> */
 		p = s;
 	else	/* this should NOT happen */
-		p = reenter_err;
+        p = "reenter incorrect";
+		// p = reenter_err;
 	/**
 	 * @note if assertion fails in any TASK, the system will be halted;
 	 * if it fails in a USER PROC, it'll return like any normal syscall
@@ -234,13 +235,12 @@ PUBLIC int sys_printx(int _unused1, int _unused2, char* s, struct s_proc* p_proc
 			}
 		}
 
-		__asm__ __volatile__("hlt");
+		//__asm__ __volatile__("hlt");
 	}
 
 	while ((ch = *p++) != 0) {
 		if (ch == MAG_CH_PANIC || ch == MAG_CH_ASSERT)
 			continue; /* skip the magic char */
-
 		out_char(tty_table[p_proc->nr_tty].p_console, ch);
 	}
 

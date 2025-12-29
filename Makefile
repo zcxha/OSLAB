@@ -18,6 +18,7 @@ LD		= ld
 ASMBFLAGS	= -I boot/include/
 ASMKFLAGS	= -I include/ -f elf
 CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector
+CFLAGS_MAIN = -I include/ -c -fno-builtin -fno-stack-protector# 文件级别的栈保护。
 LDFLAGS		= -s -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 
@@ -96,7 +97,7 @@ kernel/start.o: kernel/start.c include/type.h include/const.h include/protect.h 
 
 kernel/main.o: kernel/main.c include/type.h include/const.h include/protect.h include/string.h include/proc.h include/proto.h \
 			include/global.h
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS_MAIN) -o $@ $<
 
 kernel/clock.o: kernel/clock.c
 	$(CC) $(CFLAGS) -o $@ $<

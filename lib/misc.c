@@ -151,5 +151,5 @@ PUBLIC void assertion_failure(char *exp, char *file, char *base_file, int line)
 	spin("assertion_failure()");
 
 	/* should never arrive here */
-        __asm__ __volatile__("ud2");
+        //__asm__ __volatile__("ud2");
 }
