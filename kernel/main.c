@@ -283,7 +283,7 @@ PUBLIC void panic(const char *fmt, ...)
 PUBLIC void __stack_chk_fail(void)
 {
     __asm__("xchg %bx, %bx");
-    disp_str("stack chk failed! ");
+    panic("stack chk fail!");
     __asm__("ud2");
     while (1)
     {

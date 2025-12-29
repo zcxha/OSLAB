@@ -353,6 +353,9 @@ save:
 	mov	ds, dx
 	mov	es, dx
 	mov	fs, dx
+    ; mov gs, SELECTOR_VIDEO
+    mov dx, SELECTOR_VIDEO
+    mov gs, dx
 
 	mov	edx, esi	; 恢复 edx
 

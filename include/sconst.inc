@@ -43,5 +43,6 @@ EOI		equ	0x20
 SELECTOR_FLAT_C		equ		0x08		; LOADER 里面已经确定了的.
 SELECTOR_TSS		equ		0x20		; TSS. 从外层跳到内存时 SS 和 ESP 的值从里面获得.
 SELECTOR_KERNEL_CS	equ		SELECTOR_FLAT_C
+SELECTOR_VIDEO      equ		(0x18)	; ┛<-- RPL=3
 
 PageDirBase		equ	20000000h	; 页目录开始地址:		512M

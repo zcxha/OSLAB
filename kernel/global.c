@@ -112,7 +112,11 @@ PUBLIC u32 has_preempt = 0;
 PUBLIC rbtree sched_tree = {{RB_BLACK, 0, &sched_tree.nil, &sched_tree.nil, &sched_tree.nil}, &sched_tree.nil};
 PUBLIC rbtree frame_tree = {{RB_BLACK, 0, &frame_tree.nil, &frame_tree.nil, &frame_tree.nil}, &frame_tree.nil};
 
-PUBLIC unsigned long __stack_chk_guard = 0xDEADBEEF;
+/* TODO: gcc进行stack protect插桩，插桩代码是比较gs:20跟canary是否相同，因此用户态的gs不能指向图形界面 */
+/* https://www.labcorner.de/the-gs-segment-and-stack-smashing-protection/ */
+// PUBLIC unsigned long __stack_chk_guard = 0xDEADBEEF;
+
+
 
 /* Frame Tracker */
 PUBLIC FrameTracker phy_frames[FRAME_COUNT];

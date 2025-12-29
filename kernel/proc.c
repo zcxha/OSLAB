@@ -125,12 +125,16 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     memcpy(&p_proc->ldts[1], &gdt[SELECTOR_KERNEL_DS >> 3],
            sizeof(DESCRIPTOR));
     p_proc->ldts[1].attr1 = DA_DRW | privilege << 5;
+
+    init_descriptor(&p_proc->ldts[2], &p_proc->tcb_head, sizeof(tcbhead_t) - 1, DA_DR);
+    p_proc->ldts[2].attr1 |= privilege << 5;
+
     p_proc->regs.cs = ((8 * 0) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.ds = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.es = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.fs = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     p_proc->regs.ss = ((8 * 1) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-    p_proc->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
+    p_proc->regs.gs = ((8 * 2) & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
     // disp_str("at3 ");
     p_proc->regs.eip = (u32)p_task->initial_eip;
     p_proc->regs.esp = (u32)p_task_stack;
@@ -143,7 +147,9 @@ PUBLIC void add_task(TASK *p_task, char *p_task_stack, u16 selector_ldt,
     p_proc->has_int_msg = 0;
     p_proc->q_sending = 0;
     p_proc->next_sending = 0;
-
+    
+    p_proc->tcb_head.stack_protector = 0xDEADBEEF; /* TODO:RAND */
+    
     p_proc->se->priority = prio;
     /* 给这个进程新建页表 */
     if (!is_task && vmem_en)

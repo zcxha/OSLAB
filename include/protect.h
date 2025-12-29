@@ -84,7 +84,7 @@ typedef struct s_tss {
 #define	SELECTOR_KERNEL_GS	SELECTOR_VIDEO
 
 /* 每个任务有一个单独的 LDT, 每个 LDT 中的描述符个数: */
-#define LDT_SIZE		2
+#define LDT_SIZE		3
 
 /* descriptor indices in LDT */
 #define INDEX_LDT_C             0

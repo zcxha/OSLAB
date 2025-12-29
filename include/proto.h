@@ -27,6 +27,7 @@ PUBLIC void	init_prot();
 PUBLIC u32	seg2phys(u16 seg);
 PUBLIC void exception_handler(int __unused, int vec_no, int __unused1, PROCESS* p_proc);
 PUBLIC void page_fault_handler(int cr2, int vec_no, int __unused1, PROCESS *p_proc);
+PUBLIC void init_descriptor(struct s_descriptor * p_desc, u32 base, u32 limit, u16 attribute);
 
 /* klib.c */
 PUBLIC void	delay(int time);
