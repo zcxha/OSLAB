@@ -12,7 +12,7 @@ CFLAGS		= -I ../include/ -c -fno-builtin -fno-stack-protector -Wall
 LDFLAGS		= -Ttext $(ENTRYPOINT)
 DASMFLAGS	= -D
 LIB		= ../lib/orangescrt.a
-BIN		= echo pwd ls touch remove edit cat ps kill log
+BIN		= echo pwd ls touch remove edit cat ps kill log dino
 
 # All Phony Targets
 .PHONY : everything final clean realclean disasm all install libc
@@ -99,5 +99,11 @@ log.o : log.c ../include/type.h ../include/stdio.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 log : log.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+dino.o : dino.c ../include/type.h ../include/stdio.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+dino : dino.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
 

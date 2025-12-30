@@ -1,0 +1,7 @@
+# 强制所有文本文件使用 LF 换行（不管在 Windows 还是 Linux）
+* text=auto eol=lf
+
+# 二进制文件不要动（尤其是你的 img 镜像文件）
+*.img binary
+*.bin binary
+*.tar binary

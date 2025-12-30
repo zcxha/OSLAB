@@ -614,6 +614,17 @@ PUBLIC void dump_msg(const char * title, MESSAGE* m)
  *****************************************************************************/
 PUBLIC int sys_logcontrol(int what, int status, int buf_ptr, struct proc* p)
 {
+	if (what == 100) { /* GET TICKS */
+		return ticks;
+	}
+
+	if (what == 200) { /* GET KEY NON-BLOCKING */
+		TTY* tty = &tty_table[current_console];
+        u32 key = tty->last_key;
+        tty->last_key = 0;
+        return key;
+	}
+
 	if (what == 999) { /* READ LOG */
 		/* status is buffer size */
 		int size = status;

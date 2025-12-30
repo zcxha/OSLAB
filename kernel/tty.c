@@ -137,6 +137,8 @@ PRIVATE void init_tty(TTY* tty)
 	tty->ibuf_cnt = 0;
 	tty->ibuf_head = tty->ibuf_tail = tty->ibuf;
 
+    tty->last_key = 0;
+
 	tty->tty_caller = NO_TASK;
 	tty->tty_procnr = NO_TASK;
 	tty->tty_req_buf = 0;
@@ -219,6 +221,7 @@ PUBLIC void in_process(TTY* tty, u32 key)
  *****************************************************************************/
 PRIVATE void put_key(TTY* tty, u32 key)
 {
+	tty->last_key = key;
 	if (tty->ibuf_cnt < TTY_IN_BYTES) {
 		*(tty->ibuf_head) = key;
 		tty->ibuf_head++;

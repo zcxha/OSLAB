@@ -27,11 +27,11 @@
 #define BRIGHT  0x08    /* 0000 1000 */
 #define	MAKE_COLOR(x,y)	((x<<4) | y) /* MAKE_COLOR(Background,Foreground) */
 
-/* GDT å’Œ IDT ä¸­æè¿°ç¬¦çš„ä¸ªæ•° */
+/* GDT ºÍ IDT ÖÐÃèÊö·ûµÄ¸öÊý */
 #define	GDT_SIZE	128
 #define	IDT_SIZE	256
 
-/* æƒé™ */
+/* È¨ÏÞ */
 #define	PRIVILEGE_KRNL	0
 #define	PRIVILEGE_TASK	1
 #define	PRIVILEGE_USER	3
@@ -129,7 +129,7 @@
 #define	AT_WINI_IRQ	14	/* at winchester */
 
 /* tasks */
-/* æ³¨æ„ TASK_XXX çš„å®šä¹‰è¦ä¸Ž global.c ä¸­å¯¹åº” */
+/* ×¢Òâ TASK_XXX µÄ¶¨ÒåÒªÓë global.c ÖÐ¶ÔÓ¦ */
 #define INVALID_DRIVER	-20
 #define INTERRUPT	-10
 #define TASK_TTY	0

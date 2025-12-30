@@ -99,6 +99,9 @@ PUBLIC void out_char(CONSOLE* con, char ch)
 	case '\n':
 		con->cursor = con->orig + SCR_WIDTH * (cursor_y + 1);
 		break;
+	case '\r':
+		con->cursor = con->orig + SCR_WIDTH * cursor_y;
+		break;
 	case '\b':
 		if (con->cursor > con->orig) {
 			con->cursor--;

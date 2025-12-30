@@ -30,6 +30,8 @@ typedef struct s_tty
 	int	tty_trans_cnt;
 
 	struct s_console *	console;
+    
+    u32 last_key; /* For non-blocking input (game mode) */
 }TTY;
 
 #endif /* _ORANGES_TTY_H_ */
