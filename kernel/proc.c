@@ -64,6 +64,17 @@ PUBLIC void schedule()
 			}
 		}
 
+		/* Aging: boost ticks of ready processes that were not chosen */
+		if (greatest_ticks > 0) {
+			for (p = &FIRST_PROC; p <= &LAST_PROC; p++) {
+				if (p->p_flags == 0 && p != p_proc_ready) {
+					if (p->ticks < p->priority * 2) {
+						p->ticks++;
+					}
+				}
+			}
+		}
+
 		if (!greatest_ticks)
 			for (p = &FIRST_PROC; p <= &LAST_PROC; p++)
 				if (p->p_flags == 0)

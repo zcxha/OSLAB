@@ -123,6 +123,10 @@ PUBLIC int do_open()
 		}
 		else {
 			assert(pin->i_mode == I_REGULAR);
+			if (flags & O_TRUNC) {
+				pin->i_size = 0;
+				sync_inode(pin);
+			}
 		}
 	}
 	else {
@@ -413,3 +417,4 @@ PRIVATE void new_dir_entry(struct inode *dir_inode,int inode_nr,char *filename)
 	/* update dir inode */
 	sync_inode(dir_inode);
 }
+

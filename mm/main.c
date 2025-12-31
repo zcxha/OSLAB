@@ -25,6 +25,15 @@ PUBLIC void do_fork_test();
 
 PRIVATE void init_mm();
 
+struct mem_block {
+	int base;
+	int size;
+	int pid;
+};
+
+#define NR_MEM_BLOCKS 64
+PRIVATE struct mem_block mem_map[NR_MEM_BLOCKS];
+
 /*****************************************************************************
  *                                task_mm
  *****************************************************************************/
@@ -87,6 +96,16 @@ PRIVATE void init_mm()
 
 	/* print memory size */
 	printl("{MM} memsize:%dMB\n", memory_size / (1024 * 1024));
+
+	/* initialize memory map */
+	int i;
+	for (i = 0; i < NR_MEM_BLOCKS; i++) {
+		mem_map[i].base = 0;
+		mem_map[i].size = 0;
+		mem_map[i].pid = -1;
+	}
+	mem_map[0].base = PROCS_BASE;
+	mem_map[0].size = memory_size - PROCS_BASE;
 }
 
 /*****************************************************************************
@@ -103,30 +122,44 @@ PRIVATE void init_mm()
 PUBLIC int alloc_mem(int pid, int memsize)
 {
 	assert(pid >= (NR_TASKS + NR_NATIVE_PROCS));
-	if (memsize > PROC_IMAGE_SIZE_DEFAULT) {
-		panic("unsupported memory request: %d. "
-		      "(should be less than %d)",
-		      memsize,
-		      PROC_IMAGE_SIZE_DEFAULT);
+	
+	int i;
+	for (i = 0; i < NR_MEM_BLOCKS; i++) {
+		if (mem_map[i].pid == -1 && mem_map[i].size >= memsize) {
+			/* Found a free block large enough */
+			int base = mem_map[i].base;
+			
+			/* If the block is significantly larger, split it */
+			if (mem_map[i].size > memsize) {
+				int j;
+				for (j = 0; j < NR_MEM_BLOCKS; j++) {
+					if (mem_map[j].size == 0 && mem_map[j].pid == -1) {
+						mem_map[j].base = base + memsize;
+						mem_map[j].size = mem_map[i].size - memsize;
+						mem_map[j].pid = -1;
+						break;
+					}
+				}
+				/* If no empty slot in mem_map, we just use the whole block */
+				if (j != NR_MEM_BLOCKS)
+					mem_map[i].size = memsize;
+			}
+			
+			mem_map[i].pid = pid;
+			printl("{MM} alloc_mem: pid=%d, base=0x%x, size=0x%x\n", pid, base, memsize);
+			return base;
+		}
 	}
 
-	int base = PROCS_BASE +
-		(pid - (NR_TASKS + NR_NATIVE_PROCS)) * PROC_IMAGE_SIZE_DEFAULT;
-
-	if (base + memsize >= memory_size)
-		panic("memory allocation failed. pid:%d", pid);
-
-	return base;
+	panic("memory allocation failed. pid:%d", pid);
+	return -1;
 }
 
 /*****************************************************************************
  *                                free_mem
  *****************************************************************************/
 /**
- * Free a memory block. Because a memory block is corresponding with a PID, so
- * we don't need to really `free' anything. In another word, a memory block is
- * dedicated to one and only one PID, no matter what proc actually uses this
- * PID.
+ * Free a memory block. 
  * 
  * @param pid  Whose memory is to be freed.
  * 
@@ -134,5 +167,41 @@ PUBLIC int alloc_mem(int pid, int memsize)
  *****************************************************************************/
 PUBLIC int free_mem(int pid)
 {
-	return 0;
+	int i;
+	for (i = 0; i < NR_MEM_BLOCKS; i++) {
+		if (mem_map[i].pid == pid) {
+			printl("{MM} free_mem: pid=%d, base=0x%x, size=0x%x\n", pid, mem_map[i].base, mem_map[i].size);
+			mem_map[i].pid = -1;
+			
+			/* Try to merge with adjacent free blocks */
+			int j;
+			for (j = 0; j < NR_MEM_BLOCKS; j++) {
+				if (mem_map[j].pid == -1 && mem_map[j].size > 0) {
+					/* check if j is right after i */
+					if (mem_map[i].base + mem_map[i].size == mem_map[j].base) {
+						mem_map[i].size += mem_map[j].size;
+						mem_map[j].base = 0;
+						mem_map[j].size = 0;
+						/* restart merging from i */
+						j = -1;
+						continue;
+					}
+					/* check if i is right after j */
+					if (mem_map[j].base + mem_map[j].size == mem_map[i].base) {
+						mem_map[j].size += mem_map[i].size;
+						mem_map[i].base = 0;
+						mem_map[i].size = 0;
+						/* i is now empty, j is the new block */
+						i = j;
+						/* restart merging from i */
+						j = -1;
+						continue;
+					}
+				}
+			}
+			return 0;
+		}
+	}
+
+	return -1;
 }

@@ -30,6 +30,7 @@ void assertion_failure(char *exp, char *file, char *base_file, int line);
 
 #define	O_CREAT		1
 #define	O_RDWR		2
+#define O_TRUNC         0x200
 
 #define SEEK_SET	1
 #define SEEK_CUR	2
@@ -71,8 +72,8 @@ struct time {
  *   printf:
  *
  *           [send msg]                WRITE           DEV_WRITE
- *                      USER_PROC ------------ùù FS -------------ùù TTY
- *                              ùI______________ùLùI_______________/
+ *                      USER_PROC ------------ÔøΩÔøΩ FS -------------ÔøΩÔøΩ TTY
+ *                              ÔøΩI______________ÔøΩLÔøΩI_______________/
  *           [recv msg]             SYSCALL_RET       SYSCALL_RET
  *
  *----------------------------------------------------------------------
@@ -104,7 +105,7 @@ PUBLIC  int     vsprintf(char *buf, const char *fmt, va_list args);
 PUBLIC  int     logcontrol(int what, int status, void *buf);
 
 /*--------*/
-/* ù?ùù */
+/* ÔøΩ?ÔøΩÔøΩ */
 /*--------*/
 
 #ifdef ENABLE_DISK_LOG
@@ -151,3 +152,4 @@ PUBLIC	int	syslog		(const char *fmt, ...);
 
 
 #endif /* _ORANGES_STDIO_H_ */
+
