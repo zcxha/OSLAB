@@ -523,7 +523,12 @@ p->ticks = p->priority = prio;
 - **特殊逻辑**：
   - `deadlock()` 追 `p_sendto` 链检测环并 `panic`（`kernel/proc.c:245-270`），属于“失败即停止”的强一致策略。
   - `inform_int()` 把硬件中断转换成可接收的 `HARD_INT` 语义（`kernel/proc.c:528-551`）。
-  - `sys_logcontrol` 将“控制开关/读取/写入/时间/键盘”等需求复用到同一个系统调用号上（见 `all.md:10.1/10.2` 对应实现分析；代码落点 `kernel/proc.c:626-677`）。
+  - `sys_logcontrol` 将“控制开关/读取/写入/时间/键盘”等需求复用到同一个系统调用号上（见 `all.md:11.1/11.2` 对应实现分析；代码落点 `kernel/proc.c:626-677`）。
+  - `dynamic_check()` 实现“动态度量 + 可视化告警”的防御链路（`kernel/proc.c:692-802`），由时钟中断周期性触发：
+    - **心跳指示**：在屏幕中心（Row 12, Col 40）闪烁绿色/浅绿色 `M`，用于表明动态检测处于持续运行状态（`kernel/proc.c:699-726`）。
+    - **攻击可视化告警**：当检测到“返回地址越界”时，用红底白字的 `!` 填满整个屏幕（`kernel/proc.c:777-795`），形成极强的可见性告警。
+    - **显存段选择子修复**：该函数直接写显存，必须显式设置 `gs=SELECTOR_KERNEL_GS` 才能保证在中断上下文下稳定写入视频内存（`kernel/proc.c:707-725` 与 `kernel/proc.c:786-793`）。
+    - **误报与实验可控性**：仅依赖“读取 `*esp` 作为返回地址”的启发式在任意时刻都可能误报（`esp` 可能指向局部变量/参数而非 ret addr）。因此当前实现将“越界检测 + 红屏告警”限定为进程名为 `attack` 时启用（`kernel/proc.c:757-761`），以保证 `ls/echo` 等正常命令不会被误判刷红屏。
 - **关键函数与 I/O 约定（按真实签名）**：
    - `schedule(void)`（`kernel/proc.c:51-88`）
      - **输入**：全局 `proc_table[]` 中处于 READY 的条目（`p_flags==0`）与其 `ticks/priority`。
@@ -574,11 +579,13 @@ p->ticks = p->priority = prio;
 - **输入**：键盘扫描码（来自 `kernel/keyboard.c`）与用户进程对 `/dev_tty*` 的 `read/write` 请求（经 FS 转发）。
 - **输出**：字符回显到显存、把输入字符投递给等待 `read()` 的进程（通过 `SUSPEND_PROC/RESUME_PROC` 机制，见 `fs/main.c:67-69`）。
 - **边界条件**：组合键（如 `Shift+Up/Down`）当前用于滚屏（`all.md:7.3`），与“命令历史”行为存在键位复用冲突，需要在扩展设计中重新分配键位或做模式区分。
+- **内核日志输出位置约定**：`printl -> sys_printx` 的默认输出目标是 `TTY_FIRST`（tty0），避免内核日志干扰用户交互式 Shell（通常运行在 tty1/tty2）（`kernel/tty.c:400-453`，关键输出点 `kernel/tty.c:442-447`）。
 
 **`kernel/hd.c`**
 - **职责**：硬盘驱动任务，处理 `DEV_*` 消息并通过端口 I/O 完成扇区读写。
 - **输入**：来自 FS 的 `DEV_OPEN/DEV_READ/DEV_WRITE` 请求（`include/sys/const.h:188-193`）。
 - **输出**：完成扇区级数据传输，并通过消息回包唤醒请求方，体现异步 I/O（见 `all.md:2.3`）。
+- **输出噪声控制**：硬盘 I/O 频率很高，驱动层若打印多余换行会在 tty0 形成“空行刷屏”，淹没 `{MM}` 等关键日志。因此在 `hd_rdwt()` 中不应存在无意义的 `printl("\n")`（`kernel/hd.c:166-214`）。
 
 **`kernel/systask.c`**
 - **职责**：系统服务请求（ticks/pid/rtc/proc_table 查询等）。
@@ -647,6 +654,7 @@ if (reply) { mm_msg.type = SYSCALL_RET; send_recv(SEND, src, &mm_msg); }
 - **split 依赖**：需要找到一个“空槽位”（`size==0 && pid==-1`）来存放剩余空闲块（`mm/main.c:135-142`）。
   - 如果找不到空槽位（`j == NR_MEM_BLOCKS`），则 **不会 split**，而是“整块分配给该 pid”（因为 `mem_map[i].size` 不会被缩小）。
 - **失败策略**：这里不是返回 -1，而是直接 `panic("memory allocation failed...")`（`mm/main.c:154`），因此它是“不可恢复错误”。
+- **调试输出（与 tty0 观测强相关）**：分配成功后会打印 `{MM} alloc_mem...`（`mm/main.c:149-150`），释放时会打印 `{MM} free_mem...`（`mm/main.c:173-174`）。这些日志通常用于观察 `fork/exec/exit` 触发的内存生命周期。
 
 #### 5.1.4 `free_mem()`：相邻合并的实现方式
 `free_mem(pid)`（`mm/main.c:168-207`）做两步：
@@ -717,6 +725,32 @@ if (reply) { mm_msg.type = SYSCALL_RET; send_recv(SEND, src, &mm_msg); }
 
 因此 `exec` 的本质是：不创建新进程，而是在**同一个 PID 的地址空间里覆盖代码段/数据段**，并重置入口与栈。
 
+#### 5.2.4 静态完整性度量：`Integrity Check` 的落点与输出语义
+OrangeOS 在 `exec` 路径上加入了一个“静态度量（Static Measurement）”步骤，用于在装载 ELF 之前对二进制内容做快速校验（`mm/exec.c:92-133`）。
+
+**度量位置：为何放在 `do_exec()`**
+- `exec` 是“替换进程镜像”的唯一入口：只有在这里才能对即将装载的文件内容进行统一检查。
+- MM 已经把整个文件读入 `mmbuf`，天然具备“对完整内容遍历计算”的条件（`mm/exec.c:84-91`）。
+
+**度量算法：XOR 校验和（checksum）**
+- 实现采用按字节异或的方式计算 `checksum`：
+  - `checksum ^= mmbuf[j]`（`mm/exec.c:95-99`）
+- 这类校验和计算开销极低，适合作为实验性质的静态度量（它不是密码学安全哈希，更多用于教学演示“可信基准 vs 实际测量值”的对比）。
+
+**可信库（Trusted DB）与文件名匹配**
+- 可信库是一个内联的 `trusted_db[]` 数组，保存“程序名 -> 预期 checksum”（`mm/exec.c:103-112`）。
+- `pathname` 可能是 `/echo`、`echo` 或带路径的形式，因此 `check_name()` 用“后缀匹配 + 斜杠边界”把 `pathname` 规约到文件名语义（`mm/exec.c:29-53` 与 `mm/exec.c:118-130`）。
+
+**输出语义：PASSED / FAILED / Unknown**
+`do_exec()` 会打印三类结果，均输出到内核日志（通常在 tty0）：
+- `Integrity Check PASSED`：可信库命中且 checksum 一致（`mm/exec.c:122-124`）。
+- `Integrity Check FAILED`：可信库命中但 checksum 不一致，同时打印期望值与实际值（`mm/exec.c:124-127`）。
+- `Integrity Check: Unknown binary`：可信库未命中，输出计算得到的 checksum 供更新基准（`mm/exec.c:131-133`）。
+
+**与“动态防御”的关系**
+- 静态度量解决的是“装载前的可信性”问题：文件内容是否符合预期。
+- 动态防御解决的是“运行时行为/控制流异常”问题：例如实验中用 `attack` 触发越界返回地址并红屏告警（见 `kernel/proc.c:692-802`）。
+
 ### 5.3 MM 核心文件功能说明（输入/输出与关键边界）
 #### 5.3.1 `mm/main.c`：MM 的消息分发与内存块管理
 - **职责**：作为 Ring1 服务进程运行 `task_mm()` 消息循环（`all.md:5.1.1`），并维护 `mem_map[]` 实现 first-fit 分配与合并释放（`all.md:5.1.3-5.1.4`）。
@@ -748,6 +782,7 @@ if (reply) { mm_msg.type = SYSCALL_RET; send_recv(SEND, src, &mm_msg); }
 
 #### 5.3.3 `mm/exec.c`：ELF 装载与 argv 指针修正
 - **职责**：解析 ELF、把 `PT_LOAD` 段拷入目标地址空间，并重置入口点与用户栈（`all.md:5.2.3`）。
+- **静态度量扩展**：在装载前对 `mmbuf` 做 XOR 校验并与 `trusted_db[]` 比对，输出 `PASSED/FAILED/Unknown` 三态结果（`mm/exec.c:92-133`，详见 `all.md:5.2.4`）。
 - **输入**：调用者传来的 `pathname` 指针与参数块 `BUF` 指针（来自系统调用消息）。
 - **输出**：写回调用者的 `regs.eip/regs.esp/regs.eax/regs.ecx` 等寄存器值（通过消息回包语义）。
 - **边界条件**：
@@ -1469,9 +1504,429 @@ main
 
 ---
 
-## 10. 用户态扩展深度分析 (Deep Dive)
+## 10. 动静态防护 (Static & Dynamic Defense)
 
-### 10.1 系统日志系统 (Log System)
+本章围绕一个核心目标：在 OrangeOS 现有“微内核 + Ring1 服务进程 + Ring3 命令”的结构上，把“运行前可信性（静态）”与“运行中异常可见（动态）”串成一条完整链路，并保证该链路的输出不干扰正常 Shell 交互。
+
+OrangeOS 的安全机制在当前实现中更偏“教学实验”：强调落点清晰、链路完整、现象可观测，而非追求密码学强度或低误报率。理解这一点有助于正确解读后文的实现取舍。
+
+### 10.1 总览：两条链路的触发点与输出通道
+
+**A. 静态防护（Static Measurement）**
+- **触发点**：`execv()` 进入 MM 的 `do_exec()`（`mm/exec.c:63-183`），在 ELF 装载前对文件内容做测量。
+- **输入**：目标二进制文件的完整内容（已读入 `mmbuf`）。
+- **输出**：以 `printl` 输出到内核日志（通常观察位置是 tty0），包括 `PASSED/FAILED/Unknown` 等结果（`mm/exec.c:101-133`）。
+
+**B. 动态防护（Dynamic Measurement）**
+- **触发点**：时钟中断 `clock_handler()` 每 100 tick 调用 `dynamic_check()`（`kernel/clock.c:37-40`），属于周期性触发。
+- **输入**：当前正在运行的进程 `p_proc_ready` 的寄存器快照与 LDT 代码段描述符（`kernel/proc.c:695-771`）。
+- **输出**：两类直接写显存的可视化信号：
+  - 屏幕中心闪烁 `M` 作为“检测心跳”（`kernel/proc.c:699-726`）。
+  - 触发告警时全屏红底白字 `!`（`kernel/proc.c:777-795`）。
+
+两条链路共同依赖一个前提：**日志与告警必须可被观察且可被区分**。因此实现上刻意把“文字日志（printl）”与“可视化告警（直接写显存）”分流：前者用于可追溯，后者用于不可忽略。
+
+### 10.2 静态防护：`do_exec()` 装载前完整性度量
+
+静态防护的实现完全落在 MM 的 `do_exec()`，它天然位于“读取文件 -> 装载 ELF”之间，是检查二进制完整性的最佳位置（`mm/exec.c:84-149`）。
+
+#### 10.2.1 数据流：从 pathname 到 mmbuf
+
+执行链路（只展开与静态度量相关部分）：
+```text
+Ring3: execv(path, argv)
+  -> lib/exec.c: 组装 MESSAGE 并 send_recv(BOTH, TASK_MM, &msg)
+Ring1: mm/exec.c: do_exec()
+  -> stat(pathname,&s)
+  -> fd=open(pathname,O_RDWR); read(fd,mmbuf,s.st_size); close(fd)
+  -> 对 mmbuf 做 checksum；与 trusted_db 比对；打印结果
+  -> 继续 ELF 装载（PT_LOAD phys_copy 等）
+```
+
+这里的关键点是：度量发生在 `read()` 之后、ELF 装载之前，因此“检查对象就是即将被装载执行的真实字节序列”。
+
+#### 10.2.2 度量算法：XOR checksum（实验可观测优先）
+
+当前采用按字节异或累积的校验和：
+```c
+u8 checksum = 0;
+for (j = 0; j < s.st_size; j++) {
+    checksum ^= mmbuf[j];
+}
+```
+对应实现落点：`mm/exec.c:95-99`。
+
+这类校验和的特征：
+- **优点**：实现极简、开销低、适合演示“测量 -> 比对 -> 输出三态结果”。
+- **局限**：不抗碰撞，无法抵御刻意构造的对抗样本；因此它是“教学型完整性度量”，不是生产级哈希。
+
+#### 10.2.3 可信基准：`trusted_db[]` 与 `check_name()` 的匹配语义
+
+可信库采用一个内联数组：
+```c
+struct { char * name; u8 sum; } trusted_db[] = {
+    {"echo", 0x12},
+    {"pwd", 0x34},
+    {0, 0}
+};
+```
+对应实现落点：`mm/exec.c:103-112`。
+
+由于 `pathname` 可能是 `/echo`、`echo` 或更长路径，因此 `check_name()` 采取“后缀匹配 + 斜杠边界”的方式把路径规约到“文件名”语义（`mm/exec.c:29-53`）。这一点决定了“可信库条目应该以 basename 形式存放”，而不是包含路径前缀。
+
+#### 10.2.4 输出三态：PASSED / FAILED / Unknown
+
+比对输出逻辑分三种情况（`mm/exec.c:118-133`）：
+- **PASSED**：可信库命中且 checksum 相等，打印 `Integrity Check PASSED for ...`。
+- **FAILED**：可信库命中但 checksum 不等，打印 `FAILED` 并附带 `Expected/Got`。
+- **Unknown**：可信库未命中，打印 `Unknown binary` 与计算得到的 checksum，便于将来补录基准。
+
+该输出使用 `printl`，因此默认流向 tty0（见 `kernel/tty.c:442-447` 的输出约定）。这保证静态度量不会干扰 tty1 的 Shell 回显，但也要求排查时切换到 tty0 观察日志。
+
+### 10.3 动态防护：周期触发 + 控制流异常检测 + 可视化告警
+
+动态防护由“触发器（clock）”与“检查器（dynamic_check）”构成，两者分别落在 `kernel/clock.c` 与 `kernel/proc.c`。
+
+#### 10.3.1 触发器：`clock_handler()` 每 100 tick 调用 `dynamic_check()`
+
+实现非常直接：
+```c
+if (ticks % 100 == 0) {
+    dynamic_check();
+}
+```
+对应实现落点：`kernel/clock.c:37-40`。
+
+该触发点位于时钟中断处理函数中，意味着：
+- 检查在 Ring0 中断上下文执行，不依赖用户进程主动配合。
+- 检查频率与 `HZ`/ticks 定义相关；当前每 100 tick 一次，属于“可见但不过分频繁”的实验频率。
+
+#### 10.3.2 检查对象：以 `p_proc_ready` 为当前观测进程
+
+`dynamic_check()` 的第一行就是：
+```c
+struct proc* p = p_proc_ready;
+```
+对应实现落点：`kernel/proc.c:695-697`。
+
+含义是：每次触发只检查“此刻正在运行”的进程。这种设计的优点是实现简单、开销低；缺点是覆盖面取决于调度器是否给每个进程足够的时间片。
+
+#### 10.3.3 心跳可视化：屏幕中心闪烁 `M`
+
+心跳信号用于回答“动态检测到底有没有在跑”。实现方式是直接写显存字符单元（字符 + 属性）：
+```c
+int center_offset = (12 * 80 + 40) * 2;
+asm volatile(
+    "movw %1, %%gs\n\t"
+    "movb $'M', %%al\n\t"
+    "movb $0x02, %%ah\n\t"
+    "movl %0, %%edi\n\t"
+    "movw %%ax, %%gs:(%%edi)"
+    :: "r"(center_offset), "r"((u16)SELECTOR_KERNEL_GS) : "eax", "edi"
+);
+```
+对应实现落点：`kernel/proc.c:699-726`。
+
+这里必须强调 `gs` 的设置：`SELECTOR_KERNEL_GS` 在 `include/sys/protect.h:89` 定义为 `SELECTOR_VIDEO`（`include/sys/protect.h:83-89`），其 RPL=3（`SELECTOR_VIDEO (0x18+3)`）保证了视频段选择子的访问语义与系统整体的段权限设置一致。动态检查运行在中断上下文，不能假设 `gs` 一定保持在“视频段”，因此每次写显存前显式 `movw ... , %gs` 是稳定显示的关键。
+
+#### 10.3.4 控制流检查：从 `esp` 取“疑似返回地址”并做段界限判定
+
+当前实现采取一种最直接、也最容易误报的启发式：
+1. 读取当前进程的用户栈指针：`u32 esp = p->regs.esp;`（`kernel/proc.c:738-739`）
+2. 把该虚拟地址转换为线性地址并解引用：`u32 ret_addr = *stack_top_linear;`（`kernel/proc.c:748-751`）
+3. 从 LDT 代码段描述符重建段界限：
+   - `limit_low + limit_high_attr2` 拼出 20-bit limit（`kernel/proc.c:764-766`）
+   - 若置位 `DA_LIMIT_4K`，按 4KB 粒度扩展到字节级上限（`kernel/proc.c:769-771`）
+4. 判断 `ret_addr > code_limit` 则认为越界（`kernel/proc.c:777`）。
+
+上述逻辑的关键实现片段如下（仅摘取核心步骤）：
+```c
+u32 esp = p->regs.esp;
+u32* stack_top_linear = (u32*)va2la(proc2pid(p), (void*)esp);
+u32 ret_addr = *stack_top_linear;
+
+struct descriptor * d = &p->ldts[INDEX_LDT_C];
+u32 code_limit = (d->limit_low) | ((d->limit_high_attr2 & 0xF) << 16);
+if (d->limit_high_attr2 & DA_LIMIT_4K) {
+    code_limit = (code_limit << 12) | 0xFFF;
+}
+if (ret_addr > code_limit) { /* alert */ }
+```
+对应实现落点：`kernel/proc.c:738-777`。
+
+#### 10.3.5 告警输出：全屏红底白字 `!`（直接写显存）
+
+一旦判定越界，告警策略不是打印日志，而是填满整个屏幕的字符单元（80*25=2000）：
+```c
+for (i = 0; i < 2000; i++) {
+    int offset = i * 2;
+    asm volatile(
+        "movw %1, %%gs\n\t"
+        "movb $'!', %%al\n\t"
+        "movb $0x4F, %%ah\n\t"
+        "movl %0, %%edi\n\t"
+        "movw %%ax, %%gs:(%%edi)"
+        :: "r"(offset), "r"((u16)SELECTOR_KERNEL_GS) : "eax", "edi"
+    );
+}
+```
+对应实现落点：`kernel/proc.c:783-794`。
+
+属性字节 `0x4F` 的意义是“红底 + 亮白字”，其视觉强度远高于普通 `printl` 日志，用于满足“攻击发生时不可忽略”的实验要求。
+
+### 10.4 误报根因与当前实现的取舍（为何 `ls/echo` 会被刷红）
+
+如果对所有进程都执行“`*esp` 作为返回地址”的检查，在实践中会频繁误报，原因在于：
+- 中断到来时刻不可控，`esp` 可能指向局部变量、参数、临时指针，而不是真实的 `ret addr`。
+- 即便 `esp` 指向的是某个“数据值”，它也可能是一个大整数或指针，被误判为“超过代码段界限”的地址。
+
+因此当前实现采用了一个实验化的约束：仅对名为 `attack` 的进程启用越界检测与红屏告警（`kernel/proc.c:757-761`）。这使得：
+- `attack` 能稳定触发红屏，便于演示动态防护效果。
+- `ls/echo` 等正常命令不会被误判导致屏幕被刷红，保证系统可用性。
+
+这一取舍本质上是“演示可控性优先”，而不是“普适检测能力优先”。
+
+### 10.5 与输出可观测性的工程耦合：tty0 噪声与关键日志保留
+
+动静态防护要“可观测”，就必须让 tty0 的输出既包含关键日志，又不被噪声淹没。为此系统在多个层面形成了明确约定：
+
+1. **内核日志默认只输出到 tty0**
+   - `sys_printx` 通过 `out_char(TTY_FIRST->console, ch)` 固定输出目标（`kernel/tty.c:442-447`），避免干扰 tty1 的交互式 Shell。
+2. **驱动层避免打印无意义换行**
+   - 硬盘驱动 `hd_rdwt()` 处于高频路径，若在此打印 `printl("\n")` 会造成 tty0 空行刷屏，掩盖 `{MM} Integrity Check...` 等关键输出（`kernel/hd.c:166-214`）。
+3. **MM 的内存生命周期日志保留为“关键观测点”**
+   - `alloc_mem/free_mem` 分别打印 `{MM} alloc_mem...` 与 `{MM} free_mem...`（`mm/main.c:149-150`、`mm/main.c:173-174`），它们与 `fork/exec/exit` 的发生高度相关，属于理解系统运行轨迹的重要信号源。
+
+---
+
+## 11. 文件系统安全增强
+
+本章介绍新增的两项安全特性：透明文件加密与进程白名单访问控制。
+
+### 11.1 透明文件加密 (Transparent File Encryption)
+
+#### 11.1.1 设计目标与触发条件
+本特性满足“**打开读入内存为明文**、**写回磁盘为密文**”的要求，并尽量不改变原有 FS/HD 的调用链。
+
+- **触发条件（当前实现）**：路径名中包含子串 `secret` 的文件被视为“受保护文件”（见 `fs/open.c:97-116`）。
+- **加密算法（当前实现）**：对缓冲区逐字节异或 `0x99`（见 `fs/read_write.c:25-30`）。
+
+#### 11.1.2 inode 内存标志位：`i_flags`
+为了做到“不影响磁盘 inode 格式”，加密/保护标志不写入磁盘，仅保存在内存 inode 中：
+
+**代码位置**：`include/sys/fs.h:75-91`
+```c
+struct inode {
+    u32 i_mode;
+    u32 i_size;
+    u32 i_start_sect;
+    u32 i_nr_sects;
+    u8  _unused[16];
+
+    /* the following items are only present in memory */
+    int i_dev;
+    int i_cnt;
+    int i_num;
+    u32 i_flags;    /* File flags (in-memory) */
+};
+
+#define I_FLAGS_ENCRYPT 0x01
+#define I_FLAGS_PROTECT 0x02
+```
+
+这意味着：
+- 即使系统重启，文件“是否受保护”仍由路径规则重新判定（而不是从磁盘元数据恢复）。
+- 旧文件系统镜像完全兼容（不会破坏原有 inode 布局与 `INODE_SIZE`）。
+
+#### 11.1.3 写时加密、读时解密的插入点（`do_rdwt`）
+文件 I/O 的核心路径是 `fs/read_write.c:do_rdwt()`：该函数已经把“字节级读写”映射为“扇区级读写”，因此在这里插入加解密最自然。
+
+**(1) 加密函数**
+**代码位置**：`fs/read_write.c:25-30`
+```c
+PRIVATE void crypt_buf(char * buf, int len)
+{
+    int i;
+    for (i = 0; i < len; i++)
+        buf[i] ^= 0x99;
+}
+```
+
+**(2) 读路径：磁盘读入（密文）→ 解密 → 拷贝给用户（明文）**
+**代码位置**：`fs/read_write.c:125-142`
+```c
+rw_sector(DEV_READ,
+          pin->i_dev,
+          i * SECTOR_SIZE,
+          chunk * SECTOR_SIZE,
+          TASK_FS,
+          fsbuf);
+
+if (fs_msg.type == READ) {
+    if (pin->i_flags & I_FLAGS_ENCRYPT)
+        crypt_buf(fsbuf + off, bytes);
+
+    phys_copy((void*)va2la(src, buf + bytes_rw),
+              (void*)va2la(TASK_FS, fsbuf + off),
+              bytes);
+}
+```
+
+**(3) 写路径：用户数据（明文）→ 拷贝到 FS 缓冲 → 加密 → 写入磁盘（密文）→ 立即还原缓冲（明文）**
+**代码位置**：`fs/read_write.c:143-162`
+```c
+else {  /* WRITE */
+    phys_copy((void*)va2la(TASK_FS, fsbuf + off),
+              (void*)va2la(src, buf + bytes_rw),
+              bytes);
+
+    if (pin->i_flags & I_FLAGS_ENCRYPT)
+        crypt_buf(fsbuf + off, bytes);
+
+    rw_sector(DEV_WRITE,
+              pin->i_dev,
+              i * SECTOR_SIZE,
+              chunk * SECTOR_SIZE,
+              TASK_FS,
+              fsbuf);
+
+    if (pin->i_flags & I_FLAGS_ENCRYPT)
+        crypt_buf(fsbuf + off, bytes);
+}
+```
+
+“写后还原”不是必需条件，但它能避免后续逻辑把 `fsbuf` 当作明文缓存使用时出现二次加密/解密的混乱。
+
+#### 11.1.4 如何直观看到“落盘密文”
+系统在写入受保护文件时会打印“即将写入磁盘的密文字节预览”（前 8 字节）。
+
+**代码位置**：`fs/read_write.c:32-45` 与 `fs/read_write.c:148-151`
+```c
+PRIVATE void dump_crypto_sample(char * buf, int len, char * prefix)
+{
+    char msg[128];
+    int i;
+    int n = len < 8 ? len : 8;
+    sprintf(msg, "{FS} %s [", prefix);
+    for (i = 0; i < n; i++) {
+        char byte_hex[4];
+        sprintf(byte_hex, "%x ", (unsigned char)buf[i]);
+        strcat(msg, byte_hex);
+    }
+    strcat(msg, "]\n");
+    printl(msg);
+}
+```
+
+```c
+if (pin->i_flags & I_FLAGS_ENCRYPT) {
+    crypt_buf(fsbuf + off, bytes);
+    dump_crypto_sample(fsbuf + off, bytes, "DISK WRITE (Ciphertext):");
+}
+```
+
+验证时在 tty0 观察：
+- 若写入内容是 `abc`（十六进制 `61 62 63`），则密文应为 `61^99=f8`、`62^99=fb`、`63^99=fa`，因此日志会出现类似 `f8 fb fa ...` 的字节序列（输出格式为 `%x`，不补 0）。
+
+### 11.2 进程白名单访问控制 (Process Whitelist)
+
+**核心逻辑**:
+- **策略**: 仅允许白名单内的进程（`Init`, `TestA`, `cat`, `edit`）访问受保护文件。
+- **拦截点**: 在文件打开阶段 (`do_open`) 进行鉴权，拒绝非白名单进程获取文件描述符。
+
+**验证方法**:
+1. **密文验证**: 写入受保护文件时观察 `{FS} DISK WRITE (Ciphertext): [ ... ]`，其字节序列应与明文不同（例如 `abc` 对应 `f8 fb fa`）。
+2. **白名单验证**:
+   - 使用 `TestA` (默认 Shell) 创建 `secret.txt` -> **成功**。
+   - 使用 `edit secret.txt` (已加入白名单) -> **成功打开并编辑**。
+   - 使用 `cat secret.txt` (已加入白名单) -> **成功显示明文**。
+   - 使用 `touch secret.txt` (未在白名单) -> **失败 (ACCESS DENIED)**。
+
+**关键实现**:
+- **身份识别**: 使用 `proc_table[src].name` 获取调用者进程名。
+- **鉴权逻辑**: 在 `fs/open.c` 中，若 inode 标记为 `I_FLAGS_PROTECT`，则检查进程名。若不在白名单，打印 `ACCESS DENIED` 并返回错误。
+
+#### 11.2.1 受保护文件识别与标志写入（`do_open`）
+**代码位置**：`fs/open.c:97-116`
+```c
+if (pin) {
+    /* Security Check */
+    int is_secret = 0;
+    const char * p = pathname;
+    while (*p) {
+        if (*p == 's' && *(p+1) == 'e' && *(p+2) == 'c' && *(p+3) == 'r' && *(p+4) == 'e' && *(p+5) == 't') {
+            is_secret = 1;
+            break;
+        }
+        p++;
+    }
+
+    if (is_secret) {
+        pin->i_flags |= I_FLAGS_ENCRYPT | I_FLAGS_PROTECT;
+        printl("{FS} PROTECTED FILE DETECTED: %s\n", pathname);
+    } else {
+        if (pin->i_cnt == 1)
+            pin->i_flags = 0;
+    }
+```
+
+这里的 `pin->i_cnt == 1` 分支用于避免“inode 结构复用导致的脏标志”误判：当 inode 仅首次被引用时，清空历史遗留的 `i_flags`。
+
+#### 11.2.2 白名单判定与拒绝返回（`do_open`）
+**代码位置**：`fs/open.c:118-129`
+```c
+if (pin->i_flags & I_FLAGS_PROTECT) {
+    /* Whitelist: Init, TestA, cat, and edit */
+    if (strcmp(proc_table[src].name, "Init") != 0 && 
+        strcmp(proc_table[src].name, "TestA") != 0 &&
+        strcmp(proc_table[src].name, "cat") != 0 &&
+        strcmp(proc_table[src].name, "edit") != 0) {
+        printl("{FS} ACCESS DENIED: Process '%s' tries to access protected file '%s'\n", proc_table[src].name, pathname);
+        put_inode(pin);
+        return -1;
+    }
+    printl("{FS} ACCESS GRANTED: Process '%s' accessed protected file '%s'\n", proc_table[src].name, pathname);
+}
+```
+
+鉴权发生在“把 `fd` 绑定到 `f_desc_table[i]` 之前”，因此非白名单进程无法获得有效文件描述符，后续的 `read/write` 也就无从谈起。
+
+**代码落点**:
+- `include/sys/fs.h`: 新增 `i_flags` 字段与 `I_FLAGS_*` 宏。
+- `fs/open.c`: 安全检查与白名单逻辑。
+- `fs/read_write.c`: 加解密逻辑。
+
+#### 11.3 使用建议与常见现象解释
+本节给出与“对比验证”直接相关的操作建议，避免出现因用户态工具行为导致的误判。
+
+**(1) 为什么 `cat secret.txt` 会在 `abc` 后面跟很多“特殊符号”？**
+这通常不是加解密出错，而是文件并未被“覆盖写截断”，导致旧内容残留在文件尾部：
+- 例如旧文件大小是 100 字节，新写入只覆盖了前 3 字节 `abc`，后面 97 字节仍是旧数据，`cat` 会把它们一并输出。
+
+为避免该问题，`edit` 在“直接写入内容”的路径上会对已有文件使用 `O_TRUNC` 截断后再写入：
+**代码位置**：`command/edit.c:659-677`
+```c
+int fd = open(argv[1], O_RDWR | O_TRUNC);
+if (fd == -1) {
+    fd = open(argv[1], O_CREAT | O_RDWR);
+    if (fd == -1) {
+        printf("Failed to create %s. Permission denied or invalid path.\n", argv[1]);
+        return 1;
+    }
+}
+write(fd, argv[2], strlen(argv[2]));
+close(fd);
+```
+
+因此在进行“加密/白名单”演示时，建议用如下方式生成一个内容干净的样例文件：
+- `edit secret.txt abc`（覆盖写 + 截断）
+- 再 `cat secret.txt` 验证明文输出
+
+---
+
+## 12. 用户态扩展深度分析 (Deep Dive)
+
+### 12.1 系统日志系统 (Log System)
 **代码文件**: `kernel/proc.c`, `command/log.c`
 
 - **环形缓冲区**: 内核分配 4KB 空间（`include/sys/global.h:53-55` 的 `LOGBUF_SIZE=4096`）。`append_log` 负责在游标到达末尾时回绕。
@@ -1481,7 +1936,7 @@ main
     - **文件 I/O**: 在 `do_rdwt` 中记录访问的文件名和读写字节数。
 - **防死锁设计**: 系统调用日志记录函数会过滤掉 `logcontrol` 自身的调用，防止产生无限递归。
 
-### 10.2 Dino 字符游戏
+### 12.2 Dino 字符游戏
 **代码文件**: `command/dino.c`
 
 一个无需图形界面的字符版恐龙跑酷游戏，展示了系统的高级交互能力。
@@ -1507,7 +1962,7 @@ printf("\r%s", line);
 
 ---
 
-## 11. 总结
+## 13. 总结
 
 OrangeOS 展示了一个具备现代特性的微内核操作系统雏形：
 1.  **分层清晰**: 引导 -> 内核 -> 系统服务 -> 用户进程。

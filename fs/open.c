@@ -95,6 +95,39 @@ PUBLIC int do_open()
 	}
 
 	if (pin) {
+		/* Security Check */
+		int is_secret = 0;
+		const char * p = pathname;
+		while (*p) {
+			if (*p == 's' && *(p+1) == 'e' && *(p+2) == 'c' && *(p+3) == 'r' && *(p+4) == 'e' && *(p+5) == 't') {
+				is_secret = 1;
+				break;
+			}
+			p++;
+		}
+
+		if (is_secret) {
+			pin->i_flags |= I_FLAGS_ENCRYPT | I_FLAGS_PROTECT;
+			printl("{FS} PROTECTED FILE DETECTED: %s\n", pathname);
+		} else {
+			/* If we are the first to open, clear flags to avoid garbage from reused inode */
+			if (pin->i_cnt == 1)
+				pin->i_flags = 0;
+		}
+
+		if (pin->i_flags & I_FLAGS_PROTECT) {
+			/* Whitelist: Init, TestA, cat, and edit */
+			if (strcmp(proc_table[src].name, "Init") != 0 && 
+			    strcmp(proc_table[src].name, "TestA") != 0 &&
+			    strcmp(proc_table[src].name, "cat") != 0 &&
+			    strcmp(proc_table[src].name, "edit") != 0) {
+				printl("{FS} ACCESS DENIED: Process '%s' tries to access protected file '%s'\n", proc_table[src].name, pathname);
+				put_inode(pin);
+				return -1;
+			}
+			printl("{FS} ACCESS GRANTED: Process '%s' accessed protected file '%s'\n", proc_table[src].name, pathname);
+		}
+
 		/* connects proc with file_descriptor */
 		pcaller->filp[fd] = &f_desc_table[i];
 

@@ -22,6 +22,28 @@
 
 extern int logcontrol(int what, int status, void *buf);
 
+PRIVATE void crypt_buf(char * buf, int len)
+{
+	int i;
+	for (i = 0; i < len; i++)
+		buf[i] ^= 0x99;
+}
+
+PRIVATE void dump_crypto_sample(char * buf, int len, char * prefix)
+{
+	char msg[128];
+	int i;
+	int n = len < 8 ? len : 8;
+	sprintf(msg, "{FS} %s [", prefix);
+	for (i = 0; i < n; i++) {
+		char byte_hex[4];
+		sprintf(byte_hex, "%x ", (unsigned char)buf[i]);
+		strcat(msg, byte_hex);
+	}
+	strcat(msg, "]\n");
+	printl(msg);
+}
+
 /*****************************************************************************
  *                                do_rdwt
  *****************************************************************************/
@@ -111,6 +133,9 @@ PUBLIC int do_rdwt()
 				  fsbuf);
 
 			if (fs_msg.type == READ) {
+				if (pin->i_flags & I_FLAGS_ENCRYPT)
+					crypt_buf(fsbuf + off, bytes);
+
 				phys_copy((void*)va2la(src, buf + bytes_rw),
 					  (void*)va2la(TASK_FS, fsbuf + off),
 					  bytes);
@@ -119,12 +144,21 @@ PUBLIC int do_rdwt()
 				phys_copy((void*)va2la(TASK_FS, fsbuf + off),
 					  (void*)va2la(src, buf + bytes_rw),
 					  bytes);
+
+				if (pin->i_flags & I_FLAGS_ENCRYPT) {
+					crypt_buf(fsbuf + off, bytes);
+					dump_crypto_sample(fsbuf + off, bytes, "DISK WRITE (Ciphertext):");
+				}
+
 				rw_sector(DEV_WRITE,
 					  pin->i_dev,
 					  i * SECTOR_SIZE,
 					  chunk * SECTOR_SIZE,
 					  TASK_FS,
 					  fsbuf);
+
+				if (pin->i_flags & I_FLAGS_ENCRYPT)
+					crypt_buf(fsbuf + off, bytes);
 			}
 			off = 0;
 			bytes_rw += bytes;

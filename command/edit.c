@@ -659,20 +659,17 @@ int main(int args, char *argv[])
     else if (args == 3)
     {
         // 编辑文件内容或创建带内容的文件
-        // 首先检查文件是否存在
-        int fd = open(argv[1], O_RDWR);
-        if (fd != -1) {
-            // 文件存在，先关闭它
-            close(fd);
-            // 删除文件
-            unlink(argv[1]);
-        }
-        // 创建新文件
-        fd = open(argv[1], O_CREAT | O_RDWR);
+        // 尝试打开现有文件并截断
+        int fd = open(argv[1], O_RDWR | O_TRUNC);
         if (fd == -1) {
-            printf("Failed to open %s for writing.\n", argv[1]);
-            return 1;
+            // 文件不存在，创建新文件
+            fd = open(argv[1], O_CREAT | O_RDWR);
+            if (fd == -1) {
+                printf("Failed to create %s. Permission denied or invalid path.\n", argv[1]);
+                return 1;
+            }
         }
+        
         // 写入内容
         write(fd, argv[2], strlen(argv[2]));
         close(fd);

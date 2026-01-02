@@ -83,7 +83,11 @@ struct inode {
 	int	i_dev;
 	int	i_cnt;		/**< How many procs share this inode  */
 	int	i_num;		/**< inode nr.  */
+	u32	i_flags;	/**< File flags (in-memory) */
 };
+
+#define I_FLAGS_ENCRYPT 0x01
+#define I_FLAGS_PROTECT 0x02
 
 /**
  * @def   INODE_SIZE
