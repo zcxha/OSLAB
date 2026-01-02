@@ -105,7 +105,7 @@ PUBLIC  int     vsprintf(char *buf, const char *fmt, va_list args);
 PUBLIC  int     logcontrol(int what, int status, void *buf);
 
 /*--------*/
-/* ï¿½?ï¿½ï¿½ */
+/* ï¿??ï¿½ï¿½ */
 /*--------*/
 
 #ifdef ENABLE_DISK_LOG
@@ -152,4 +152,3 @@ PUBLIC	int	syslog		(const char *fmt, ...);
 
 
 #endif /* _ORANGES_STDIO_H_ */
-

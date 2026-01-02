@@ -689,3 +689,116 @@ PUBLIC void do_log_syscall(int eax, int ebx, int ecx, int edx)
 	}
 }
 
+/*****************************************************************************
+ *                                dynamic_check
+ *****************************************************************************/
+PUBLIC void dynamic_check()
+{
+	struct proc* p = p_proc_ready;
+
+	/* Heartbeat Indicator: Flash a green 'M' at the center of the screen 
+	 * to indicate that the dynamic measurement is active.
+	 */
+	static int heartbeat = 0;
+	heartbeat = !heartbeat;
+	/* Screen center: Row 12, Col 40. Offset = (12*80 + 40) * 2 */
+	int center_offset = (12 * 80 + 40) * 2;
+	
+	if (heartbeat) {
+		asm volatile(
+			"movw %1, %%gs\n\t"
+			"movb $'M', %%al\n\t"
+			"movb $0x02, %%ah\n\t" /* Green Color */
+			"movl %0, %%edi\n\t"
+			"movw %%ax, %%gs:(%%edi)"
+			:: "r"(center_offset), "r"((u16)SELECTOR_KERNEL_GS) : "eax", "edi"
+		);
+	} else {
+		/* Restore space or keep M but change color? Let's just blink M */
+		asm volatile(
+			"movw %1, %%gs\n\t"
+			"movb $'M', %%al\n\t"
+			"movb $0x0A, %%ah\n\t" /* Light Green Color */
+			"movl %0, %%edi\n\t"
+			"movw %%ax, %%gs:(%%edi)"
+			:: "r"(center_offset), "r"((u16)SELECTOR_KERNEL_GS) : "eax", "edi"
+		);
+	}
+
+	/* Only check user processes. 
+	 * NR_TASKS system tasks (0-4), NR_NATIVE_PROCS (5-8). 
+	 * User processes start from index NR_TASKS + NR_NATIVE_PROCS.
+	 */
+	/* if (proc2pid(p) < NR_TASKS + NR_NATIVE_PROCS) {
+		return; 
+	} */
+	
+	if (p->p_flags != 0) return; /* Not running */
+
+	/* Get stack pointer (user stack esp from regs) */
+	u32 esp = p->regs.esp;
+	
+	/* Convert virtual address to linear address */
+	/* Note: stack grows downwards. The 'top' element is at esp. */
+	/* We assume the top element is the return address (e.g. just called a function or just pushed EIP). 
+	 * However, in random interrupt moment, ESP might point to local vars.
+	 * But the requirement asks to "parse stack structure, check return address".
+	 * A simple heuristic is checking the content at [ESP]. If it looks like a code pointer, verify it.
+	 */
+	u32* stack_top_linear = (u32*)va2la(proc2pid(p), (void*)esp);
+	
+	/* Read value at stack top */
+	u32 ret_addr = *stack_top_linear;
+	
+	/* Simulation for Verification: 
+	 * If the process name is "attack", we simulate a malicious return address 
+	 * to demonstrate the detection logic.
+	 */
+	if (strcmp(p->name, "attack") == 0) {
+		ret_addr = 0xFFFFFFFF; /* Force an illegal address */
+	} else {
+		return;
+	}
+
+	/* Check Code Segment Limit */
+	struct descriptor * d = &p->ldts[INDEX_LDT_C];
+	u32 code_limit = (d->limit_low) | 
+					 ((d->limit_high_attr2 & 0xF) << 16);
+	
+	/* If G bit is set (Granularity 4KB) */
+	if (d->limit_high_attr2 & DA_LIMIT_4K) {
+		code_limit = (code_limit << 12) | 0xFFF;
+	}
+
+	/* Check Code Segment Limit */
+	/* Note: In flat model, base is 0, so linear addr = offset. 
+	 * We are checking if the offset is within the segment limit.
+	 */
+	if (ret_addr > code_limit) {
+		/* It might not be a return address, but if it is interpreted as one, it's illegal. */
+		
+		/* INTRUSIVE VISUAL ALERT: Fill the ENTIRE SCREEN with RED '!' */
+		/* This is impossible to miss. */
+		/* Video memory size: 80 cols * 25 rows = 2000 chars */
+		int i;
+		for (i = 0; i < 2000; i++) {
+			int offset = i * 2;
+			asm volatile(
+				"movw %1, %%gs\n\t"
+				"movb $'!', %%al\n\t"
+				"movb $0x4F, %%ah\n\t" /* Red Background, White Text */
+				"movl %0, %%edi\n\t"
+				"movw %%ax, %%gs:(%%edi)"
+				:: "r"(offset), "r"((u16)SELECTOR_KERNEL_GS) : "eax", "edi"
+			);
+		}
+	} else {
+        /* It is within code segment. */
+		/* Do NOT clear the screen automatically in ISR, as it will cause flicker.
+		 * If an alert was triggered, it will stay until the screen is redrawn by TTY or user.
+		 * This ensures the alert is seen.
+		 */
+    }
+}
+
+

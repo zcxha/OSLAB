@@ -34,6 +34,11 @@ PUBLIC void clock_handler(int irq)
 	if (++ticks >= MAX_TICKS)
 		ticks = 0;
 
+	/* Dynamic Measurement Trigger */
+	if (ticks % 100 == 0) {
+		dynamic_check();
+	}
+
 	if (p_proc_ready->ticks)
 		p_proc_ready->ticks--;
 

@@ -443,9 +443,6 @@ PUBLIC int sys_printx(int _unused1, int _unused2, char* s, struct proc* p_proc)
 		if (ch == MAG_CH_PANIC || ch == MAG_CH_ASSERT)
 			continue; /* skip the magic char */
 
-		/* TTY * ptty; */
-		/* for (ptty = TTY_FIRST; ptty < TTY_END; ptty++) */
-		/* 	out_char(ptty->console, ch); /\* output chars to all TTYs *\/ */
 		out_char(TTY_FIRST->console, ch);
 	}
 

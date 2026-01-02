@@ -67,7 +67,7 @@ PUBLIC void task_sys()
                 case END_WHICH_PROC:
             proc_table[msg.PID].p_flags = FREE_SLOT; 
             msg.type = SYSCALL_RET;
-            msg.RETVAL = 0; // 添加返回值�?�置
+            msg.RETVAL = 0; // 添加返回值设置
             send_recv(SEND, src, &msg);
                         break;
 		default:

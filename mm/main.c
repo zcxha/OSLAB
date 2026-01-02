@@ -146,7 +146,7 @@ PUBLIC int alloc_mem(int pid, int memsize)
 			}
 			
 			mem_map[i].pid = pid;
-			printl("{MM} alloc_mem: pid=%d, base=0x%x, size=0x%x\n", pid, base, memsize);
+		printl("{MM} alloc_mem: pid=%d, base=0x%x, size=0x%x\n", pid, base, memsize);
 			return base;
 		}
 	}
@@ -170,7 +170,7 @@ PUBLIC int free_mem(int pid)
 	int i;
 	for (i = 0; i < NR_MEM_BLOCKS; i++) {
 		if (mem_map[i].pid == pid) {
-			printl("{MM} free_mem: pid=%d, base=0x%x, size=0x%x\n", pid, mem_map[i].base, mem_map[i].size);
+		printl("{MM} free_mem: pid=%d, base=0x%x, size=0x%x\n", pid, mem_map[i].base, mem_map[i].size);
 			mem_map[i].pid = -1;
 			
 			/* Try to merge with adjacent free blocks */

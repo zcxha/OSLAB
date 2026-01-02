@@ -84,6 +84,18 @@ PUBLIC void init_screen(TTY* tty)
  *****************************************************************************/
 PUBLIC void out_char(CONSOLE* con, char ch)
 {
+	if (con->cursor - con->orig >= con->con_size) {
+		int cursor_x = (con->cursor - con->orig) % SCR_WIDTH;
+		int cursor_y = (con->cursor - con->orig) / SCR_WIDTH;
+		int cp_orig = con->orig + (cursor_y + 1) * SCR_WIDTH - SCR_SIZE;
+		w_copy(con->orig, cp_orig, SCR_SIZE - SCR_WIDTH);
+		con->crtc_start = con->orig;
+		con->cursor = con->orig + (SCR_SIZE - SCR_WIDTH) + cursor_x;
+		clear_screen(con->cursor, SCR_WIDTH);
+		if (!con->is_full)
+			con->is_full = 1;
+	}
+
 	u8* pch = (u8*)(V_MEM_BASE + con->cursor * 2);
 
 	assert(con->cursor - con->orig < con->con_size);

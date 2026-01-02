@@ -1,9 +1,4 @@
-make clean
-make all
+make image
 cd command
-make realclean
-make all
 make install
 cd ..
-
-make image

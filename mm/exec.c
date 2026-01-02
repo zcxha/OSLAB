@@ -22,6 +22,36 @@
 #include "elf.h"
 
 
+/* Forward declaration for string functions if not available */
+/* We don't have strstr in kernel library, so let's implement a simple one or use strcmp if we can match basename */
+/* Or, we can just implement a simple helper here */
+
+PRIVATE int check_name(const char * full_path, const char * name)
+{
+	/* Check if 'name' is a suffix of 'full_path' or exact match */
+	int path_len = strlen(full_path);
+	int name_len = strlen(name);
+	
+	if (name_len > path_len) return 0;
+	
+	/* Compare the end of full_path with name */
+	int i;
+	for (i = 0; i < name_len; i++) {
+		if (full_path[path_len - name_len + i] != name[i]) {
+			return 0;
+		}
+	}
+	
+	/* Ensure that it's a full filename match (preceded by / or start of string) */
+	if (path_len > name_len) {
+		if (full_path[path_len - name_len - 1] != '/') {
+			return 0;
+		}
+	}
+	
+	return 1;
+}
+
 /*****************************************************************************
  *                                do_exec
  *****************************************************************************/
@@ -58,6 +88,49 @@ PUBLIC int do_exec()
 	assert(s.st_size < MMBUF_SIZE);
 	read(fd, mmbuf, s.st_size);
 	close(fd);
+
+	/**
+	 * Static Measurement: Integrity Check
+	 */
+	u8 checksum = 0;
+	int j;
+	for (j = 0; j < s.st_size; j++) {
+		checksum ^= mmbuf[j];
+	}
+
+	printl("{MM} Static Measurement: Checking %s, Size: %d, Checksum: 0x%x\n", pathname, s.st_size, checksum);
+
+	/* Simple Trusted DB */
+	struct {
+		char * name;
+		u8 sum;
+	} trusted_db[] = {
+		{"echo", 0x12}, /* Example value */
+		{"pwd", 0x34},
+		{0, 0}
+	};
+
+	/* Compare */
+	int found = 0;
+	/* Simple match logic. The 'pathname' might be absolute path like "/ls" or "ls". 
+	 * We need to be careful about matching.
+	 */
+	for (j = 0; trusted_db[j].name; j++) {
+		/* Check if trusted_db name matches the filename part of pathname */
+		if (check_name(pathname, trusted_db[j].name)) { 
+			found = 1;
+			if (trusted_db[j].sum == checksum) {
+				printl("{MM} Integrity Check PASSED for %s\n", pathname);
+			} else {
+				printl("{MM} Integrity Check FAILED for %s (Expected: 0x%x, Got: 0x%x)\n", 
+					pathname, trusted_db[j].sum, checksum);
+			}
+			break;
+		}
+	}
+	if (!found) {
+		printl("{MM} Integrity Check: Unknown binary %s (Not in trusted DB). Calculated Checksum: 0x%x\n", pathname, checksum);
+	}
 
 	/* overwrite the current proc image with the new one */
 	Elf32_Ehdr* elf_hdr = (Elf32_Ehdr*)(mmbuf);
