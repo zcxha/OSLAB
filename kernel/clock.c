@@ -70,6 +70,7 @@ PUBLIC void clock_handler(int irq)
     // disp_str("clock2 ");
 }
 
+/* 安全防护点1. 完整性 */
 PUBLIC void check_integrity()
 {
     for (int i = 0; i < NR_TASKS + NR_PROCS; i++)

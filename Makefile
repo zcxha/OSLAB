@@ -18,7 +18,7 @@ LD		= ld
 ASMBFLAGS	= -I boot/include/
 ASMKFLAGS	= -I include/ -f elf
 CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector
-CFLAGS_MAIN = -I include/ -c -fno-builtin -fstack-protector -save-temps# 文件级别的栈保护。
+CFLAGS_MAIN = -I include/ -c -fno-builtin -fstack-protector -save-temps# 安全防护点2.文件级别的栈保护。
 LDFLAGS		= -s -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 

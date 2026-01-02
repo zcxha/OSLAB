@@ -42,6 +42,8 @@ void test_frame_pgtable()
         map(PAGE_DIR_BASE, tmp, ft);
         printl("mapped: 0x%x->0x%x\n", tmp, la2pa(PAGE_DIR_BASE, tmp));
     }
+
+    printl("[test]frame/pgtable passed!");
 }
 
 void test_malloc_free()
@@ -52,6 +54,7 @@ void test_malloc_free()
         *(arr + i) = 0;
     }
     free(arr);
+    printl("[test]malloc_free passed!");
 }
 
 void testmm()

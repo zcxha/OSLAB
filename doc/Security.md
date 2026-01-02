@@ -51,3 +51,21 @@
 3. 缓冲区溢出
 
 考虑在ebp和retaddr之间/local var和retaddr之间添加一个canary。
+
+我们在main.c，即用户程序存在的地方，编译选项加上-fstack-protector，这样gcc-5.4就会进行代码插桩，加上这样的代码段：
+
+![image-20251229113024637](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113024637.png)
+
+![image-20251229113031165](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113031165.png)
+
+因为原来的系统用户可以直接访问视频选择子，因此在这里我们ldt加载一个新的thread_blk段，设置用户gs指向该段。在save中添加gs的切换。这样就可以实现canary的保存与访问。
+
+![image-20251229113214456](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113214456.png)
+
+![image-20251229113227377](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113227377.png)
+
+![image-20251229113244037](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113244037.png)
+
+![image-20251229113250016](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113250016.png)
+
+![image-20251229113308341](E:\OSLAB\work\LAB\doc\images\Security\image-20251229113308341.png)

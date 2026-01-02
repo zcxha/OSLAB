@@ -1,8 +1,25 @@
+Loading
+HD Boot
+in HD LDR
 
-A.A.A.B.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.B.B.A.
-A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.B.B.C.C.B.B.A.A.A.C.
-C.B.B.A.A.A.C.C.B.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.B.B.C.C.A.
-A.A.A.A.A.B.B.B.C.C.C.B.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.A.A.A.B.B.
-C.C.A.A.A.B.B.C.C.B.B.B.B.A.A.A.C.C.A.A.A.C.C.B.B.B.A.A.A.C.C.B.B.A.A.A.C.C.B.B.
-A.A.A.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.
-A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.A.C.C.B.B.A.A.A.B.B.B.C.C.A.A.A.C.C.A.A.A.B.B.B.B.
+
+
+
+BaseAddrL BaseAddrH LengthLow LengthHigh   Type
+00000000h 00000000h 0009F000h 00000000h 00000001h
+0009F000h 00000000h 00001000h 00000000h 00000002h
+000E8000h 00000000h 00018000h 00000000h 00000002h
+00100000h 00000000h 3FEF0000h 00000000h 00000001h
+3FFF0000h 00000000h 00010000h 00000000h 00000003h
+FFFC0000h 00000000h 00040000h 00000000h 00000002h
+
+RAM size: 3FFF0000h
+
+
+
+-----"cstart" begins-----
+user space all deallocated!
+-----"cstart" finished-----
+-----"kernel_main" begins-----
+ adding all tasks...  added one task  added one task  added one task new pgtb 0x
+30000000 added one task new pgtb 0x30401000 added one task new pgtb 0x30802000 a

@@ -440,7 +440,7 @@ PRIVATE void unblock(PROCESS *p)
     // 注意unblock应该是去找那个进程，而不是直接unblk最后入栈的
     for (int i = 0; i < wait_cnt; i++)
     {
-        // 这里currently先按照pid来找
+        // 这里currently先按照pid来找 TODO: 如果进程多了，建议使用红黑树(平衡树特性可以logn查找)
         if (wait_table[i]->pid == p->pid && i != wait_cnt - 1)
         {
             PROCESS *tmp = wait_table[wait_cnt - 1];

@@ -43,3 +43,5 @@ dd if=stage2 of=disk.img bs=512 seek=1 conv=notrunc
 # 给vmware生成vmdk
 # https://stackoverflow.com/questions/454899/how-to-convert-flat-raw-disk-image-to-vmdk-for-virtualbox-or-vmplayer
 # qemu-img convert -O vmdk disk.img disk.vmdk
+
+# 测试点x. 硬盘启动、vmware启动、真机启动（无设备条件因此无法现场测试）

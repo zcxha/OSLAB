@@ -121,6 +121,7 @@ PUBLIC int kernel_main()
     FrameTracker *shrft = frame_alloc();
     disp_int(proc_table[NR_TASKS+0].pg_dir_base);
     disp_int(dbg_first_entry(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000));
+    /* 测试点3. 不想PageFault？那就试试打开这个！ */
     // kmap(proc_table[NR_TASKS + 0].pg_dir_base, 0x30000000, shrft);
     // kmap(proc_table[NR_TASKS + 1].pg_dir_base, 0x30000000, shrft);
     disp_int(*kget_final_entry(proc_table[NR_TASKS+0].pg_dir_base, 0x30000000));
@@ -163,16 +164,17 @@ void TestA()
             flag = 1;
             for (int i = 0; i < NR_TASKS + NR_PROCS; i++)
             {
-
+                /* 测试点1. CFS调度系统 */
                 printf("%d ", stat[i]);
             }
             if (!vmem_en)
             {
-                // testmm(); // 需要在不开启虚拟内存的情况下测试
+                /* 测试点2. MMU、heap */
+                testmm(); // 需要在不开启虚拟内存的情况下测试
             }
             else
             {
-                /* shm */
+                /* 测试点3. shm共享内存 */
                 // char *p = 0x30000000;
                 // printf("shr:%c /", *p);
             }
@@ -194,13 +196,15 @@ void TestB()
     {
         if (!flag)
         {
+            /* 已有逻辑测试：硬盘 */
             flag = 1;
             MESSAGE msg;
             reset_msg(&msg);
             msg.type = DEV_OPEN;
             msg.DEVICE = 0;
             send_recv(BOTH, TASK_HD, &msg);
-
+            
+            /* 测试点4. 共享内存，或测试pagefault_handler */
             /* shm : and this is a function which checks page fault handler. */
             // char *p = 0x30000000;
             // *p = 'S';
@@ -220,16 +224,12 @@ void TestC()
     int i = 0x2000;
     while (1)
     {
-        /* POC1. change prog .text data */
+        /* 安全测试点1. POC1. change prog .text data, 这两个测例是互斥的，临时发现，暂时没有排查原因*/
         // void *baseA = TestA;
         /* change A prog data! */
         // *((char *)baseA) = '0';
 
-        /* POC2.  */
-
-
-
-        /* POC3. Stack overflow */
+        /* 安全测试点2. POC2. Stack overflow, 只要出现3次断点就说明这个测试成功 */
         __asm__("xchg %bx, %bx");
         void *pdst = stackoverflowdest;
         char src[27] = "thisisstackoverflow   ";
@@ -279,7 +279,7 @@ PUBLIC void panic(const char *fmt, ...)
     //__asm__ __volatile__("ud2");
 }
 
-/* gcc canary fail handler */
+/* 安全防护点2. gcc canary fail handler */
 PUBLIC void __stack_chk_fail(void)
 {
     __asm__("xchg %bx, %bx");
