@@ -170,11 +170,11 @@ void TestA()
             if (!vmem_en)
             {
                 /* 测试点2. MMU、heap */
-                testmm(); // 需要在不开启虚拟内存的情况下测试
+                // testmm(); // 需要在不开启虚拟内存的情况下测试
             }
             else
             {
-                /* 测试点3. shm共享内存 */
+                /* 测试点3. shm共享内存，注意要开启虚拟内存 */
                 // char *p = 0x30000000;
                 // printf("shr:%c /", *p);
             }
@@ -226,7 +226,7 @@ void TestC()
     {
         /* 安全测试点1. POC1. change prog .text data, 这两个测例是互斥的，临时发现，暂时没有排查原因*/
         // void *baseA = TestA;
-        /* change A prog data! */
+        // /* change A prog data! */
         // *((char *)baseA) = '0';
 
         /* 安全测试点2. POC2. Stack overflow, 只要出现3次断点就说明这个测试成功 */

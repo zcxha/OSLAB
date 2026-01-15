@@ -52,7 +52,9 @@ typedef struct s_proc
 	STACK_FRAME regs; /* process registers saved in stack frame */
 
 	u16 ldt_sel;			   /* gdt selector giving ldt base and limit */
-    pte* pg_dir_base;
+    pte* pg_dir_base;/*
+                        这个进程页目录基地址，在进程切换的时候会负责切换CR3
+                    */
     DESCRIPTOR ldts[LDT_SIZE]; /* local descriptors for code and data */
 
 	struct sched_entity *se; /* sched_entity */
@@ -86,9 +88,7 @@ typedef struct s_proc
 				    * queue (q_sending)
 				    */
     void *p_base; /* .text base addr of this process, maybe for integrity check */
-                    /*
-                        这个进程页目录基地址，在进程切换的时候会负责切换CR3
-                    */
+                    
     tcbhead_t tcb_head;
     
     int nr_tty;
