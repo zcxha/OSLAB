@@ -1,0 +1,21 @@
+这里有两个文件夹
+my_shell是我实现的两版shell，在实验报告中详细说明了已经
+my_security是我基于实现的扩展shell对系统本身的安全分析、写的漏洞poc和安全防护
+每个文件夹中（ly_shell(1)、ly_shell(2)、ly_security(1)、ly_security(2)）中都有一个structure.md文档，里面是整个项目的目录树
+
+编译方法：
+每个文件夹中都有一个tesh.sh，其内容如下：
+    make clean
+    make all
+    cd command
+    make realclean
+    make all
+    make install
+    cd ..
+
+    make image
+你可以直接在命令行输入sh test.sh来运行这个脚本，或者你不怕麻烦的话从主文件夹开始一行一行输也没事
+
+使用说明在每个文件夹中都有：How_To_Use.md中有写
+
+对了，不要忘记改bochsrc中的路径和注释掉倒数第二行，不然没法运行
