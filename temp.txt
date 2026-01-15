@@ -1,0 +1,134 @@
+.
+├── 1.txt
+├── bochsrc
+├── boot
+│   ├── boot.asm
+│   ├── hdboot.asm
+│   ├── hdldr.asm
+│   ├── include
+│   │   ├── fat12hdr.inc
+│   │   ├── load.inc
+│   │   └── pm.inc
+│   ├── loader.asm
+│   └── menu.lst
+├── doc
+│   ├── arch.md
+│   ├── CFS schedule.docx
+│   ├── CFS schedule.md
+│   ├── fs.md
+│   ├── images
+│   │   ├── Security
+│   │   │   ├── image-20251228150422685.png
+│   │   │   ├── image-20251228150600184.png
+│   │   │   ├── image-20251228150646635.png
+│   │   │   ├── image-20251228154402952.png
+│   │   │   ├── image-20251228170914952.png
+│   │   │   ├── image-20251228170928880.png
+│   │   │   ├── image-20251228170956001.png
+│   │   │   ├── image-20251229113024637.png
+│   │   │   ├── image-20251229113031165.png
+│   │   │   ├── image-20251229113214456.png
+│   │   │   ├── image-20251229113227377.png
+│   │   │   ├── image-20251229113244037.png
+│   │   │   ├── image-20251229113250016.png
+│   │   │   └── image-20251229113308341.png
+│   │   └── 实验报告md版本
+│   │       ├── clip_image002.gif
+│   │       ├── clip_image006.jpg
+│   │       ├── clip_image008.jpg
+│   │       ├── clip_image010.jpg
+│   │       └── clip_image016.jpg
+│   ├── kernel arch.vsdx
+│   ├── mm.md
+│   ├── mm.vsdx
+│   ├── Q&A.md
+│   ├── sched.md
+│   ├── sched.vsdx
+│   ├── Security.docx
+│   ├── Security.md
+│   ├── Security.vsdx
+│   ├── trap & context switch.vsdx
+│   ├── ~WRL1141.tmp
+│   ├── 使用说明.md
+│   ├── ~$实验报告.docx
+│   └── 实验报告.docx
+├── drv
+│   └── hd.c
+├── floppyboot.sh
+├── fs
+│   └── fat32.c
+├── git-filter-repo
+├── hdboot.sh
+├── include
+│   ├── console.h
+│   ├── const.h
+│   ├── drv
+│   │   └── hd.h
+│   ├── fs
+│   │   └── fat32.h
+│   ├── global.h
+│   ├── keyboard.h
+│   ├── keymap.h
+│   ├── mm
+│   │   ├── aspace.h
+│   │   ├── buddy_system.h
+│   │   ├── frame_allocator.h
+│   │   ├── heap_allocator.h
+│   │   ├── memory_set.h
+│   │   └── page_table.h
+│   ├── mm.h
+│   ├── proc.h
+│   ├── protect.h
+│   ├── proto.h
+│   ├── rbtree.h
+│   ├── sconst.inc
+│   ├── string.h
+│   ├── test
+│   │   └── testmm.h
+│   ├── tty.h
+│   └── type.h
+├── kernel
+│   ├── clock.c
+│   ├── console.c
+│   ├── global.c
+│   ├── i8259.c
+│   ├── kernel.asm
+│   ├── keyboard.c
+│   ├── main.c
+│   ├── printf.c
+│   ├── proc.c
+│   ├── protect.c
+│   ├── rbtree.c
+│   ├── start.c
+│   ├── syscall.asm
+│   ├── systask.c
+│   ├── tty.c
+│   └── vsprintf.c
+├── krnl.map
+├── lib
+│   ├── kliba.asm
+│   ├── klib.c
+│   ├── misc.c
+│   └── string.asm
+├── main.i
+├── main.s
+├── Makefile
+├── mkimg.sh
+├── mm
+│   ├── buddy_system.c
+│   ├── frame_allocator.c
+│   ├── heap_allocator.c
+│   └── page_table.c
+├── rbtree.exe
+├── README.md
+├── snapshot.txt
+├── stage1
+├── stage2
+├── temp
+│   ├── mm.asm
+│   └── testmm.c
+├── temp.txt
+└── test
+    └── testmm.c
+
+18 directories, 113 files
